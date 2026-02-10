@@ -1,0 +1,16 @@
+{
+  "resourceName": "beaconHillDB",
+  "tableName": "beaconHillDB",
+  "partitionKey": {
+    "fieldName": "farm_id",
+    "fieldType": "number"
+  },
+  "sortKey": {
+    "fieldName": "timestamp",
+    "fieldType": "number"
+  },
+  "gsi": [],
+  "triggerFunctions": [
+    "beaconHillDBTriggercc5a1762"
+  ]
+}
