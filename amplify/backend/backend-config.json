@@ -1,0 +1,107 @@
+{
+  "api": {
+    "apiGet": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "dbGet"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "API Gateway"
+    }
+  },
+  "auth": {
+    "beaconhill56651fb6": {
+      "customAuth": false,
+      "dependsOn": [],
+      "frontendAuthConfig": {
+        "mfaConfiguration": "OFF",
+        "mfaTypes": [
+          "SMS"
+        ],
+        "passwordProtectionSettings": {
+          "passwordPolicyCharacters": [],
+          "passwordPolicyMinLength": 8
+        },
+        "signupAttributes": [
+          "EMAIL"
+        ],
+        "socialProviders": [],
+        "usernameAttributes": [],
+        "verificationMechanisms": [
+          "EMAIL"
+        ]
+      },
+      "providerPlugin": "awscloudformation",
+      "service": "Cognito"
+    }
+  },
+  "function": {
+    "beaconHillDBTriggercc5a1762": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "Name",
+            "Arn",
+            "StreamArn"
+          ],
+          "category": "storage",
+          "resourceName": "beaconHillDB"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "dbGet": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    }
+  },
+  "parameters": {
+    "AMPLIFY_function_beaconHillDBTriggercc5a1762_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "beaconHillDBTriggercc5a1762"
+        }
+      ]
+    },
+    "AMPLIFY_function_beaconHillDBTriggercc5a1762_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "beaconHillDBTriggercc5a1762"
+        }
+      ]
+    },
+    "AMPLIFY_function_dbGet_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "dbGet"
+        }
+      ]
+    },
+    "AMPLIFY_function_dbGet_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "dbGet"
+        }
+      ]
+    }
+  },
+  "storage": {
+    "beaconHillDB": {
+      "providerPlugin": "awscloudformation",
+      "service": "DynamoDB"
+    }
+  }
+}
