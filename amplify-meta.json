@@ -1,0 +1,171 @@
+{
+  "providers": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-beaconhill-dev-6a4b1-authRole",
+      "UnauthRoleArn": "arn:aws:iam::562780096124:role/amplify-beaconhill-dev-6a4b1-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::562780096124:role/amplify-beaconhill-dev-6a4b1-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-beaconhill-dev-6a4b1-deployment",
+      "UnauthRoleName": "amplify-beaconhill-dev-6a4b1-unauthRole",
+      "StackName": "amplify-beaconhill-dev-6a4b1",
+      "StackId": "arn:aws:cloudformation:us-east-1:562780096124:stack/amplify-beaconhill-dev-6a4b1/3cd54a00-06be-11f1-b4ca-12158860be77",
+      "AmplifyAppId": "d3lv3c6ppm80xp",
+      "APIGatewayAuthURL": "https://s3.amazonaws.com/amplify-beaconhill-dev-6a4b1-deployment/amplify-cfn-templates/api/APIGatewayAuthStack.json"
+    }
+  },
+  "auth": {
+    "beaconhill56651fb6": {
+      "service": "Cognito",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [],
+      "customAuth": false,
+      "frontendAuthConfig": {
+        "socialProviders": [],
+        "usernameAttributes": [],
+        "signupAttributes": [
+          "EMAIL"
+        ],
+        "passwordProtectionSettings": {
+          "passwordPolicyMinLength": 8,
+          "passwordPolicyCharacters": []
+        },
+        "mfaConfiguration": "OFF",
+        "mfaTypes": [
+          "SMS"
+        ],
+        "verificationMechanisms": [
+          "EMAIL"
+        ]
+      },
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-beaconhill-dev-6a4b1-deployment/amplify-cfn-templates/auth/beaconhill56651fb6-cloudformation-template.json",
+        "logicalId": "authbeaconhill56651fb6"
+      },
+      "lastPushTimeStamp": "2026-02-10T20:59:23.275Z",
+      "output": {
+        "UserPoolId": "us-east-1_zeF4O52QZ",
+        "AppClientIDWeb": "6s68l8smm01s11hv7g4320pgf4",
+        "AppClientID": "7p24jo3mi79611qtodpeermj5e",
+        "IdentityPoolId": "us-east-1:e560c7f7-2969-48c9-8640-9607091e7be9",
+        "UserPoolArn": "arn:aws:cognito-idp:us-east-1:562780096124:userpool/us-east-1_zeF4O52QZ",
+        "IdentityPoolName": "beaconhill56651fb6_identitypool_56651fb6__dev",
+        "UserPoolName": "beaconhill56651fb6_userpool_56651fb6"
+      },
+      "lastPushDirHash": "JUciWAlGHT4ZnlnZjVjALDDY9Tc="
+    }
+  },
+  "function": {
+    "dbGet": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda",
+      "lastBuildTimeStamp": "2026-02-10T20:49:50.456Z",
+      "lastBuildType": "PROD",
+      "lastPackageTimeStamp": "2026-02-10T20:49:51.642Z",
+      "distZipFilename": "dbGet-7330724f47595375424f-build.zip",
+      "s3Bucket": {
+        "deploymentBucketName": "amplify-beaconhill-dev-6a4b1-deployment",
+        "s3Key": "amplify-builds/dbGet-7330724f47595375424f-build.zip"
+      },
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-beaconhill-dev-6a4b1-deployment/amplify-cfn-templates/function/dbGet-cloudformation-template.json",
+        "logicalId": "functiondbGet"
+      },
+      "lastPushTimeStamp": "2026-02-10T20:59:23.278Z",
+      "output": {
+        "LambdaExecutionRoleArn": "arn:aws:iam::562780096124:role/beaconhillLambdaRole3a022078-dev",
+        "Region": "us-east-1",
+        "Arn": "arn:aws:lambda:us-east-1:562780096124:function:dbGet-dev",
+        "Name": "dbGet-dev",
+        "LambdaExecutionRole": "beaconhillLambdaRole3a022078-dev"
+      },
+      "lastPushDirHash": "qbLzX3o4HP/9a0QbL7rGQwf4P30="
+    },
+    "beaconHillDBTriggercc5a1762": {
+      "service": "Lambda",
+      "providerPlugin": "awscloudformation",
+      "build": true,
+      "dependsOn": [
+        {
+          "category": "storage",
+          "resourceName": "beaconHillDB",
+          "attributes": [
+            "Name",
+            "Arn",
+            "StreamArn"
+          ]
+        }
+      ],
+      "lastPushTimeStamp": "2026-02-10T20:59:24.720Z",
+      "lastBuildTimeStamp": "2026-02-10T20:56:42.599Z",
+      "lastBuildType": "PROD",
+      "lastPackageTimeStamp": "2026-02-10T20:56:42.652Z",
+      "distZipFilename": "beaconHillDBTriggercc5a1762-536a4474654a612b426c-build.zip",
+      "s3Bucket": {
+        "deploymentBucketName": "amplify-beaconhill-dev-6a4b1-deployment",
+        "s3Key": "amplify-builds/beaconHillDBTriggercc5a1762-536a4474654a612b426c-build.zip"
+      },
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-beaconhill-dev-6a4b1-deployment/amplify-cfn-templates/function/beaconHillDBTriggercc5a1762-cloudformation-template.json",
+        "logicalId": "functionbeaconHillDBTriggercc5a1762"
+      },
+      "output": {
+        "LambdaExecutionRoleArn": "arn:aws:iam::562780096124:role/beaconHillDBLambdaRolecc5a1762-dev",
+        "Region": "us-east-1",
+        "Arn": "arn:aws:lambda:us-east-1:562780096124:function:beaconHillDBTriggercc5a1762-dev",
+        "Name": "beaconHillDBTriggercc5a1762-dev",
+        "LambdaExecutionRole": "beaconHillDBLambdaRolecc5a1762-dev"
+      },
+      "lastPushDirHash": "8B1xFQp94OQucfbT0N+DfZMK0/I="
+    }
+  },
+  "api": {
+    "apiGet": {
+      "service": "API Gateway",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [
+        {
+          "category": "function",
+          "resourceName": "dbGet",
+          "attributes": [
+            "Name",
+            "Arn"
+          ]
+        }
+      ],
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-beaconhill-dev-6a4b1-deployment/amplify-cfn-templates/api/apiGet-cloudformation-template.json",
+        "logicalId": "apiapiGet"
+      },
+      "lastPushTimeStamp": "2026-02-10T20:59:23.280Z",
+      "output": {
+        "ApiName": "apiGet",
+        "RootUrl": "https://o4odsac82g.execute-api.us-east-1.amazonaws.com/dev",
+        "ApiId": "o4odsac82g"
+      },
+      "lastPushDirHash": "Iys7sszCybz2ODtgxYnAkwv43ks="
+    }
+  },
+  "storage": {
+    "beaconHillDB": {
+      "service": "DynamoDB",
+      "providerPlugin": "awscloudformation",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-beaconhill-dev-6a4b1-deployment/amplify-cfn-templates/storage/beaconHillDB-cloudformation-template.json",
+        "logicalId": "storagebeaconHillDB"
+      },
+      "lastPushTimeStamp": "2026-02-10T20:59:24.720Z",
+      "output": {
+        "PartitionKeyName": "farm_id",
+        "SortKeyName": "timestamp",
+        "SortKeyType": "N",
+        "Region": "us-east-1",
+        "Arn": "arn:aws:dynamodb:us-east-1:562780096124:table/beaconHillDB-dev",
+        "StreamArn": "arn:aws:dynamodb:us-east-1:562780096124:table/beaconHillDB-dev/stream/2026-02-10T20:56:52.192",
+        "PartitionKeyType": "N",
+        "Name": "beaconHillDB-dev"
+      },
+      "lastPushDirHash": "QaUXZepcZkSrArFWmoqS6BwuxeU="
+    }
+  }
+}
