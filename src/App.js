@@ -9,7 +9,7 @@ import { isTestMode } from './config';
 import { createMockItem, getInitialMockItems } from './data/mockData';
 import { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import NavigationPanel from './components/NavigationPanel/NavigationPanel';
+import SidebarComponent from './components/SidebarComponent/SidebarComponent';
 import LiveDashboardPage from './pages/LiveDashboardPage/LiveDashboardPage';
 import AnalyticsPage from './pages/AnalyticsPage/AnalyticsPage';
 import ConfigurationPage from './pages/ConfigurationPage/ConfigurationPage';
@@ -53,19 +53,15 @@ const MOCK_USER = {
 
 function AuthenticatedApp({ signOut, user, useMockData, mockItems, onAddMockItem }) {
   return (
-    <div className="App">
-      <header className="App-header">
-        <span className="App-logo" aria-hidden="true" />
-        <p>Welcome, {user?.signInDetails?.loginId || user?.username}!</p>
-        <NavigationPanel />
-        <main style={{ marginTop: '24px' }}>
-          <Routes>
-            <Route path="/" element={<LiveDashboardPage />} />
-            <Route path="/analytics" element={<AnalyticsPage />} />
-            <Route path="/configuration" element={<ConfigurationPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-          </Routes>
-        </main>
+    <div className="App App-authenticated-layout">
+      <SidebarComponent user={user} />
+      <main className="App-main">
+        <Routes>
+          <Route path="/" element={<LiveDashboardPage />} />
+          <Route path="/analytics" element={<AnalyticsPage />} />
+          <Route path="/configuration" element={<ConfigurationPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+        </Routes>
         {useMockData && (
           <>
             <button
@@ -105,7 +101,7 @@ function AuthenticatedApp({ signOut, user, useMockData, mockItems, onAddMockItem
             </button>
           </>
         )}
-      </header>
+      </main>
     </div>
   );
 }

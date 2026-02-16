@@ -2,6 +2,20 @@
   text-align: center;
 }
 
+.App-authenticated-layout {
+  display: flex;
+  flex-direction: row;
+  min-height: 100vh;
+  text-align: left;
+}
+
+.App-main {
+  flex: 1;
+  overflow: auto;
+  padding: 24px;
+  background-color: #ffffff;
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;

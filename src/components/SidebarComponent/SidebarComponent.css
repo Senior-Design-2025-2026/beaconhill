@@ -1,0 +1,11 @@
+.sidebar-component {
+  overflow-x: hidden;
+}
+
+.sidebar-nav-item {
+  text-decoration: none;
+}
+
+.sidebar-nav-item:hover {
+  text-decoration: none;
+}
