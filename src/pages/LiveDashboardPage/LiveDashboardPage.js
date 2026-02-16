@@ -53,32 +53,38 @@ function getTimeWindowMs(tf) {
 }
 
 /**
- * Build an array of hourly ISO timestamps from minTs to maxTs (inclusive).
- * Each entry is on the hour boundary.
+ * Build an array of hourly UTC epoch-ms values from minMs to maxMs (inclusive).
+ * Each value is snapped to the top of the hour in UTC.
  */
-function buildHourlyTimeline(minTs, maxTs) {
-  const start = new Date(minTs);
-  start.setMinutes(0, 0, 0);
-  const end = new Date(maxTs);
-  end.setMinutes(0, 0, 0);
+function buildHourlyTimeline(minMs, maxMs) {
+  const start = new Date(minMs);
+  start.setUTCMinutes(0, 0, 0);
+  const end = new Date(maxMs);
+  end.setUTCMinutes(0, 0, 0);
+
   const timeline = [];
   const cursor = new Date(start);
-  while (cursor <= end) {
-    timeline.push(cursor.toISOString());
-    cursor.setHours(cursor.getHours() + 1);
+  while (cursor.getTime() <= end.getTime()) {
+    timeline.push(cursor.getTime());
+    cursor.setUTCHours(cursor.getUTCHours() + 1);
   }
   return timeline;
 }
 
-/** Format an ISO string for the slider label. */
-function formatSliderLabel(iso) {
-  if (!iso) return '';
-  const d = new Date(iso);
+/** Format a UTC epoch-ms value to a short label like "02/15 08:00". */
+function formatTimestampLabel(ms) {
+  const d = new Date(ms);
   const month = String(d.getUTCMonth() + 1).padStart(2, '0');
   const day = String(d.getUTCDate()).padStart(2, '0');
   const hours = String(d.getUTCHours()).padStart(2, '0');
   const mins = String(d.getUTCMinutes()).padStart(2, '0');
   return `${month}/${day} ${hours}:${mins}`;
+}
+
+/** Format just the hour portion for slider tick marks. */
+function formatHourLabel(ms) {
+  const d = new Date(ms);
+  return `${String(d.getUTCHours()).padStart(2, '0')}:00`;
 }
 
 /**
@@ -123,46 +129,52 @@ function LiveDashboardPage() {
     return farmMeasurements.filter((m) => new Date(m.timestamp).getTime() >= cutoff);
   }, [farmMeasurements, selectedTimeframe, maxTimestampMs]);
 
-  /* --- Slider timeline (hourly, min→max of time-filtered data) --- */
+  /* --- Slider timeline (hourly, min→max of time-filtered data, in epoch-ms) --- */
 
   const timeline = useMemo(() => {
     if (timeFilteredMeasurements.length === 0) return [];
     const timestamps = timeFilteredMeasurements.map((m) => new Date(m.timestamp).getTime());
     const minTs = Math.min(...timestamps);
     const maxTs = Math.max(...timestamps);
-    return buildHourlyTimeline(new Date(minTs).toISOString(), new Date(maxTs).toISOString());
+    return buildHourlyTimeline(minTs, maxTs);
   }, [timeFilteredMeasurements]);
 
-  /** Set of ISO timestamps that have at least one measurement. */
+  /** Set of epoch-ms values (snapped to hour) that have at least one measurement. */
   const timestampsWithData = useMemo(() => {
     const set = new Set();
     timeFilteredMeasurements.forEach((m) => {
       const d = new Date(m.timestamp);
-      d.setMinutes(0, 0, 0);
-      set.add(d.toISOString());
+      d.setUTCMinutes(0, 0, 0);
+      set.add(d.getTime());
     });
     return set;
   }, [timeFilteredMeasurements]);
 
   const effectiveSliderIndex = sliderIndex != null ? sliderIndex : Math.max(0, timeline.length - 1);
-  const selectedTimestamp = timeline[effectiveSliderIndex] || null;
+  const selectedTimestampMs = timeline[effectiveSliderIndex] || null;
 
-  /** Slider marks: enabled (primary color) when data exists, muted otherwise. */
+  /** Slider marks with the hour as the label for each tick. */
   const sliderMarks = useMemo(() => {
-    return timeline.map((ts, i) => ({
+    return timeline.map((ms, i) => ({
       value: i,
-      label: timestampsWithData.has(ts) ? '●' : '○',
+      label: formatHourLabel(ms),
     }));
-  }, [timeline, timestampsWithData]);
+  }, [timeline]);
 
   /* --- Helpers for Snapshot View --- */
 
-  /** Get a node's measurement at the selected timestamp, if any. */
-  function getMeasurementAt(nodeId, timestamp) {
-    if (!timestamp) return null;
-    return timeFilteredMeasurements.find(
-      (m) => m.nodeId === nodeId && m.timestamp === timestamp
-    ) || null;
+  /**
+   * Get a node's measurement at the selected timestamp (compared by epoch-ms).
+   * Snaps the measurement timestamp to the hour before comparing.
+   */
+  function getMeasurementAt(nodeId, targetMs) {
+    if (targetMs == null) return null;
+    return timeFilteredMeasurements.find((m) => {
+      if (m.nodeId !== nodeId) return false;
+      const mDate = new Date(m.timestamp);
+      mDate.setUTCMinutes(0, 0, 0);
+      return mDate.getTime() === targetMs;
+    }) || null;
   }
 
   /* --- Render --- */
@@ -231,8 +243,11 @@ function LiveDashboardPage() {
           {/* Timestamp Slider */}
           {timeline.length > 0 && (
             <Box className="snapshot-slider-wrapper">
-              <Typography variant="subtitle2" sx={{ color: '#2D2D2D', mb: 0.5 }}>
-                Timestamp: {selectedTimestamp ? formatSliderLabel(selectedTimestamp) : '—'}
+              <Typography variant="subtitle2" sx={{ color: '#2D2D2D', mb: 1 }}>
+                Timestamp: {selectedTimestampMs != null ? formatTimestampLabel(selectedTimestampMs) : '—'}
+                {selectedTimestampMs != null && !timestampsWithData.has(selectedTimestampMs) && (
+                  <span className="slider-no-data-hint"> (no data at this hour)</span>
+                )}
               </Typography>
               <Slider
                 value={effectiveSliderIndex}
@@ -241,11 +256,17 @@ function LiveDashboardPage() {
                 step={1}
                 marks={sliderMarks}
                 valueLabelDisplay="auto"
-                valueLabelFormat={(v) => formatSliderLabel(timeline[v])}
+                valueLabelFormat={(v) => formatTimestampLabel(timeline[v])}
                 onChange={(e, v) => setSliderIndex(v)}
                 sx={{
                   color: '#EEBE02',
-                  '& .MuiSlider-markLabel': { fontSize: '0.65rem', color: '#616161' },
+                  '& .MuiSlider-markLabel': {
+                    fontSize: '0.6rem',
+                    color: '#616161',
+                    transform: 'rotate(-45deg)',
+                    transformOrigin: 'top left',
+                    mt: 1,
+                  },
                 }}
               />
             </Box>
@@ -253,7 +274,7 @@ function LiveDashboardPage() {
 
           {/* Per-node sections */}
           {farmNodes.map((node) => {
-            const measurement = getMeasurementAt(node.nodeId, selectedTimestamp);
+            const measurement = getMeasurementAt(node.nodeId, selectedTimestampMs);
             const online = measurement != null;
             return (
               <div key={node.nodeId} className="node-section">
@@ -283,10 +304,10 @@ function LiveDashboardPage() {
                   </Button>
                 </div>
 
-                {online ? (
-                  <div className="node-gauges-row">
-                    {METRIC_CONFIG.map((metric) => (
-                      <div key={metric.key} className="node-gauge-item">
+                <div className="node-gauges-row">
+                  {METRIC_CONFIG.map((metric) => (
+                    <div key={metric.key} className="node-gauge-item">
+                      {online ? (
                         <LinearGaugeComponent
                           label={metric.label}
                           value={measurement[metric.key]}
@@ -295,14 +316,19 @@ function LiveDashboardPage() {
                           high={metric.high}
                           unit={metric.unit}
                         />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <Typography variant="body2" sx={{ color: '#616161', fontStyle: 'italic', mt: 1 }}>
-                    No data at selected timestamp
-                  </Typography>
-                )}
+                      ) : (
+                        <div className="node-gauge-placeholder">
+                          <Typography variant="subtitle2" sx={{ color: '#2D2D2D', mb: 0.5 }}>
+                            {metric.label}
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: '#9e9e9e', fontStyle: 'italic' }}>
+                            No Measurement Detected
+                          </Typography>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             );
           })}
