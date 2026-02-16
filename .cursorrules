@@ -10,6 +10,8 @@
 
 # Coding Standards
 - **Functional Components:** Always use functional components with Hooks.
+- **UI Library** Always use Material UI for components when applicable. These will be used to build BeaconHill components within [src/components/](./src/components/)
+- **Iconograpy** Always use Material UI for 
 - **JavaScript:** Do not use TypeScript. Use JSDoc for types where it helps clarity.
 - **React:** Clearly document the React components used and house implementation details in singular files for development.
 - **Amplify:** Use Amplify Auth and API modules as in `App.js` (e.g. `get`, `fetchAuthSession`). Do not assume DataStore or `amplify/data/resource.ts`; follow the existing REST API pattern.

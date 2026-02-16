@@ -9,6 +9,12 @@ import '@aws-amplify/ui-react/styles.css';
 import { isTestMode } from './config';
 import { createMockItem, getInitialMockItems } from './mockData';
 import { useState } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import NavigationPanel from './components/NavigationPanel/NavigationPanel';
+import LiveDashboardPage from './pages/LiveDashboardPage/LiveDashboardPage';
+import AnalyticsPage from './pages/AnalyticsPage/AnalyticsPage';
+import ConfigurationPage from './pages/ConfigurationPage/ConfigurationPage';
+import SettingsPage from './pages/SettingsPage/SettingsPage';
 
 Amplify.configure(awsconfig);
 
@@ -51,22 +57,17 @@ function AuthenticatedApp({ signOut, user, useMockData, mockItems, onAddMockItem
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Welcome, {user?.signInDetails?.loginId || user?.username}!
-        </p>
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-
-        {useMockData ? (
+        <p>Welcome, {user?.signInDetails?.loginId || user?.username}!</p>
+        <NavigationPanel />
+        <main style={{ marginTop: '24px' }}>
+          <Routes>
+            <Route path="/" element={<LiveDashboardPage />} />
+            <Route path="/analytics" element={<AnalyticsPage />} />
+            <Route path="/configuration" element={<ConfigurationPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Routes>
+        </main>
+        {useMockData && (
           <>
             <button
               type="button"
@@ -86,24 +87,24 @@ function AuthenticatedApp({ signOut, user, useMockData, mockItems, onAddMockItem
               </ul>
             )}
           </>
-        ) : (
-          <button
-            type="button"
-            onClick={callSecureApi}
-            style={{ marginTop: '10px', padding: '10px 20px', fontSize: '16px' }}
-          >
-            Call secure API
-          </button>
         )}
-
         {!useMockData && (
-          <button
-            type="button"
-            onClick={signOut}
-            style={{ marginTop: '20px', padding: '10px 20px', fontSize: '16px' }}
-          >
-            Sign out
-          </button>
+          <>
+            <button
+              type="button"
+              onClick={callSecureApi}
+              style={{ marginTop: '10px', padding: '10px 20px', fontSize: '16px' }}
+            >
+              Call secure API
+            </button>
+            <button
+              type="button"
+              onClick={signOut}
+              style={{ marginTop: '20px', padding: '10px 20px', fontSize: '16px' }}
+            >
+              Sign out
+            </button>
+          </>
         )}
       </header>
     </div>
@@ -117,19 +118,15 @@ function App() {
     setMockItems((prev) => [...prev, createMockItem()]);
   };
 
-  if (isTestMode) {
-    return (
-      <AuthenticatedApp
-        signOut={() => {}}
-        user={MOCK_USER}
-        useMockData
-        mockItems={mockItems}
-        onAddMockItem={addMockItem}
-      />
-    );
-  }
-
-  return (
+  const authenticatedContent = isTestMode ? (
+    <AuthenticatedApp
+      signOut={() => {}}
+      user={MOCK_USER}
+      useMockData
+      mockItems={mockItems}
+      onAddMockItem={addMockItem}
+    />
+  ) : (
     <Authenticator hideSignUp={true}>
       {({ signOut, user }) => (
         <AuthenticatedApp
@@ -141,6 +138,8 @@ function App() {
       )}
     </Authenticator>
   );
+
+  return <BrowserRouter>{authenticatedContent}</BrowserRouter>;
 }
 
 export default App;
