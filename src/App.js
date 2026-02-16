@@ -134,7 +134,16 @@ function App() {
     </Authenticator>
   );
 
-  return <BrowserRouter>{authenticatedContent}</BrowserRouter>;
+  return (
+    <BrowserRouter
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
+    >
+      {authenticatedContent}
+    </BrowserRouter>
+  );
 }
 
 export default App;

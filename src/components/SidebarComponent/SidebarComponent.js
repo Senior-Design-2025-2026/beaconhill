@@ -44,63 +44,79 @@ function SidebarComponent({ user, farm = 'My Farm' }) {
 
   return (
     <Box
-      className="sidebar-component"
+      className="sidebar-container"
       sx={{
-        width: expanded ? 256 : 64,
-        minHeight: '100vh',
-        backgroundColor: theme.sidebar.primary,
-        display: 'flex',
-        flexDirection: 'column',
-        transition: 'width 0.2s ease',
         flexShrink: 0,
+        p: 1,
+        backgroundColor: '#FFFFFF',
+        minHeight: '100vh',
       }}
     >
-      {/* Toggle and branding */}
       <Box
+        className="sidebar-component"
         sx={{
+          width: expanded ? 240 : 56,
+          backgroundColor: theme.sidebar.primary,
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: expanded ? 'space-between' : 'center',
-          px: expanded ? 2 : 1,
-          py: 2,
-          borderBottom: `1px solid ${theme.sidebar.secondary}`,
+          flexDirection: 'column',
+          transition: 'width 0.2s ease',
+          borderRadius: '12px',
+          height: '100%',
+          overflow: 'hidden',
         }}
       >
-        {expanded ? (
-          <>
-            <Typography
-              component="span"
-              sx={{
-                color: theme.text.accent,
-                fontWeight: 800,
-                fontSize: '1.25rem',
-              }}
-            >
-              Beacon
-            </Typography>
-            <Typography
-              component="span"
-              sx={{
-                color: theme.text.accent,
-                fontWeight: 200,
-                fontSize: '1.25rem',
-              }}
-            >
-              Hill
-            </Typography>
-          </>
-        ) : null}
-        <IconButton
-          onClick={() => setExpanded((e) => !e)}
-          aria-label={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
-          sx={{ color: theme.text.accent }}
+        {/* Toggle and branding */}
+        <Box
+          className="sidebar-header"
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: expanded ? 'space-between' : 'center',
+            px: expanded ? 2 : 1,
+            py: 2,
+            borderBottom: '1px solid #2B2B2B',
+          }}
         >
-          {expanded ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-        </IconButton>
-      </Box>
+          {expanded && (
+            <Box className="sidebar-title" sx={{ lineHeight: 1 }}>
+              <Typography
+                component="span"
+                className="sidebar-title-beacon"
+                sx={{
+                  fontWeight: 800,
+                  color: '#EEBE02',
+                  fontSize: '1.25rem',
+                  letterSpacing: '-0.02em',
+                }}
+              >
+                Beacon
+              </Typography>
+              <Typography
+                component="span"
+                className="sidebar-title-hill"
+                sx={{
+                  fontWeight: 200,
+                  color: '#EEBE02',
+                  fontSize: '1.25rem',
+                  letterSpacing: '-0.02em',
+                }}
+              >
+                Hill
+              </Typography>
+            </Box>
+          )}
+          <IconButton
+            onClick={() => setExpanded((e) => !e)}
+            aria-label={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
+            className="sidebar-toggle-button"
+            sx={{ color: '#EEBE02' }}
+          >
+            {expanded ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+          </IconButton>
+        </Box>
 
       {/* Nav items */}
-      <List sx={{ flex: 1, py: 1, px: 1 }}>
+      <List className="sidebar-nav-list" sx={{ flex: 1, p: 1 }}>
         {NAV_ITEMS.map(({ label, path, Icon }) => {
           const isActive = location.pathname === path;
           return (
@@ -108,23 +124,27 @@ function SidebarComponent({ user, farm = 'My Farm' }) {
               key={path}
               component={Link}
               to={path}
-              className="sidebar-nav-item"
+              className={`sidebar-nav-item ${isActive ? 'sidebar-nav-item-active' : ''} ${!expanded ? 'sidebar-nav-item-collapsed' : ''}`}
               sx={{
-                borderRadius: 1,
+                borderRadius: '8px',
                 mb: 0.5,
-                backgroundColor: isActive ? theme.sidebar.active : 'transparent',
-                color: isActive ? theme.sidebar.primary : theme.text.accent,
+                backgroundColor: isActive ? '#EEBE02' : '#2B2B2B',
+                color: isActive ? '#202020' : '#EEBE02',
+                justifyContent: expanded ? 'flex-start' : 'center',
+                px: expanded ? 2 : 1,
+                transition: 'all 0.2s ease',
                 '&:hover': {
-                  backgroundColor: isActive
-                    ? theme.sidebar.active
-                    : theme.sidebar.secondary,
+                  backgroundColor: isActive ? '#EEBE02' : '#2B2B2B',
+                  opacity: isActive ? 1 : 0.9,
                 },
               }}
             >
               <ListItemIcon
+                className={`sidebar-nav-icon ${!expanded ? 'sidebar-nav-icon-collapsed' : ''}`}
                 sx={{
-                  minWidth: 40,
+                  minWidth: expanded ? 40 : 'auto',
                   color: 'inherit',
+                  margin: expanded ? undefined : 0,
                 }}
               >
                 <Icon />
@@ -137,23 +157,25 @@ function SidebarComponent({ user, farm = 'My Farm' }) {
 
       {/* Footer: user, farm, profile image placeholder */}
       <Box
+        className="sidebar-footer"
         sx={{
-          p: 1.5,
-          borderTop: `1px solid ${theme.sidebar.secondary}`,
-          backgroundColor: theme.sidebar.secondary,
           display: 'flex',
           alignItems: 'center',
           gap: 1.5,
           flexDirection: expanded ? 'row' : 'column',
           justifyContent: expanded ? 'flex-start' : 'center',
+          borderTop: '1px solid #2B2B2B',
+          backgroundColor: '#2B2B2B',
+          p: 1.5,
         }}
       >
         <Avatar
+          className="sidebar-avatar"
           sx={{
             width: 40,
             height: 40,
-            bgcolor: theme.sidebar.active,
-            color: theme.sidebar.primary,
+            bgcolor: '#EEBE02',
+            color: '#202020',
           }}
         >
           {initial !== 'U' ? initial : <PersonIcon />}
@@ -163,19 +185,22 @@ function SidebarComponent({ user, farm = 'My Farm' }) {
             <Typography
               variant="body2"
               noWrap
-              sx={{ color: theme.text.accent, fontWeight: 600 }}
+              className="sidebar-user-name"
+              sx={{ color: '#EEBE02', fontWeight: 600 }}
             >
               {displayName}
             </Typography>
             <Typography
               variant="caption"
               noWrap
-              sx={{ color: theme.text.main }}
+              className="sidebar-farm-name"
+              sx={{ color: '#616161' }}
             >
               {farm}
             </Typography>
           </Box>
         )}
+      </Box>
       </Box>
     </Box>
   );

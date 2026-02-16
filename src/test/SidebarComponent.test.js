@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import App from '../App';
@@ -33,40 +33,57 @@ describe('Sidebar in App (test mode)', () => {
 
   test('expand/collapse toggles sidebar content', async () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true,
+        }}
+      >
         <SidebarComponent user={MOCK_USER} />
       </MemoryRouter>
     );
     expect(screen.getByText(/Beacon/i)).toBeInTheDocument();
     const toggle = screen.getByRole('button', { name: /Collapse sidebar/i });
-    await userEvent.click(toggle);
+    await act(async () => {
+      await userEvent.click(toggle);
+    });
     expect(screen.queryByText(/Beacon/i)).not.toBeInTheDocument();
     const expandBtn = screen.getByRole('button', { name: /Expand sidebar/i });
-    await userEvent.click(expandBtn);
+    await act(async () => {
+      await userEvent.click(expandBtn);
+    });
     expect(screen.getByText(/Beacon/i)).toBeInTheDocument();
   });
 
   test('navigating to Analytics shows Analytics page', async () => {
     render(<App />);
-    await userEvent.click(screen.getByRole('link', { name: /Analytics/i }));
+    await act(async () => {
+      await userEvent.click(screen.getByRole('link', { name: /Analytics/i }));
+    });
     expect(screen.getByRole('heading', { name: /Analytics/i })).toBeInTheDocument();
   });
 
   test('navigating to Configuration shows Configuration page', async () => {
     render(<App />);
-    await userEvent.click(screen.getByRole('link', { name: /Configuration/i }));
+    await act(async () => {
+      await userEvent.click(screen.getByRole('link', { name: /Configuration/i }));
+    });
     expect(screen.getByRole('heading', { name: /Configuration/i })).toBeInTheDocument();
   });
 
   test('navigating to Settings shows Settings page', async () => {
     render(<App />);
-    await userEvent.click(screen.getByRole('link', { name: /Settings/i }));
+    await act(async () => {
+      await userEvent.click(screen.getByRole('link', { name: /Settings/i }));
+    });
     expect(screen.getByRole('heading', { name: /Settings/i })).toBeInTheDocument();
   });
 
   test('navigating to Live Dashboard shows Live Dashboard page', async () => {
     render(<App />);
-    await userEvent.click(screen.getByRole('link', { name: /Live Dashboard/i }));
+    await act(async () => {
+      await userEvent.click(screen.getByRole('link', { name: /Live Dashboard/i }));
+    });
     expect(screen.getByRole('heading', { name: /Live Dashboard/i })).toBeInTheDocument();
   });
 });

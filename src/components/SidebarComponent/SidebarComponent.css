@@ -1,11 +1,121 @@
-.sidebar-component {
-  overflow-x: hidden;
+/* Sidebar Container - creates floating effect with white padding */
+.sidebar-container {
+  padding: 8px;
+  background-color: #FFFFFF;
+  min-height: 100vh;
 }
 
+/* Main Sidebar - rounded corners and primary background */
+.sidebar-component {
+  overflow-x: hidden;
+  border-radius: 12px;
+  height: 100%;
+}
+
+/* Branding Header Section */
+.sidebar-header {
+  border-bottom: 1px solid #2B2B2B;
+}
+
+/* Title Container - ensures no gap between Beacon and Hill */
+.sidebar-title {
+  display: inline-block;
+  line-height: 1;
+}
+
+/* Beacon part - extra bold */
+.sidebar-title-beacon {
+  font-weight: 800;
+  color: #EEBE02;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+/* Hill part - extra light */
+.sidebar-title-hill {
+  font-weight: 200;
+  color: #EEBE02;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+/* Navigation List Container */
+.sidebar-nav-list {
+  padding: 8px;
+}
+
+/* Navigation Item - Inactive State */
 .sidebar-nav-item {
   text-decoration: none;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  background-color: #2B2B2B;
+  color: #EEBE02;
+  transition: padding 0.2s ease, justify-content 0.2s ease;
 }
 
 .sidebar-nav-item:hover {
   text-decoration: none;
+  background-color: #2B2B2B;
+  opacity: 0.9;
+}
+
+/* Navigation Item - Active State */
+.sidebar-nav-item-active {
+  background-color: #EEBE02;
+  color: #202020;
+}
+
+.sidebar-nav-item-active:hover {
+  background-color: #EEBE02;
+  opacity: 1;
+}
+
+/* Navigation Item - Collapsed State */
+.sidebar-nav-item-collapsed {
+  justify-content: center;
+  padding: 8px;
+}
+
+/* Navigation Item Icon */
+.sidebar-nav-icon {
+  min-width: 40px;
+  color: inherit;
+}
+
+/* Navigation Item Icon - Collapsed State */
+.sidebar-nav-icon-collapsed {
+  min-width: auto;
+  margin: 0;
+}
+
+/* User Footer Section */
+.sidebar-footer {
+  border-top: 1px solid #2B2B2B;
+  background-color: #2B2B2B;
+  padding: 12px;
+}
+
+/* User Avatar */
+.sidebar-avatar {
+  width: 40px;
+  height: 40px;
+  background-color: #EEBE02;
+  color: #202020;
+}
+
+/* User Display Name */
+.sidebar-user-name {
+  color: #EEBE02;
+  font-weight: 600;
+}
+
+/* Farm Name */
+.sidebar-farm-name {
+  color: #616161;
+}
+
+/* Toggle Button */
+.sidebar-toggle-button {
+  color: #EEBE02;
 }
