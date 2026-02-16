@@ -14,6 +14,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
 import BuildIcon from '@mui/icons-material/Build';
 import SettingsIcon from '@mui/icons-material/Settings';
+import BugReportIcon from '@mui/icons-material/BugReport';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import PersonIcon from '@mui/icons-material/Person';
@@ -25,6 +26,7 @@ const NAV_ITEMS = [
   { label: 'Analytics', path: '/analytics', Icon: AnalyticsIcon },
   { label: 'Configuration', path: '/configuration', Icon: BuildIcon },
   { label: 'Settings', path: '/settings', Icon: SettingsIcon },
+  { label: 'Testing', path: '/testing', Icon: BugReportIcon },
 ];
 
 /**

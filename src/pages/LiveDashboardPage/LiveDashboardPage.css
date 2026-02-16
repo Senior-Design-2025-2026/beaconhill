@@ -1,0 +1,115 @@
+/* LiveDashboardPage styles */
+
+.live-dashboard {
+  padding: 0;
+}
+
+/* Header row: title left, filters right */
+.live-dashboard-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+/* Filter group (Farm + Timeframe) */
+.live-dashboard-filters {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Tab bar wrapper */
+.live-dashboard-tabs {
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 16px;
+}
+
+/* Content area below tabs */
+.live-dashboard-tab-panel {
+  /* container for tab content */
+}
+
+/* Ghost placeholder base */
+.ghost-placeholder {
+  width: 100%;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+/* Map placeholder */
+.ghost-placeholder-map {
+  height: 400px;
+}
+
+/* Slider placeholder */
+.ghost-placeholder-slider {
+  height: 60px;
+}
+
+/* Per-node section */
+.node-section {
+  margin-bottom: 24px;
+}
+
+/* Node section header: name + status badge */
+.node-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+/* On/off status badge */
+.node-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.node-status-badge--on {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.node-status-badge--off {
+  background-color: #fbe9e7;
+  color: #c62828;
+}
+
+/* Horizontal row of gauge placeholders */
+.node-gauges-row {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+}
+
+/* Individual gauge placeholder */
+.ghost-placeholder-gauge {
+  flex: 1;
+  height: 80px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Analytics card placeholder */
+.ghost-placeholder-analytics {
+  height: 200px;
+}
+
+/* Text inside placeholders */
+.ghost-placeholder-text {
+  color: #757575;
+}
