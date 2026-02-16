@@ -8,7 +8,7 @@
 .live-dashboard-header-row {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: 24px;
 }
 
@@ -32,25 +32,10 @@
   /* container for tab content */
 }
 
-/* Ghost placeholder base */
-.ghost-placeholder {
-  width: 100%;
-  background-color: #e0e0e0;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
-}
-
-/* Map placeholder */
-.ghost-placeholder-map {
-  height: 400px;
-}
-
-/* Slider placeholder */
-.ghost-placeholder-slider {
-  height: 60px;
+/* Snapshot slider */
+.snapshot-slider-wrapper {
+  margin: 16px 0 24px;
+  padding: 0 8px;
 }
 
 /* Per-node section */
@@ -58,12 +43,18 @@
   margin-bottom: 24px;
 }
 
-/* Node section header: name + status badge */
+/* Node section header: name + status left, configure button right */
 .node-section-header {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
   margin-bottom: 8px;
+}
+
+.node-section-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 /* On/off status badge */
@@ -86,30 +77,15 @@
   color: #c62828;
 }
 
-/* Horizontal row of gauge placeholders */
+/* Horizontal row of gauges */
 .node-gauges-row {
   display: flex;
   flex-direction: row;
   gap: 16px;
 }
 
-/* Individual gauge placeholder */
-.ghost-placeholder-gauge {
+/* Individual gauge item */
+.node-gauge-item {
   flex: 1;
-  height: 80px;
-  background-color: #e0e0e0;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Analytics card placeholder */
-.ghost-placeholder-analytics {
-  height: 200px;
-}
-
-/* Text inside placeholders */
-.ghost-placeholder-text {
-  color: #757575;
+  min-width: 0;
 }

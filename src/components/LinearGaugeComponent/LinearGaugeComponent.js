@@ -23,12 +23,6 @@ function LinearGaugeComponent({ label, value, low, mid, high, unit = '' }) {
 
   const midPercent = ((mid - min) / range) * 100;
 
-  const getZoneColor = (val) => {
-    if (val <= mid) return '#4caf50';
-    if (val <= mid + (high - mid) * 0.5) return '#EEBE02';
-    return '#f44336';
-  };
-
   return (
     <Box sx={{ mb: 2, width: '100%' }}>
       {label && (

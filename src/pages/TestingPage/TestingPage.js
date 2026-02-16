@@ -1,6 +1,19 @@
 import React, { useState } from 'react';
-import { Box, Typography, Button, Divider, TextField, Stack, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
-import dummyData from '../../data/dummy_measurements.json';
+import {
+  Box,
+  Typography,
+  Button,
+  Divider,
+  TextField,
+  Stack,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
+} from '@mui/material';
 import LinearGaugeComponent from '../../components/LinearGaugeComponent/LinearGaugeComponent';
 import HeaderComponent from '../../components/HeaderComponent/HeaderComponent';
 import DashboardIcon from '@mui/icons-material/Dashboard';
@@ -8,12 +21,26 @@ import AnalyticsIcon from '@mui/icons-material/Analytics';
 import SettingsIcon from '@mui/icons-material/Settings';
 import MapComponent from '../../components/MapComponent/MapComponent';
 import AnalyticsCardComponent from '../../components/AnalyticsCardComponent/AnalyticsCardComponent';
+import { useMeasurements } from '../../context/MeasurementsContext';
+
+/** Generate plausible random values for a measurement record. */
+function randomMeasurementValues() {
+  return {
+    temperature: +(55 + Math.random() * 20).toFixed(1),
+    moisture:    +(35 + Math.random() * 20).toFixed(1),
+    nitrogen:    +(25 + Math.random() * 20).toFixed(1),
+    phosphorus:  +(12 + Math.random() * 15).toFixed(1),
+    potassium:   +(120 + Math.random() * 60).toFixed(1),
+  };
+}
 
 /**
  * TestingPage — interactive storybook-style page for testing components.
  * Each section renders a component with input controls for quick verification.
  */
 function TestingPage() {
+  const { farms, nodes, measurements, addMeasurements } = useMeasurements();
+
   const [dummyOutput, setDummyOutput] = useState(null);
 
   const [gaugeValue, setGaugeValue] = useState(65);
@@ -25,6 +52,10 @@ function TestingPage() {
   const [headerDescription, setHeaderDescription] = useState('Real-time farm measurements');
   const [headerIconChoice, setHeaderIconChoice] = useState('dashboard');
 
+  /* Add-measurements state */
+  const [nodeChecks, setNodeChecks] = useState({ 'node-1': true, 'node-2': true, 'node-3': true });
+  const [newTimestamp, setNewTimestamp] = useState('');
+
   const iconMap = {
     dashboard: <DashboardIcon />,
     analytics: <AnalyticsIcon />,
@@ -33,7 +64,24 @@ function TestingPage() {
   };
 
   const handleLoadDummyData = () => {
-    setDummyOutput(dummyData);
+    setDummyOutput({ farms, nodes, measurements });
+  };
+
+  const handleAddMeasurements = () => {
+    if (!newTimestamp) return;
+    const isoTs = new Date(newTimestamp).toISOString();
+    const newEntries = Object.entries(nodeChecks)
+      .filter(([, checked]) => checked)
+      .map(([nodeId]) => ({
+        measurementId: `m-${nodeId.split('-')[1]}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        farmId: 'farm-1',
+        nodeId,
+        timestamp: isoTs,
+        ...randomMeasurementValues(),
+      }));
+    if (newEntries.length > 0) {
+      addMeasurements(newEntries);
+    }
   };
 
   return (
@@ -42,13 +90,71 @@ function TestingPage() {
         Testing Page
       </Typography>
 
+      {/* --- Add New Measurements Section --- */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h5" sx={{ color: '#2D2D2D', mb: 1 }}>
+          Add New Measurements
+        </Typography>
+        <Typography variant="body2" sx={{ color: '#616161', mb: 2 }}>
+          Select which nodes should receive a new measurement, set a timestamp, and click the button.
+          The new data will appear on the Live Dashboard immediately.
+        </Typography>
+
+        <FormGroup row sx={{ mb: 2 }}>
+          {nodes.map((node) => (
+            <FormControlLabel
+              key={node.nodeId}
+              control={
+                <Checkbox
+                  checked={!!nodeChecks[node.nodeId]}
+                  onChange={(e) =>
+                    setNodeChecks((prev) => ({ ...prev, [node.nodeId]: e.target.checked }))
+                  }
+                  sx={{ color: '#EEBE02', '&.Mui-checked': { color: '#EEBE02' } }}
+                />
+              }
+              label={node.nodeName}
+            />
+          ))}
+        </FormGroup>
+
+        <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
+          <TextField
+            label="Timestamp"
+            type="datetime-local"
+            size="small"
+            value={newTimestamp}
+            onChange={(e) => setNewTimestamp(e.target.value)}
+            slotProps={{ inputLabel: { shrink: true } }}
+            sx={{ minWidth: 240 }}
+          />
+          <Button
+            variant="contained"
+            onClick={handleAddMeasurements}
+            disabled={!newTimestamp || !Object.values(nodeChecks).some(Boolean)}
+            sx={{
+              backgroundColor: '#EEBE02',
+              color: '#2D2D2D',
+              '&:hover': { backgroundColor: '#d4a900' },
+            }}
+          >
+            Add New Measurements
+          </Button>
+        </Stack>
+        <Typography variant="caption" sx={{ color: '#616161' }}>
+          Total measurements in context: {measurements.length}
+        </Typography>
+      </Box>
+
+      <Divider sx={{ mb: 4 }} />
+
       {/* --- Dummy Data Section --- */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h5" sx={{ color: '#2D2D2D', mb: 1 }}>
           Dummy Data
         </Typography>
         <Typography variant="body2" sx={{ color: '#616161', mb: 2 }}>
-          Load and inspect the dummy_measurements.json data for all nodes.
+          Load and inspect the current measurement data (including any added entries).
         </Typography>
         <Button variant="contained" onClick={handleLoadDummyData} sx={{ backgroundColor: '#EEBE02', color: '#2D2D2D', '&:hover': { backgroundColor: '#d4a900' } }}>
           Load Dummy Data
@@ -178,9 +284,9 @@ function TestingPage() {
           Map Component
         </Typography>
         <Typography variant="body2" sx={{ color: '#616161', mb: 2 }}>
-          Displays the three dummy nodes from dummy_measurements.json on an interactive map.
+          Displays the nodes on an interactive map.
         </Typography>
-        <MapComponent nodes={dummyData.nodes} height={400} />
+        <MapComponent nodes={nodes} height={400} />
       </Box>
 
       <Divider sx={{ mb: 4 }} />
@@ -191,10 +297,10 @@ function TestingPage() {
           Analytics Card Component
         </Typography>
         <Typography variant="body2" sx={{ color: '#616161', mb: 2 }}>
-          One line chart per node plotting all five metrics from dummy_measurements.json.
+          One line chart per node plotting all five metrics.
         </Typography>
-        {dummyData.nodes.map((node) => {
-          const nodeMeasurements = dummyData.measurements.filter(
+        {nodes.map((node) => {
+          const nodeMeasurements = measurements.filter(
             (m) => m.nodeId === node.nodeId
           );
           return (

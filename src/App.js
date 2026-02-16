@@ -11,6 +11,7 @@ import AnalyticsPage from './pages/AnalyticsPage/AnalyticsPage';
 import ConfigurationPage from './pages/ConfigurationPage/ConfigurationPage';
 import SettingsPage from './pages/SettingsPage/SettingsPage';
 import TestingPage from './pages/TestingPage/TestingPage';
+import { MeasurementsProvider } from './context/MeasurementsContext';
 
 Amplify.configure(awsconfig);
 
@@ -54,14 +55,16 @@ function App() {
   );
 
   return (
-    <BrowserRouter
-      future={{
-        v7_startTransition: true,
-        v7_relativeSplatPath: true,
-      }}
-    >
-      {authenticatedContent}
-    </BrowserRouter>
+    <MeasurementsProvider>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true,
+        }}
+      >
+        {authenticatedContent}
+      </BrowserRouter>
+    </MeasurementsProvider>
   );
 }
 
