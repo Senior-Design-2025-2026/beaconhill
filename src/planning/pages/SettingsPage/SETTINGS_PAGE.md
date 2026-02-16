@@ -3,6 +3,13 @@ Currently, the settings page is minimal, providing only a way to logout of the B
 
 ![Settings Page Sketch](./SettingsPage.png)
 
+## Data
+This page only utilizes the user and farm data
+
+DynamoDB Tables Used:
+- Farm
+- User
+
 ### Components
 - Profile Image: [PROFILE_IMAGE_COMPONENT.md](./../../components/ProfileImageComponent/PROFILE_IMAGE_COMPONENT.md)
 - Header: [HEADER_COMPONENT.md](./../../components/HeaderComponent/HEADER_COMPONENT.md)
