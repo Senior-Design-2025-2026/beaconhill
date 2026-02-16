@@ -1,7 +1,7 @@
 # Configuration Page
 The Configuration Page gives the user methods to configure farm and nodes.
 
-![Configuration Page](./ConfigurationPage.png.png)
+![Configuration Page](./ConfigurationPage.png)
 This page allows the user to configure node settings and tables remotely. The image of the Configuration page is not final. There should be for each configuration method, a section containing configuration buttons. There is to be a unlock button for each configuration section. Configurations should be locked until the user clicks the unlock button. 
 
 ## Data

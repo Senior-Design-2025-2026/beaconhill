@@ -1,13 +1,12 @@
-import logo from './logo.svg';
 import './App.css';
 import { Amplify } from 'aws-amplify';
-import awsconfig from './aws-exports.json';
+import awsconfig from './config/aws-exports.json';
 import { get } from 'aws-amplify/api';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 import { isTestMode } from './config';
-import { createMockItem, getInitialMockItems } from './mockData';
+import { createMockItem, getInitialMockItems } from './data/mockData';
 import { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import NavigationPanel from './components/NavigationPanel/NavigationPanel';
@@ -56,7 +55,7 @@ function AuthenticatedApp({ signOut, user, useMockData, mockItems, onAddMockItem
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
+        <span className="App-logo" aria-hidden="true" />
         <p>Welcome, {user?.signInDetails?.loginId || user?.username}!</p>
         <NavigationPanel />
         <main style={{ marginTop: '24px' }}>

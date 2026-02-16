@@ -11,7 +11,7 @@ You can run the Beacon Hill app locally in two modes: **testing** (no login, moc
    ```bash
    npm install
    ```
-3. **Config file** `src/aws-exports.json` present (for production mode; see team for the shared config if missing).
+3. **Config file** `src/config/aws-exports.json` present (for production mode; see team for the shared config if missing).
 
 ---
 

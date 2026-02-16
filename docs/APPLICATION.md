@@ -15,10 +15,10 @@ This application is intended to be a single page application. The method of chan
 - Configuration
 - Settings
 
-Here is an sketch of the sidebar created using Figma 
-![Sidebar Sketch](./SidebarComponent.png)
+Here is a sketch of the sidebar created using Figma 
+![Sidebar Sketch](../src/SidebarComponent.png)
 
-Please see the sidebar component: [SidebarComponent.md](./components/)
+Please see the sidebar component: [SidebarComponent.md](../src/components/)
 
 ## Pages
 Plans for each page is listed within the `planning/pages/` directory.

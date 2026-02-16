@@ -1,4 +1,4 @@
-![BeaconHill logo](readme_img/BeaconHill.svg)
+![BeaconHill logo](img/BeaconHill.svg)
 
 # Project description
 
@@ -12,25 +12,25 @@ The application focuses on two core objectives: collecting real-time field measu
 <table>
   <tr>
     <td align="center" style="padding:16px">
-      <img src="readme_img/steven.jpeg" alt="Steven Austin" width="88" height="88"/><br/>
+      <img src="img/steven.jpeg" alt="Steven Austin" width="88" height="88"/><br/>
       <strong>
         <a href="https://www.linkedin.com/in/steven-austin-069a593a5/" target="_blank">Steven Austin</a>
       </strong>
     </td>
     <td align="center" style="padding:16px">
-      <img src="readme_img/sage.jpeg" alt="Sage Marks" width="88" height="88"/><br/>
+      <img src="img/sage.jpeg" alt="Sage Marks" width="88" height="88"/><br/>
       <strong>
         <a href="http://linkedin.com/in/sage-marks" target="_blank">Sage Marks</a>
       </strong>
     </td>
     <td align="center" style="padding:16px">
-      <img src="readme_img/zack.jpeg" alt="Zack Mulholland" width="88" height="88"/><br/>
+      <img src="img/zack.jpeg" alt="Zack Mulholland" width="88" height="88"/><br/>
       <strong>
         <a href="https://www.linkedin.com/in/zackmulholland/" target="_blank">Zack Mulholland</a>
       </strong>
     </td>
     <td align="center" style="padding:16px">
-      <img src="readme_img/matt.jpeg" alt="Matt Krueger" width="88" height="88"/><br/>
+      <img src="img/matt.jpeg" alt="Matt Krueger" width="88" height="88"/><br/>
       <strong>
         <a href="http://linkedin.com/in/matt-krueger" target="_blank">Matt Krueger</a>
       </strong>
@@ -38,13 +38,17 @@ The application focuses on two core objectives: collecting real-time field measu
   </tr>
 </table>
 
+# Repository structure
+
+Root layout and where key tooling lives: **[docs/PROJECT_STRUCTURE.md](./docs/PROJECT_STRUCTURE.md)**.
+
 # Running the project
 
 ## Local development
 
 To run the app on your machine in **testing mode** (no login, mock data) or **production mode** (login required, real AWS backend), use the instructions and commands in:
 
-**[DEVELOPMENT_MODES.md](./DEVELOPMENT_MODES.md)**
+**[DEVELOPMENT_MODES.md](./docs/DEVELOPMENT_MODES.md)**
 
 Summary:
 
@@ -55,6 +59,6 @@ Summary:
 
 The app is hosted on AWS Amplify. Open the live site here:
 
-**[Beacon Hill (AWS)](https://main.d3lv3c6ppm80xp.amplifyapp.com)**
+**[Beacon Hill (AWS) NOT AVAILABLE -- YET]()**
 
 *If your team uses a different branch (e.g. `dev`) or a custom domain, update this link. The Amplify App ID for this project is `d3lv3c6ppm80xp`.*

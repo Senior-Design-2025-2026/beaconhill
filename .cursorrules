@@ -4,7 +4,7 @@
 - **Amplify:** Auth is Amplify Gen 2 style (e.g. `fetchAuthSession`, `getCurrentUser()`). Backend is CloudFormation (Lambda + API Gateway + DynamoDB). No `amplify/data/resource.ts`; API contract is defined by `amplify/backend/api/` and Lambda handlers.
 
 # Project Structure / Key Paths
-- **React app:** `src/` — `App.js` entry; components currently live in `src/` (flat). Prefer `src/components/` for new components as the app grows. Config: `src/aws-exports` (resolves to gitignored `aws-exports.js`).
+- **React app:** `src/` — `App.js` entry; components in `src/components/`, pages in `src/pages/`. Config: `src/config/` (e.g. `aws-exports.json`; may be gitignored).
 - **Amplify backend:** `amplify/backend/` — `api/apiGet/` (API Gateway; path `/items` → Lambda `dbGet`), `function/dbGet/` (Python Lambda), `function/beaconHillDBTriggercc5a1762/` (Node Lambda, DynamoDB trigger), `storage/beaconHillDB/` (DynamoDB), `auth/beaconhill56651fb6/` (Cognito).
 - **Config:** `amplifyconfiguration.json` or `aws-exports.js` (both gitignored); use env or Amplify CLI for local config.
 
@@ -37,7 +37,7 @@
 - Amplify config is from `aws-exports.js` or `amplifyconfiguration.json`; these are gitignored. Do not commit secrets or full config; reference `src/aws-exports` or env vars for local dev.
 
 # Test Driven Development
-- **Stack:** Jest + React Testing Library; `src/setupTests.js` (jest-dom), test files `src/**/*.test.js` (e.g. `App.test.js`).
+- **Stack:** Jest + React Testing Library; `src/setupTests.js` (jest-dom, CRA default), test files in `src/test/**/*.test.js`. Run full suite with `npm run test:ci`.
 - **Unit Tests:** For business logic involving calculations, unit tests should be written.
 - **Data Mocking:** For local development, a data mocking function should be used. Tests should be written to pass this mocked data.
 - **Data Format:** The database is DynamoDB; dummy data will come in as objects.
