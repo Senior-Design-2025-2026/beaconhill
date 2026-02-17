@@ -273,14 +273,18 @@ function LiveDashboardPage() {
                 <>
                   <div className="live-dashboard-header-meta">
                     <div>
-                      <strong>Address: </strong> {selectedFarmData.farmAddress}, {selectedFarmData.farmCity}, {selectedFarmData.farmState} {selectedFarmData.farmZipCode}
+                      <strong>Address: </strong> {selectedFarmData.farmAddress}, {selectedFarmData.farmCity}, {selectedFarmData.farmState}
                     </div>
                     <div>
-                      <strong>Crop: </strong> {selectedFarmData.farmCropType}
-                      <span className="live-dashboard-header-sep" aria-hidden="true"> | </span>
                       <strong>Total Nodes: </strong> {selectedFarmData.numberOfNodes ?? farmNodes.length}
                       <span className="live-dashboard-header-sep" aria-hidden="true"> | </span>
                       <strong>Active Nodes: </strong> {selectedFarmData.numberOfNodes ?? farmNodes.length}  {/* TODO: add active nodes count */}
+                    </div>
+                    <div>
+                      <strong>Crop: </strong> {selectedFarmData.farmCropType}
+                    </div>
+                    <div>
+                      <strong>Last Updated: </strong> {formatChicagoTime(maxTimestampMs)}
                     </div>
                   </div>
                 </>
