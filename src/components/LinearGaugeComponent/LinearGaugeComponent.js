@@ -13,7 +13,7 @@ import { Box, Typography } from '@mui/material';
  * @param {number} props.high - High threshold (end of range)
  * @param {string} [props.unit] - Optional unit string (e.g. "°F", "%", "ppm")
  */
-function LinearGaugeComponent({ label, value, low, mid, high, unit = '' }) {
+function LinearGaugeComponent({ label, value, low, lowThreshold, highThreshold, high, unit = '' }) {
   const min = low;
   const max = high;
   const range = max - min || 1;
@@ -21,20 +21,23 @@ function LinearGaugeComponent({ label, value, low, mid, high, unit = '' }) {
   const clampedValue = Math.max(min, Math.min(max, value));
   const markerPercent = ((clampedValue - min) / range) * 100;
 
-  const midPercent = ((mid - min) / range) * 100;
+  const lowThresholdPercent = ((lowThreshold - min) / range) * 100;
+  const highThresholdPercent = ((highThreshold - min) / range) * 100;
 
   return (
     <Box sx={{ mb: 2, width: '100%' }}>
       {label && (
         <Typography variant="subtitle2" sx={{ color: '#2D2D2D', mb: 0.5 }}>
-          {label}
+          {label + ' (' + unit + ')'}
         </Typography>
       )}
       <Box sx={{ position: 'relative', width: '100%', height: 24, borderRadius: 1, overflow: 'hidden', display: 'flex' }}>
-        {/* Low-to-mid zone (green) */}
-        <Box sx={{ width: `${midPercent}%`, height: '100%', backgroundColor: '#4caf50' }} />
-        {/* Mid-to-high zone (yellow to red gradient) */}
-        <Box sx={{ width: `${100 - midPercent}%`, height: '100%', background: 'linear-gradient(to right, #EEBE02, #f44336)' }} />
+        {/* Low-to-lowThreshold zone (red to yellow gradient) */}
+        <Box sx={{ width: `${lowThresholdPercent}%`, height: '100%', background: 'linear-gradient(to right, #f44336,  #EEBE02)' }} />
+        {/* lowThreshold-to-highThreshold zone (green) */}
+        <Box sx={{ width: `${highThresholdPercent - lowThresholdPercent}%`, height: '100%', background: '#4caf50' }} />
+        {/* highThreshold-to-high zone (yellow to red gradient) */}
+        <Box sx={{ width: `${100 - highThresholdPercent}%`, height: '100%', background: 'linear-gradient(to right, #EEBE02, #f44336)' }} />
       </Box>
       {/* Marker */}
       <Box sx={{ position: 'relative', width: '100%', height: 0 }}>
@@ -52,15 +55,9 @@ function LinearGaugeComponent({ label, value, low, mid, high, unit = '' }) {
         />
       </Box>
       {/* Labels row */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
-        <Typography variant="caption" sx={{ color: '#616161' }}>
-          {low}{unit}
-        </Typography>
+      <Box sx={{ position: 'relative', left: `${markerPercent}%`, transform: 'translateX(-50%)', display: 'flex', justifyContent: 'center', mt: 0.5 }}>
         <Typography variant="caption" sx={{ color: '#2D2D2D', fontWeight: 600 }}>
-          {value}{unit}
-        </Typography>
-        <Typography variant="caption" sx={{ color: '#616161' }}>
-          {high}{unit}
+          {value}
         </Typography>
       </Box>
     </Box>

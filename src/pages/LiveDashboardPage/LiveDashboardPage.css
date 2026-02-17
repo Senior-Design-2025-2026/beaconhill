@@ -88,7 +88,7 @@
   flex-direction: column;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  overflow: hidden;
+  overflow: visible;
   flex-shrink: 0;
   box-shadow: var(--shadow-light);
 }
@@ -119,7 +119,7 @@
 
 /* Snapshot slider inside tab-filter box — compact, below filters */
 .live-dashboard-slider {
-  padding: 0 32px 12px 32px;
+  padding: 0 40px 12px 40px;
   flex-shrink: 0;
   width: 100%;
   box-sizing: border-box;
@@ -137,6 +137,8 @@
 .live-dashboard-slider .MuiSlider-markLabel {
   font-size: 0.55rem;
   margin-top: 2px;
+  white-space: pre;
+  text-align: center;
 }
 
 /* Content area below tabs */

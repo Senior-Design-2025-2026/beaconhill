@@ -30,16 +30,18 @@ import LinearGaugeComponent from '../../components/LinearGaugeComponent/LinearGa
 import { useMeasurements } from '../../context/MeasurementsContext';
 import './LiveDashboardPage.css';
 
+const TEST_DATE_MS = 1771164000001;
+
 /**
  * Metric configuration: maps each measurement key to display props and
  * fixed low/mid/high ranges for LinearGaugeComponent.
  */
 const METRIC_CONFIG = [
-  { key: 'temperature', label: 'Temperature', unit: '°F', low: 0, mid: 50, high: 100 },
-  { key: 'moisture',    label: 'Moisture',    unit: '%',  low: 0, mid: 50, high: 100 },
-  { key: 'nitrogen',    label: 'Nitrogen',    unit: ' ppm', low: 0, mid: 25, high: 50 },
-  { key: 'phosphorus',  label: 'Phosphorus',  unit: ' ppm', low: 0, mid: 15, high: 30 },
-  { key: 'potassium',   label: 'Potassium',   unit: ' ppm', low: 0, mid: 100, high: 200 },
+  { key: 'temperature', label: 'Temperature', unit: '°F', low: 0, lowThreshold: 30, highThreshold: 70, high: 100 },
+  { key: 'moisture',    label: 'Moisture',    unit: '%',  low: 0, lowThreshold: 30, highThreshold: 70, high: 100 },
+  { key: 'nitrogen',    label: 'Nitrogen',    unit: 'ppm', low: 0, lowThreshold: 25, highThreshold: 50, high: 100 },
+  { key: 'phosphorus',  label: 'Phosphorus',  unit: 'ppm', low: 0, lowThreshold: 15, highThreshold: 30, high: 100 },
+  { key: 'potassium',   label: 'Potassium',   unit: 'ppm', low: 0, lowThreshold: 100, highThreshold: 200, high: 200 },
 ];
 
 /** Colors assigned to nodes in multi-node line charts. */
@@ -84,6 +86,25 @@ function buildHourlyTimeline(minMs, maxMs) {
   return timeline;
 }
 
+/**
+ * Build an array of evenly spaced UTC epoch-ms values from minMs to maxMs (inclusive), with stepHour hours between each value.
+ * Each value is snapped to the top of the hour in UTC.
+ */
+function buildTimeline(minMs, maxMs, stepHour) {
+  const start = new Date(minMs);
+  start.setUTCMinutes(0, 0, 0);
+  const end = new Date(maxMs);
+  end.setUTCMinutes(0, 0, 0);
+
+  const timeline = [];
+  const cursor = new Date(start);
+  while (cursor.getTime() <= end.getTime()) {
+    timeline.push(cursor.getTime());
+    cursor.setUTCHours(cursor.getUTCHours() + stepHour);
+  }
+  return timeline;
+}
+
 /** Format a UTC epoch-ms value to a short label like "02/15 08:00". */
 function formatTimestampLabel(ms) {
   const d = new Date(ms);
@@ -107,6 +128,26 @@ function formatChicagoTime(ms) {
     hour12: true,
     timeZoneName: 'short',
   });
+}
+
+/** Format timestamp in Chicago time for display (e.g. "2/15\n6:00 PM CST"). */
+function formatChicagoTimeLineSplit(ms) {
+  if (ms == null) return '';
+  const d = new Date(ms);
+  const tz = { timeZone: 'America/Chicago' };
+  const dateStr = d.toLocaleString('en-US', {
+    ...tz,
+    month: 'numeric',
+    day: 'numeric',
+  });
+  const timeStr = d.toLocaleString('en-US', {
+    ...tz,
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZoneName: 'short',
+  });
+  return `${dateStr}\n${timeStr}`;
 }
 
 /** Descriptive label for a snapshot: index (1-based) + Chicago time. */
@@ -180,15 +221,9 @@ function LiveDashboardPage() {
   /** Measurements filtered by the selected timeframe window. */
   const timeFilteredMeasurements = useMemo(() => {
     const windowMs = getTimeWindowMs(selectedTimeframe);
-    const cutoff = maxTimestampMs - windowMs;
+    const cutoff = (TEST_DATE_MS ?? Date.now()) - windowMs;
     return farmMeasurements.filter((m) => new Date(m.timestamp).getTime() >= cutoff);
-  }, [farmMeasurements, selectedTimeframe, maxTimestampMs]);
-
-  /** Number of nodes with at least one measurement in the current timeframe. */
-  const activeNodeCount = useMemo(() => {
-    const nodeIdsWithData = new Set(timeFilteredMeasurements.map((m) => m.nodeId));
-    return nodeIdsWithData.size;
-  }, [timeFilteredMeasurements]);
+  }, [farmMeasurements, selectedTimeframe]);
 
   /* --- Slider timeline (hourly, min to max of time-filtered data, in epoch-ms) --- */
 
@@ -216,10 +251,11 @@ function LiveDashboardPage() {
 
   /** Slider marks: index (1-based) + Chicago time. */
   const sliderMarks = useMemo(() => {
-    return timeline.map((ms, i) => ({
-      value: i,
-      label: String(i + 1),
-    }));
+    if (timeline.length === 0) return [];
+    return [
+      { value: 0, label: formatChicagoTimeLineSplit(timeline[0]) },
+      { value: timeline.length - 1, label: formatChicagoTimeLineSplit(timeline[timeline.length - 1]) },
+    ];
   }, [timeline]);
 
   /* --- Helpers for Snapshot View --- */
@@ -276,9 +312,7 @@ function LiveDashboardPage() {
                       <strong>Address: </strong> {selectedFarmData.farmAddress}, {selectedFarmData.farmCity}, {selectedFarmData.farmState}
                     </div>
                     <div>
-                      <strong>Total Nodes: </strong> {selectedFarmData.numberOfNodes ?? farmNodes.length}
-                      <span className="live-dashboard-header-sep" aria-hidden="true"> | </span>
-                      <strong>Active Nodes: </strong> {selectedFarmData.numberOfNodes ?? farmNodes.length}  {/* TODO: add active nodes count */}
+                      <strong>Nodes: </strong> {selectedFarmData.numberOfNodes ?? farmNodes.length}
                     </div>
                     <div>
                       <strong>Crop: </strong> {selectedFarmData.farmCropType}
@@ -299,7 +333,11 @@ function LiveDashboardPage() {
               onChange={(e, v) => setActiveTab(v)}
               variant="fullWidth"
               textColor="inherit"
-              TabIndicatorProps={{ style: { backgroundColor: '#EEBE02' } }}
+              sx={{
+                '& .MuiTabs-indicator': {
+                  backgroundColor: '#EEBE02',
+                },
+              }}
             >
               <Tab label="Snapshot View" sx={{ fontWeight: activeTab === 0 ? 700 : 400 }} />
               <Tab label="Timeframe Averages" sx={{ fontWeight: activeTab === 1 ? 700 : 400 }} />
@@ -460,7 +498,8 @@ function LiveDashboardPage() {
                                   label={metric.label}
                                   value={measurement[metric.key]}
                                   low={metric.low}
-                                  mid={metric.mid}
+                                  lowThreshold={metric.lowThreshold}
+                                  highThreshold={metric.highThreshold}
                                   high={metric.high}
                                   unit={metric.unit}
                                 />
@@ -511,7 +550,7 @@ function LiveDashboardPage() {
                   </TableHead>
                   <TableBody>
                     {METRIC_CONFIG.map((metric) => {
-                      const allValues = sliderFilteredMeasurements.map((m) => m[metric.key]);
+                      const allValues = selectedTimeFilteredMeasurements.map((m) => m[metric.key]);
                       const farmAvg = allValues.length > 0
                         ? (allValues.reduce((s, v) => s + v, 0) / allValues.length).toFixed(1)
                         : '—';
@@ -520,7 +559,7 @@ function LiveDashboardPage() {
                           <TableCell>{metric.label} ({metric.unit.trim()})</TableCell>
                           <TableCell align="right">{farmAvg}</TableCell>
                           {filteredNodes.map((node) => {
-                            const nodeVals = sliderFilteredMeasurements
+                            const nodeVals = selectedTimeFilteredMeasurements
                               .filter((m) => m.nodeId === node.nodeId)
                               .map((m) => m[metric.key]);
                             const avg = nodeVals.length > 0
@@ -541,7 +580,7 @@ function LiveDashboardPage() {
             {/* 5 per-metric line charts — each plots selected nodes */}
             {METRIC_CONFIG.map((metric) => {
               const traces = filteredNodes.map((node, idx) => {
-                const nodeMeasurements = sliderFilteredMeasurements
+                const nodeMeasurements = selectedTimeFilteredMeasurements
                   .filter((m) => m.nodeId === node.nodeId)
                   .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
                 return {
