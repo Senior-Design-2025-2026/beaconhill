@@ -249,6 +249,15 @@ function LiveDashboardPage() {
     [timeFilteredMeasurements, selectedNodeIds]
   );
 
+  /** Measurements for selected nodes, cumulatively filtered up to the slider timestamp. */
+  const sliderFilteredMeasurements = useMemo(() => {
+    if (selectedTimestampMs == null) return selectedTimeFilteredMeasurements;
+    const cutoffMs = selectedTimestampMs + 60 * 60 * 1000;
+    return selectedTimeFilteredMeasurements.filter(
+      (m) => new Date(m.timestamp).getTime() < cutoffMs
+    );
+  }, [selectedTimeFilteredMeasurements, selectedTimestampMs]);
+
   /* --- Render --- */
   return (
     <div className="live-dashboard">
@@ -346,19 +355,9 @@ function LiveDashboardPage() {
               </Select>
             </FormControl>
           </div>
-        </div>
-      </div>
-
-      {/* ===== Snapshot View tab ===== */}
-      {activeTab === 0 && (
-        <div className="snapshot-layout">
-          {/* Top row: Snapshots slider */}
+          {/* Snapshot slider - visible in both tabs */}
           {timeline.length > 0 && (
-            <div className="snapshot-slider-box">
-              <HeaderComponent
-                title={`Snapshot ${effectiveSliderIndex + 1}`}
-                titleVariant="h6"
-              />
+            <div className="live-dashboard-slider">
               <Slider
                 value={effectiveSliderIndex}
                 min={0}
@@ -366,7 +365,7 @@ function LiveDashboardPage() {
                 step={1}
                 marks={sliderMarks}
                 valueLabelDisplay="auto"
-                valueLabelFormat={(v) => `Snapshot ${v + 1}`}
+                valueLabelFormat={(v) => formatChicagoTime(timeline[v])}
                 onChange={(e, v) => setSliderIndex(v)}
                 sx={{
                   color: '#9e9e9e',
@@ -387,14 +386,19 @@ function LiveDashboardPage() {
                     color: '#2D2D2D',
                   },
                   '& .MuiSlider-markLabel': {
-                    fontSize: '0.75rem',
+                    fontSize: '0.55rem',
                     color: '#616161',
                   },
                 }}
               />
             </div>
           )}
+        </div>
+      </div>
 
+      {/* ===== Snapshot View tab ===== */}
+      {activeTab === 0 && (
+        <div className="snapshot-layout">
           {/* Map (25%) + Measurements (75%) */}
           <div className="snapshot-top-row">
             {/* Map box */}
@@ -414,7 +418,7 @@ function LiveDashboardPage() {
             <div className="snapshot-right">
               <div className="snapshot-panel-box">
                 <HeaderComponent
-                  title="Measurements"
+                  title={timeline.length > 0 ? `Snapshot ${effectiveSliderIndex + 1}: ${formatChicagoTime(selectedTimestampMs)}` : 'Measurements'}
                   titleVariant="h6"
                 />
                 <div className="snapshot-nodes-scroll">
@@ -507,7 +511,7 @@ function LiveDashboardPage() {
                   </TableHead>
                   <TableBody>
                     {METRIC_CONFIG.map((metric) => {
-                      const allValues = selectedTimeFilteredMeasurements.map((m) => m[metric.key]);
+                      const allValues = sliderFilteredMeasurements.map((m) => m[metric.key]);
                       const farmAvg = allValues.length > 0
                         ? (allValues.reduce((s, v) => s + v, 0) / allValues.length).toFixed(1)
                         : '—';
@@ -516,7 +520,7 @@ function LiveDashboardPage() {
                           <TableCell>{metric.label} ({metric.unit.trim()})</TableCell>
                           <TableCell align="right">{farmAvg}</TableCell>
                           {filteredNodes.map((node) => {
-                            const nodeVals = selectedTimeFilteredMeasurements
+                            const nodeVals = sliderFilteredMeasurements
                               .filter((m) => m.nodeId === node.nodeId)
                               .map((m) => m[metric.key]);
                             const avg = nodeVals.length > 0
@@ -537,7 +541,7 @@ function LiveDashboardPage() {
             {/* 5 per-metric line charts — each plots selected nodes */}
             {METRIC_CONFIG.map((metric) => {
               const traces = filteredNodes.map((node, idx) => {
-                const nodeMeasurements = selectedTimeFilteredMeasurements
+                const nodeMeasurements = sliderFilteredMeasurements
                   .filter((m) => m.nodeId === node.nodeId)
                   .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
                 return {

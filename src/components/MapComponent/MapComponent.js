@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useRef } from 'react';
 import { Box } from '@mui/material';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -48,6 +48,21 @@ const defaultIcon = createColoredIcon('#1976d2');
  * @param {number} [props.zoom] - Initial zoom level (default 15)
  * @param {number|string} [props.height] - Map container height in pixels or CSS string (default 400)
  */
+/** Programmatically re-center the map only when lat/lon actually change. */
+function ChangeView({ center, zoom }) {
+  const map = useMap();
+  const prevCenter = useRef(center);
+  useEffect(() => {
+    const [prevLat, prevLon] = prevCenter.current;
+    const [lat, lon] = center;
+    if (prevLat !== lat || prevLon !== lon) {
+      map.flyTo(center, zoom, { duration: 1 });
+      prevCenter.current = center;
+    }
+  }, [map, center, zoom]);
+  return null;
+}
+
 const DEFAULT_CENTER = [41.6611, -91.5302];
 
 function MapComponent({ nodes = [], centerLat, centerLon, zoom = 15, height = 400 }) {
@@ -69,6 +84,7 @@ function MapComponent({ nodes = [], centerLat, centerLon, zoom = 15, height = 40
         style={{ width: '100%', height: '100%' }}
         scrollWheelZoom={true}
       >
+        <ChangeView center={center} zoom={zoom} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

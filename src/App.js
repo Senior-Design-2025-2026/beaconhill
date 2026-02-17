@@ -10,7 +10,6 @@ import LiveDashboardPage from './pages/LiveDashboardPage/LiveDashboardPage';
 import AnalyticsPage from './pages/AnalyticsPage/AnalyticsPage';
 import ConfigurationPage from './pages/ConfigurationPage/ConfigurationPage';
 import SettingsPage from './pages/SettingsPage/SettingsPage';
-import TestingPage from './pages/TestingPage/TestingPage';
 import { MeasurementsProvider } from './context/MeasurementsContext';
 
 Amplify.configure(awsconfig);
@@ -30,7 +29,6 @@ function AuthenticatedApp({ signOut, user }) {
           <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/configuration" element={<ConfigurationPage />} />
           <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/testing" element={<TestingPage />} />
         </Routes>
       </main>
     </div>

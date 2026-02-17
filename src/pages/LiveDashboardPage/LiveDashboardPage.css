@@ -19,8 +19,10 @@
 }
 
 .live-dashboard-header {
-  flex: 1 1 40%;
+  flex: 1 1 40%;            /*  see live-dashboard-tab-filter-box for other box */
   min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Header container box with sidebar styling */
@@ -30,6 +32,15 @@
   border-radius: 8px;
   padding: 16px;
   box-shadow: var(--shadow-light);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Remove HeaderComponent bottom margin inside the header container */
+.live-dashboard-header-container > .MuiBox-root {
+  margin-bottom: 0;
 }
 
 /* Header title text - yellow like sidebar */
@@ -71,7 +82,7 @@
 
 /* Box containing tabs + filters — 50% width */
 .live-dashboard-tab-filter-box {
-  flex: 1 1 60%;
+  flex: 1 1 60%;                  /*  see live-dashboard-header for other box */
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -104,6 +115,28 @@
 .live-dashboard-tab-filter-box .live-dashboard-filters .MuiFormControl-root {
   flex: 1;
   min-width: 0;
+}
+
+/* Snapshot slider inside tab-filter box — compact, below filters */
+.live-dashboard-slider {
+  padding: 0 32px 12px 32px;
+  flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.live-dashboard-slider .MuiSlider-root {
+  height: 4px;
+}
+
+.live-dashboard-slider .MuiSlider-thumb {
+  width: 16px;
+  height: 16px;
+}
+
+.live-dashboard-slider .MuiSlider-markLabel {
+  font-size: 0.55rem;
+  margin-top: 2px;
 }
 
 /* Content area below tabs */
@@ -177,16 +210,6 @@
   overflow-y: auto;
   min-height: 0;
   padding-right: 4px;
-}
-
-/* Bottom slider box */
-.snapshot-slider-box {
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 16px;
-  padding-bottom: 16px;
-  flex-shrink: 0;
-  box-shadow: var(--shadow-light);
 }
 
 .slider-no-data-hint {

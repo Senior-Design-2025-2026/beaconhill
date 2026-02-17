@@ -22,11 +22,10 @@ import { theme } from '../../theme/theme';
 import './SidebarComponent.css';
 
 const NAV_ITEMS = [
-  { label: 'Live Dashboard', path: '/', Icon: DashboardIcon },
+  { label: 'Dashboard', path: '/', Icon: DashboardIcon },
   { label: 'Analytics', path: '/analytics', Icon: AnalyticsIcon },
   { label: 'Configuration', path: '/configuration', Icon: BuildIcon },
   { label: 'Settings', path: '/settings', Icon: SettingsIcon },
-  { label: 'Testing', path: '/testing', Icon: BugReportIcon },
 ];
 
 /**
