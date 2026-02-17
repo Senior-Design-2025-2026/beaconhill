@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Tabs,
   Tab,
@@ -8,15 +8,25 @@ import {
   InputLabel,
   Typography,
   Slider,
-  Box,
   Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Checkbox,
+  ListItemText,
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
+import MapIcon from '@mui/icons-material/Map';
+import ScienceIcon from '@mui/icons-material/Science';
+import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import { useNavigate } from 'react-router-dom';
+import Plot from 'react-plotly.js';
 import HeaderComponent from '../../components/HeaderComponent/HeaderComponent';
 import MapComponent from '../../components/MapComponent/MapComponent';
 import LinearGaugeComponent from '../../components/LinearGaugeComponent/LinearGaugeComponent';
-import AnalyticsCardComponent from '../../components/AnalyticsCardComponent/AnalyticsCardComponent';
 import { useMeasurements } from '../../context/MeasurementsContext';
 import './LiveDashboardPage.css';
 
@@ -31,6 +41,9 @@ const METRIC_CONFIG = [
   { key: 'phosphorus',  label: 'Phosphorus',  unit: ' ppm', low: 0, mid: 15, high: 30 },
   { key: 'potassium',   label: 'Potassium',   unit: ' ppm', low: 0, mid: 100, high: 200 },
 ];
+
+/** Colors assigned to nodes in multi-node line charts. */
+const NODE_COLORS = ['#1976d2', '#e53935', '#43a047', '#fb8c00', '#8e24aa', '#00acc1'];
 
 const TIMEFRAME_OPTIONS = [
   { label: 'Last 6 Hours',  value: '6h' },
@@ -89,8 +102,8 @@ function formatHourLabel(ms) {
 
 /**
  * LiveDashboardPage — real components with header, filters, and tabbed content.
- * Tab 0 (Snapshot View): Map, Timestamp Slider, per-node gauges with on/off status.
- * Tab 1 (Timeframe Averages): per-node analytics line charts.
+ * Tab 0 (Snapshot View): Map + Measurements side-by-side, Snapshots slider below.
+ * Tab 1 (Timeframe Averages): bento grid of per-metric charts + farm averages table.
  */
 function LiveDashboardPage() {
   const { farms, nodes, measurements } = useMeasurements();
@@ -100,6 +113,7 @@ function LiveDashboardPage() {
   const [selectedTimeframe, setSelectedTimeframe] = useState('24h');
   const [activeTab, setActiveTab] = useState(0);
   const [sliderIndex, setSliderIndex] = useState(null);
+  const [selectedNodeIds, setSelectedNodeIds] = useState([]);
 
   /* --- Derived data --- */
 
@@ -108,7 +122,23 @@ function LiveDashboardPage() {
     [nodes, selectedFarm]
   );
 
+  const selectedFarmName = useMemo(() => {
+    const farm = farms.find((f) => f.farmId === selectedFarm);
+    return farm ? farm.farmName : '';
+  }, [farms, selectedFarm]);
+
+  /** Reset selected nodes when the farm changes. */
+  useEffect(() => {
+    setSelectedNodeIds(farmNodes.map((n) => n.nodeId));
+  }, [farmNodes]);
+
   const nodeIds = useMemo(() => farmNodes.map((n) => n.nodeId), [farmNodes]);
+
+  /** Nodes that are currently selected via the filter. */
+  const filteredNodes = useMemo(
+    () => farmNodes.filter((n) => selectedNodeIds.includes(n.nodeId)),
+    [farmNodes, selectedNodeIds]
+  );
 
   /** All measurements for nodes in the selected farm. */
   const farmMeasurements = useMemo(
@@ -129,7 +159,7 @@ function LiveDashboardPage() {
     return farmMeasurements.filter((m) => new Date(m.timestamp).getTime() >= cutoff);
   }, [farmMeasurements, selectedTimeframe, maxTimestampMs]);
 
-  /* --- Slider timeline (hourly, min→max of time-filtered data, in epoch-ms) --- */
+  /* --- Slider timeline (hourly, min to max of time-filtered data, in epoch-ms) --- */
 
   const timeline = useMemo(() => {
     if (timeFilteredMeasurements.length === 0) return [];
@@ -163,10 +193,6 @@ function LiveDashboardPage() {
 
   /* --- Helpers for Snapshot View --- */
 
-  /**
-   * Get a node's measurement at the selected timestamp (compared by epoch-ms).
-   * Snaps the measurement timestamp to the hour before comparing.
-   */
   function getMeasurementAt(nodeId, targetMs) {
     if (targetMs == null) return null;
     return timeFilteredMeasurements.find((m) => {
@@ -176,6 +202,22 @@ function LiveDashboardPage() {
       return mDate.getTime() === targetMs;
     }) || null;
   }
+
+  /** Annotate ALL farm nodes with online/selected for the map. */
+  const mapNodes = useMemo(() => {
+    return farmNodes.map((node) => ({
+      ...node,
+      online: getMeasurementAt(node.nodeId, selectedTimestampMs) != null,
+      selected: selectedNodeIds.includes(node.nodeId),
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [farmNodes, selectedNodeIds, selectedTimestampMs, timeFilteredMeasurements]);
+
+  /** Measurements for selected nodes only, filtered by timeframe. */
+  const selectedTimeFilteredMeasurements = useMemo(
+    () => timeFilteredMeasurements.filter((m) => selectedNodeIds.includes(m.nodeId)),
+    [timeFilteredMeasurements, selectedNodeIds]
+  );
 
   /* --- Render --- */
 
@@ -199,6 +241,29 @@ function LiveDashboardPage() {
               {farms.map((farm) => (
                 <MenuItem key={farm.farmId} value={farm.farmId}>
                   {farm.farmName}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl size="small" sx={{ minWidth: 200 }}>
+            <InputLabel>Node(s)</InputLabel>
+            <Select
+              label="Node(s)"
+              multiple
+              value={selectedNodeIds}
+              onChange={(e) => setSelectedNodeIds(e.target.value)}
+              renderValue={(sel) =>
+                farmNodes
+                  .filter((n) => sel.includes(n.nodeId))
+                  .map((n) => n.nodeName)
+                  .join(', ')
+              }
+            >
+              {farmNodes.map((node) => (
+                <MenuItem key={node.nodeId} value={node.nodeId}>
+                  <Checkbox checked={selectedNodeIds.includes(node.nodeId)} />
+                  <ListItemText primary={node.nodeName} />
                 </MenuItem>
               ))}
             </Select>
@@ -236,13 +301,104 @@ function LiveDashboardPage() {
 
       {/* ===== Snapshot View tab ===== */}
       {activeTab === 0 && (
-        <div className="live-dashboard-tab-panel">
-          {/* Map */}
-          <MapComponent nodes={farmNodes} height={400} />
+        <div className="snapshot-layout">
+          {/* Top row: Map (25%) + Measurements (75%) */}
+          <div className="snapshot-top-row">
+            {/* Map box */}
+            <div className="snapshot-left">
+              <div className="snapshot-panel-box">
+                <HeaderComponent
+                  title={selectedFarmName}
+                  icon={<MapIcon />}
+                  titleVariant="h6"
+                />
+                <div className="snapshot-map-fill">
+                  <MapComponent nodes={mapNodes} height="100%" />
+                </div>
+              </div>
+            </div>
 
-          {/* Timestamp Slider */}
+            {/* Measurements box */}
+            <div className="snapshot-right">
+              <div className="snapshot-panel-box">
+                <HeaderComponent
+                  title="Measurements"
+                  icon={<ScienceIcon />}
+                  titleVariant="h6"
+                />
+                <div className="snapshot-nodes-scroll">
+                  {filteredNodes.map((node) => {
+                    const measurement = getMeasurementAt(node.nodeId, selectedTimestampMs);
+                    const online = measurement != null;
+                    return (
+                      <div key={node.nodeId} className="node-section">
+                        <div className="node-section-header">
+                          <div className="node-section-header-left">
+                            <Typography variant="h6" sx={{ color: '#2D2D2D' }}>
+                              {node.nodeName}
+                            </Typography>
+                            <span
+                              className={`node-status-badge ${online ? 'node-status-badge--on' : 'node-status-badge--off'}`}
+                            >
+                              {online ? 'Online' : 'Offline'}
+                            </span>
+                          </div>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<SettingsIcon />}
+                            onClick={() => navigate('/configuration')}
+                            sx={{
+                              borderColor: '#EEBE02',
+                              color: '#2D2D2D',
+                              '&:hover': { borderColor: '#d4a900', backgroundColor: 'rgba(238,190,2,0.08)' },
+                            }}
+                          >
+                            Configure
+                          </Button>
+                        </div>
+
+                        <div className="node-gauges-row">
+                          {METRIC_CONFIG.map((metric) => (
+                            <div key={metric.key} className="node-gauge-item">
+                              {online ? (
+                                <LinearGaugeComponent
+                                  label={metric.label}
+                                  value={measurement[metric.key]}
+                                  low={metric.low}
+                                  mid={metric.mid}
+                                  high={metric.high}
+                                  unit={metric.unit}
+                                />
+                              ) : (
+                                <div className="node-gauge-placeholder">
+                                  <Typography variant="subtitle2" sx={{ color: '#2D2D2D', mb: 0.5 }}>
+                                    {metric.label}
+                                  </Typography>
+                                  <Typography variant="body2" sx={{ color: '#9e9e9e', fontStyle: 'italic' }}>
+                                    No Measurement Detected
+                                  </Typography>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom row: Snapshots slider */}
           {timeline.length > 0 && (
-            <Box className="snapshot-slider-wrapper">
+            <div className="snapshot-slider-box">
+              <HeaderComponent
+                title="Snapshots"
+                icon={<CameraAltIcon />}
+                titleVariant="h6"
+              />
               <Typography variant="subtitle2" sx={{ color: '#2D2D2D', mb: 1 }}>
                 Timestamp: {selectedTimestampMs != null ? formatTimestampLabel(selectedTimestampMs) : '—'}
                 {selectedTimestampMs != null && !timestampsWithData.has(selectedTimestampMs) && (
@@ -269,87 +425,102 @@ function LiveDashboardPage() {
                   },
                 }}
               />
-            </Box>
+            </div>
           )}
-
-          {/* Per-node sections */}
-          {farmNodes.map((node) => {
-            const measurement = getMeasurementAt(node.nodeId, selectedTimestampMs);
-            const online = measurement != null;
-            return (
-              <div key={node.nodeId} className="node-section">
-                <div className="node-section-header">
-                  <div className="node-section-header-left">
-                    <Typography variant="h6" sx={{ color: '#2D2D2D' }}>
-                      {node.nodeName}
-                    </Typography>
-                    <span
-                      className={`node-status-badge ${online ? 'node-status-badge--on' : 'node-status-badge--off'}`}
-                    >
-                      {online ? 'Online' : 'Offline'}
-                    </span>
-                  </div>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<SettingsIcon />}
-                    onClick={() => navigate('/configuration')}
-                    sx={{
-                      borderColor: '#EEBE02',
-                      color: '#2D2D2D',
-                      '&:hover': { borderColor: '#d4a900', backgroundColor: 'rgba(238,190,2,0.08)' },
-                    }}
-                  >
-                    Configure
-                  </Button>
-                </div>
-
-                <div className="node-gauges-row">
-                  {METRIC_CONFIG.map((metric) => (
-                    <div key={metric.key} className="node-gauge-item">
-                      {online ? (
-                        <LinearGaugeComponent
-                          label={metric.label}
-                          value={measurement[metric.key]}
-                          low={metric.low}
-                          mid={metric.mid}
-                          high={metric.high}
-                          unit={metric.unit}
-                        />
-                      ) : (
-                        <div className="node-gauge-placeholder">
-                          <Typography variant="subtitle2" sx={{ color: '#2D2D2D', mb: 0.5 }}>
-                            {metric.label}
-                          </Typography>
-                          <Typography variant="body2" sx={{ color: '#9e9e9e', fontStyle: 'italic' }}>
-                            No Measurement Detected
-                          </Typography>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
         </div>
       )}
 
       {/* ===== Timeframe Averages tab ===== */}
       {activeTab === 1 && (
         <div className="live-dashboard-tab-panel">
-          {farmNodes.map((node) => {
-            const nodeMeasurements = timeFilteredMeasurements.filter(
-              (m) => m.nodeId === node.nodeId
-            );
-            return (
-              <AnalyticsCardComponent
-                key={node.nodeId}
-                nodeName={node.nodeName}
-                measurements={nodeMeasurements}
-              />
-            );
-          })}
+          <div className="averages-bento-grid">
+            {/* Top-left: Farm Averages table */}
+            <div className="bento-box">
+              <Typography variant="h6" sx={{ color: '#2D2D2D', mb: 1 }}>
+                Farm Averages
+              </Typography>
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 700 }}>Measurement</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }} align="right">Farm Avg</TableCell>
+                      {filteredNodes.map((n) => (
+                        <TableCell key={n.nodeId} sx={{ fontWeight: 700 }} align="right">
+                          {n.nodeName}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {METRIC_CONFIG.map((metric) => {
+                      const allValues = selectedTimeFilteredMeasurements.map((m) => m[metric.key]);
+                      const farmAvg = allValues.length > 0
+                        ? (allValues.reduce((s, v) => s + v, 0) / allValues.length).toFixed(1)
+                        : '—';
+                      return (
+                        <TableRow key={metric.key}>
+                          <TableCell>{metric.label} ({metric.unit.trim()})</TableCell>
+                          <TableCell align="right">{farmAvg}</TableCell>
+                          {filteredNodes.map((node) => {
+                            const nodeVals = selectedTimeFilteredMeasurements
+                              .filter((m) => m.nodeId === node.nodeId)
+                              .map((m) => m[metric.key]);
+                            const avg = nodeVals.length > 0
+                              ? (nodeVals.reduce((s, v) => s + v, 0) / nodeVals.length).toFixed(1)
+                              : '—';
+                            return (
+                              <TableCell key={node.nodeId} align="right">{avg}</TableCell>
+                            );
+                          })}
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </div>
+
+            {/* 5 per-metric line charts — each plots selected nodes */}
+            {METRIC_CONFIG.map((metric) => {
+              const traces = filteredNodes.map((node, idx) => {
+                const nodeMeasurements = selectedTimeFilteredMeasurements
+                  .filter((m) => m.nodeId === node.nodeId)
+                  .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+                return {
+                  x: nodeMeasurements.map((m) => m.timestamp),
+                  y: nodeMeasurements.map((m) => m[metric.key]),
+                  type: 'scatter',
+                  mode: 'lines+markers',
+                  name: node.nodeName,
+                  line: { color: NODE_COLORS[idx % NODE_COLORS.length], width: 2 },
+                  marker: { size: 4 },
+                };
+              });
+
+              const layout = {
+                title: { text: `${metric.label} (${metric.unit.trim()})`, font: { size: 13, color: '#2D2D2D' } },
+                xaxis: { type: 'date', tickformat: '%H:%M' },
+                yaxis: { title: metric.unit.trim() },
+                legend: { orientation: 'h', y: -0.3 },
+                margin: { l: 48, r: 16, t: 36, b: 72 },
+                autosize: true,
+                height: 300,
+              };
+
+              return (
+                <div key={metric.key} className="bento-box">
+                  <Plot
+                    data={traces}
+                    layout={layout}
+                    config={{ responsive: true, displayModeBar: false }}
+                    useResizeHandler
+                    style={{ width: '100%' }}
+                  />
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>

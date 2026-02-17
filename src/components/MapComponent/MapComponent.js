@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Box } from '@mui/material';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
@@ -13,27 +13,53 @@ L.Icon.Default.mergeOptions({
 });
 
 /**
+ * Build an SVG map-pin icon with the given fill color.
+ * Returns an L.divIcon so we can use inline SVG without external assets.
+ */
+function createColoredIcon(color) {
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="25" height="41" viewBox="0 0 25 41">
+      <path d="M12.5 0C5.6 0 0 5.6 0 12.5C0 21.9 12.5 41 12.5 41S25 21.9 25 12.5C25 5.6 19.4 0 12.5 0Z"
+            fill="${color}" stroke="#fff" stroke-width="1.5"/>
+      <circle cx="12.5" cy="12.5" r="5" fill="#fff"/>
+    </svg>`;
+  return L.divIcon({
+    html: svg,
+    className: '',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+  });
+}
+
+const greenIcon = createColoredIcon('#2e7d32');
+const redIcon = createColoredIcon('#c62828');
+const defaultIcon = createColoredIcon('#1976d2');
+
+/**
  * MapComponent — renders an interactive Leaflet map with node markers.
  *
  * @param {Object} props
- * @param {Array<{nodeId: string, nodeName: string, lat: number, lon: number}>} props.nodes
- *   Array of node objects to plot as pins on the map.
+ * @param {Array<{nodeId: string, nodeName: string, lat: number, lon: number, online?: boolean, selected?: boolean}>} props.nodes
+ *   Array of node objects. If `online` / `selected` are provided, markers are
+ *   colored green (online) or red (offline) and use full (selected) or half (unselected) opacity.
  * @param {number} [props.centerLat] - Latitude for the map center (defaults to avg of nodes)
  * @param {number} [props.centerLon] - Longitude for the map center (defaults to avg of nodes)
  * @param {number} [props.zoom] - Initial zoom level (default 15)
- * @param {number} [props.height] - Map container height in pixels (default 400)
+ * @param {number|string} [props.height] - Map container height in pixels or CSS string (default 400)
  */
-function MapComponent({ nodes = [], centerLat, centerLon, zoom = 15, height = 400 }) {
-  const defaultCenter = [41.6611, -91.5302];
+const DEFAULT_CENTER = [41.6611, -91.5302];
 
-  let center = defaultCenter;
-  if (centerLat != null && centerLon != null) {
-    center = [centerLat, centerLon];
-  } else if (nodes.length > 0) {
-    const avgLat = nodes.reduce((sum, n) => sum + n.lat, 0) / nodes.length;
-    const avgLon = nodes.reduce((sum, n) => sum + n.lon, 0) / nodes.length;
-    center = [avgLat, avgLon];
-  }
+function MapComponent({ nodes = [], centerLat, centerLon, zoom = 15, height = 400 }) {
+  const center = useMemo(() => {
+    if (centerLat != null && centerLon != null) return [centerLat, centerLon];
+    if (nodes.length > 0) {
+      const avgLat = nodes.reduce((sum, n) => sum + n.lat, 0) / nodes.length;
+      const avgLon = nodes.reduce((sum, n) => sum + n.lon, 0) / nodes.length;
+      return [avgLat, avgLon];
+    }
+    return DEFAULT_CENTER;
+  }, [nodes, centerLat, centerLon]);
 
   return (
     <Box sx={{ width: '100%', height, borderRadius: 1, overflow: 'hidden' }}>
@@ -47,15 +73,30 @@ function MapComponent({ nodes = [], centerLat, centerLon, zoom = 15, height = 40
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {nodes.map((node) => (
-          <Marker key={node.nodeId} position={[node.lat, node.lon]}>
-            <Popup>
-              <strong>{node.nodeName}</strong>
-              <br />
-              Lat: {node.lat}, Lon: {node.lon}
-            </Popup>
-          </Marker>
-        ))}
+        {nodes.map((node) => {
+          const hasStatus = node.online !== undefined;
+          const icon = hasStatus
+            ? (node.online ? greenIcon : redIcon)
+            : defaultIcon;
+          const opacity = hasStatus
+            ? (node.selected !== false ? 1.0 : 0.5)
+            : 1.0;
+
+          return (
+            <Marker
+              key={node.nodeId}
+              position={[node.lat, node.lon]}
+              icon={icon}
+              opacity={opacity}
+            >
+              <Popup>
+                <strong>{node.nodeName}</strong>
+                <br />
+                Lat: {node.lat}, Lon: {node.lon}
+              </Popup>
+            </Marker>
+          );
+        })}
       </MapContainer>
     </Box>
   );

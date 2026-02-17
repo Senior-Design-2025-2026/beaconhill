@@ -9,9 +9,10 @@ import { Box, Typography, Stack } from '@mui/material';
  * @param {string} props.title - Page title text
  * @param {string} [props.description] - Optional description displayed under the title
  * @param {React.ReactNode} [props.icon] - Optional MUI icon element displayed left of the title
+ * @param {string} [props.titleVariant] - MUI Typography variant for the title (default "h4")
  * @param {React.ReactNode} [props.children] - Optional additional content (e.g. filter controls)
  */
-function HeaderComponent({ title, description, icon, children }) {
+function HeaderComponent({ title, description, icon, children, titleVariant = 'h4' }) {
   return (
     <Box sx={{ mb: 3 }}>
       <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: description ? 0.5 : 0 }}>
@@ -20,7 +21,7 @@ function HeaderComponent({ title, description, icon, children }) {
             {icon}
           </Box>
         )}
-        <Typography variant="h4" component="h1" sx={{ color: '#2D2D2D', fontWeight: 700 }}>
+        <Typography variant={titleVariant} component="h1" sx={{ color: '#2D2D2D', fontWeight: 700 }}>
           {title}
         </Typography>
       </Stack>

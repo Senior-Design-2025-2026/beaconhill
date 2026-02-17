@@ -1,8 +1,15 @@
-/* Sidebar Container - creates floating effect with white padding */
+/* Sidebar Container - sticky full-viewport height, stays in flex flow */
 .sidebar-container {
+  position: sticky;
+  top: 0;
+  height: 100vh;
   padding: 8px;
   background-color: #FFFFFF;
-  min-height: 100vh;
+  flex-shrink: 0;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
 }
 
 /* Main Sidebar - rounded corners and primary background */
@@ -10,6 +17,8 @@
   overflow-x: hidden;
   border-radius: 12px;
   height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Branding Header Section */

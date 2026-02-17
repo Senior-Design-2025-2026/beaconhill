@@ -6,7 +6,9 @@
   display: flex;
   flex-direction: row;
   min-height: 100vh;
+  height: 100vh;
   text-align: left;
+  overflow: hidden;
 }
 
 .App-main {
@@ -14,6 +16,8 @@
   overflow: auto;
   padding: 24px;
   background-color: #ffffff;
+  height: 100vh;
+  box-sizing: border-box;
 }
 
 .App-logo {
