@@ -1,70 +1,64 @@
-# Getting Started with Create React App
+![BeaconHill logo](img/BeaconHill.svg)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Project description
 
-## Available Scripts
+BeaconHill’s dashboard web application empowers farmers with real-time insights drawn directly from their fields. Utilizing a network of in-field sensors, the system continuously collects key data such as soil moisture, temperature, and other vital environmental factors. This information is synthesized and displayed through an intuitive dashboard, enabling informed decisions to optimize resource usage, reduce costs, and improve crop yields.
 
-In the project directory, you can run:
+The application focuses on two core objectives: collecting real-time field measurements and providing historical data visualizations to uncover trends and predict future farm conditions. By making even incremental improvements in crop yield and resource allocation, BeaconHill helps farmers enhance profitability and sustainability at scale. As agriculture evolves, this solution equips producers with the tools needed to thrive in a data-driven future.
 
-### `npm start`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+# Authors
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+<table>
+  <tr>
+    <td align="center" style="padding:16px">
+      <img src="img/steven.jpeg" alt="Steven Austin" width="88" height="88"/><br/>
+      <strong>
+        <a href="https://www.linkedin.com/in/steven-austin-069a593a5/" target="_blank">Steven Austin</a>
+      </strong>
+    </td>
+    <td align="center" style="padding:16px">
+      <img src="img/sage.jpeg" alt="Sage Marks" width="88" height="88"/><br/>
+      <strong>
+        <a href="http://linkedin.com/in/sage-marks" target="_blank">Sage Marks</a>
+      </strong>
+    </td>
+    <td align="center" style="padding:16px">
+      <img src="img/zack.jpeg" alt="Zack Mulholland" width="88" height="88"/><br/>
+      <strong>
+        <a href="https://www.linkedin.com/in/zackmulholland/" target="_blank">Zack Mulholland</a>
+      </strong>
+    </td>
+    <td align="center" style="padding:16px">
+      <img src="img/matt.jpeg" alt="Matt Krueger" width="88" height="88"/><br/>
+      <strong>
+        <a href="http://linkedin.com/in/matt-krueger" target="_blank">Matt Krueger</a>
+      </strong>
+    </td>
+  </tr>
+</table>
 
-### `npm test`
+# Repository structure
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Root layout and where key tooling lives: **[docs/PROJECT_STRUCTURE.md](./docs/PROJECT_STRUCTURE.md)**.
 
-### `npm run build`
+# Running the project
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Local development
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+To run the app on your machine in **testing mode** (no login, mock data) or **production mode** (login required, real AWS backend), use the instructions and commands in:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+**[DEVELOPMENT_MODES.md](./docs/DEVELOPMENT_MODES.md)**
 
-### `npm run eject`
+Summary:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- **Testing:** `npm run start:test` → app at http://localhost:3000, no sign-in, mock data only.
+- **Production (local):** `npm start` or `npm run start:prod` → app at http://localhost:3000, Cognito sign-in, live API.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Live deployment (AWS)
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+The app is hosted on AWS Amplify. Open the live site here:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+**[Beacon Hill (AWS) NOT AVAILABLE -- YET]()**
 
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+*If your team uses a different branch (e.g. `dev`) or a custom domain, update this link. The Amplify App ID for this project is `d3lv3c6ppm80xp`.*

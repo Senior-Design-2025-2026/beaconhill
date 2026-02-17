@@ -1,0 +1,718 @@
+{
+
+
+  "farms": [
+    {
+      "farmId": "1",
+      "farmName": "Hubbard Park",
+      "farmCity": "Iowa City",
+      "farmState": "IA",
+      "farmAddress": "125 N Madison St",
+      "farmZipCode": "52240",
+      "farmCropType": "Corn",
+      "farmOwner": "John Doe",
+      "farmNumber": "1234567890",
+      "lat": 41.6611,
+      "lon": -91.5302,
+      "numberOfNodes": 3
+    },
+    {
+      "farmId": "2",
+      "farmName": "Pentacrest Lawn",
+      "farmCity": "Iowa City",
+      "farmState": "IA",
+      "farmAddress": "21 N Clinton St",
+      "farmZipCode": "52240",
+      "farmCropType": "Corn",
+      "farmOwner": "Jane Smith",
+      "farmNumber": "3195550002",
+      "lat": 41.6614,
+      "lon": -91.5358,
+      "numberOfNodes": 3
+    },
+    {
+      "farmId": "3",
+      "farmName": "City Park",
+      "farmCity": "Iowa City",
+      "farmState": "IA",
+      "farmAddress": "200 E. Park Rd",
+      "farmZipCode": "52246",
+      "farmCropType": "Soybeans",
+      "farmOwner": "Alex Johnson",
+      "farmNumber": "3195550003",
+      "lat": 41.6772917,
+      "lon": -91.5434033,
+      "numberOfNodes": 3
+    }
+  ],
+
+
+
+  "nodes": [
+    {
+      "nodeId": "1",
+      "nodeName": "Node 1",
+      "farmId": "1",
+      "lat": 41.6611,
+      "lon": -91.5302
+    },
+    {
+      "nodeId": "2",
+      "nodeName": "Node 2",
+      "farmId": "1",
+      "lat": 41.6625,
+      "lon": -91.5280
+    },
+    {
+      "nodeId": "3",
+      "nodeName": "Node 3",
+      "farmId": "1",
+      "lat": 41.6598,
+      "lon": -91.5315
+    },
+    {
+      "nodeId": "4",
+      "nodeName": "Pentacrest North",
+      "farmId": "2",
+      "lat": 41.6618,
+      "lon": -91.5350
+    },
+    {
+      "nodeId": "5",
+      "nodeName": "Pentacrest South",
+      "farmId": "2",
+      "lat": 41.6610,
+      "lon": -91.5365
+    },
+    {
+      "nodeId": "6",
+      "nodeName": "Pentacrest Center",
+      "farmId": "2",
+      "lat": 41.6614,
+      "lon": -91.5358
+    },
+    {
+      "nodeId": "7",
+      "nodeName": "City Park North",
+      "farmId": "3",
+      "lat": 41.6780,
+      "lon": -91.5430
+    },
+    {
+      "nodeId": "8",
+      "nodeName": "City Park South",
+      "farmId": "3",
+      "lat": 41.6765,
+      "lon": -91.5438
+    },
+    {
+      "nodeId": "9",
+      "nodeName": "City Park Center",
+      "farmId": "3",
+      "lat": 41.6773,
+      "lon": -91.5434
+    }
+  ],
+
+
+  "measurements": [
+    {
+      "measurementId": "m-1-01",
+      "farmId": "1",
+      "nodeId": "1",
+      "timestamp": "2026-02-15T00:00:00Z",  
+      "temperature": 62.3,
+      "moisture": 45.1,
+      "nitrogen": 32.5,
+      "phosphorus": 18.2,
+      "potassium": 145.0
+    },
+    {
+      "measurementId": "m-1-02",
+      "farmId": "1",
+      "nodeId": "1",
+      "timestamp": "2026-02-15T01:00:00Z",
+      "temperature": 61.8,
+      "moisture": 45.5,
+      "nitrogen": 33.0,
+      "phosphorus": 18.0,
+      "potassium": 146.2
+    },
+    {
+      "measurementId": "m-1-03",
+      "farmId": "1",
+      "nodeId": "1",
+      "timestamp": "2026-02-15T02:00:00Z",
+      "temperature": 60.5,
+      "moisture": 46.2,
+      "nitrogen": 31.8,
+      "phosphorus": 17.5,
+      "potassium": 143.8
+    },
+    {
+      "measurementId": "m-1-04",
+      "farmId": "1",
+      "nodeId": "1",
+      "timestamp": "2026-02-15T03:00:00Z",
+      "temperature": 59.2,
+      "moisture": 47.0,
+      "nitrogen": 30.2,
+      "phosphorus": 17.8,
+      "potassium": 142.1
+    },
+    {
+      "measurementId": "m-1-05",
+      "farmId": "1",
+      "nodeId": "1",
+      "timestamp": "2026-02-15T04:00:00Z",
+      "temperature": 58.7,
+      "moisture": 48.3,
+      "nitrogen": 29.5,
+      "phosphorus": 16.9,
+      "potassium": 140.5
+    },
+    {
+      "measurementId": "m-1-06",
+      "farmId": "1",
+      "nodeId": "1",
+      "timestamp": "2026-02-15T05:00:00Z",
+      "temperature": 58.1,
+      "moisture": 49.0,
+      "nitrogen": 28.8,
+      "phosphorus": 16.5,
+      "potassium": 139.0
+    },
+    {
+      "measurementId": "m-1-07",
+      "farmId": "1",
+      "nodeId": "1",
+      "timestamp": "2026-02-15T06:00:00Z",
+      "temperature": 59.5,
+      "moisture": 48.1,
+      "nitrogen": 30.0,
+      "phosphorus": 17.2,
+      "potassium": 141.3
+    },
+    {
+      "measurementId": "m-1-08",
+      "farmId": "1",
+      "nodeId": "1",
+      "timestamp": "2026-02-15T07:00:00Z",
+      "temperature": 61.2,
+      "moisture": 46.8,
+      "nitrogen": 31.5,
+      "phosphorus": 18.0,
+      "potassium": 144.0
+    },
+    {
+      "measurementId": "m-1-09",
+      "farmId": "1",
+      "nodeId": "1",
+      "timestamp": "2026-02-15T08:00:00Z",
+      "temperature": 63.8,
+      "moisture": 44.5,
+      "nitrogen": 33.2,
+      "phosphorus": 19.1,
+      "potassium": 148.5
+    },
+    {
+      "measurementId": "m-1-10",
+      "farmId": "1",
+      "nodeId": "1",
+      "timestamp": "2026-02-15T09:00:00Z",
+      "temperature": 66.1,
+      "moisture": 42.0,
+      "nitrogen": 35.0,
+      "phosphorus": 20.5,
+      "potassium": 152.0
+    },
+    {
+      "measurementId": "m-1-11",
+      "farmId": "1",
+      "nodeId": "1",
+      "timestamp": "2026-02-15T10:00:00Z",
+      "temperature": 68.5,
+      "moisture": 40.2,
+      "nitrogen": 36.8,
+      "phosphorus": 21.3,
+      "potassium": 155.0
+    },
+    {
+      "measurementId": "m-1-12",
+      "farmId": "1",
+      "nodeId": "1",
+      "timestamp": "2026-02-15T11:00:00Z",
+      "temperature": 70.2,
+      "moisture": 38.5,
+      "nitrogen": 38.0,
+      "phosphorus": 22.0,
+      "potassium": 158.2
+    },
+    {
+      "measurementId": "m-1-13",
+      "farmId": "1",
+      "nodeId": "1",
+      "timestamp": "2026-02-15T12:00:00Z",
+      "temperature": 71.5,
+      "moisture": 37.0,
+      "nitrogen": 39.2,
+      "phosphorus": 23.1,
+      "potassium": 160.0
+    },
+    {
+      "measurementId": "m-1-14",
+      "farmId": "1",
+      "nodeId": "1",
+      "timestamp": "2026-02-15T13:00:00Z",
+      "temperature": 72.0,
+      "moisture": 36.5,
+      "nitrogen": 40.0,
+      "phosphorus": 23.5,
+      "potassium": 161.5
+    },
+    {
+      "measurementId": "m-1-15",
+      "farmId": "1",
+      "nodeId": "1",
+      "timestamp": "2026-02-15T14:00:00Z",
+      "temperature": 71.8,
+      "moisture": 36.8,
+      "nitrogen": 39.5,
+      "phosphorus": 23.0,
+      "potassium": 160.8
+    },
+
+    {
+      "measurementId": "m-2-01",
+      "farmId": "1",
+      "nodeId": "2",
+      "timestamp": "2026-02-15T00:00:00Z",
+      "temperature": 60.0,
+      "moisture": 50.2,
+      "nitrogen": 28.0,
+      "phosphorus": 14.5,
+      "potassium": 130.0
+    },
+    {
+      "measurementId": "m-2-02",
+      "farmId": "1",
+      "nodeId": "2",
+      "timestamp": "2026-02-15T01:00:00Z",
+      "temperature": 59.5,
+      "moisture": 51.0,
+      "nitrogen": 27.5,
+      "phosphorus": 14.2,
+      "potassium": 128.5
+    },
+    {
+      "measurementId": "m-2-03",
+      "farmId": "1",
+      "nodeId": "2",
+      "timestamp": "2026-02-15T02:00:00Z",
+      "temperature": 58.2,
+      "moisture": 52.5,
+      "nitrogen": 26.0,
+      "phosphorus": 13.8,
+      "potassium": 125.0
+    },
+    {
+      "measurementId": "m-2-05",
+      "farmId": "1",
+      "nodeId": "2",
+      "timestamp": "2026-02-15T04:00:00Z",
+      "temperature": 56.5,
+      "moisture": 55.0,
+      "nitrogen": 24.0,
+      "phosphorus": 12.5,
+      "potassium": 120.0
+    },
+    {
+      "measurementId": "m-2-06",
+      "farmId": "1",
+      "nodeId": "2",
+      "timestamp": "2026-02-15T05:00:00Z",
+      "temperature": 55.8,
+      "moisture": 56.2,
+      "nitrogen": 23.5,
+      "phosphorus": 12.0,
+      "potassium": 118.5
+    },
+    {
+      "measurementId": "m-2-07",
+      "farmId": "1",
+      "nodeId": "2",
+      "timestamp": "2026-02-15T06:00:00Z",
+      "temperature": 57.2,
+      "moisture": 54.5,
+      "nitrogen": 25.0,
+      "phosphorus": 13.2,
+      "potassium": 123.0
+    },
+    {
+      "measurementId": "m-2-09",
+      "farmId": "1",
+      "nodeId": "2",
+      "timestamp": "2026-02-15T08:00:00Z",
+      "temperature": 61.5,
+      "moisture": 49.0,
+      "nitrogen": 29.5,
+      "phosphorus": 15.5,
+      "potassium": 133.0
+    },
+    {
+      "measurementId": "m-2-10",
+      "farmId": "1",
+      "nodeId": "2",
+      "timestamp": "2026-02-15T09:00:00Z",
+      "temperature": 64.0,
+      "moisture": 46.5,
+      "nitrogen": 31.0,
+      "phosphorus": 17.0,
+      "potassium": 138.0
+    },
+    {
+      "measurementId": "m-2-11",
+      "farmId": "1",
+      "nodeId": "2",
+      "timestamp": "2026-02-15T10:00:00Z",
+      "temperature": 66.5,
+      "moisture": 44.0,
+      "nitrogen": 33.0,
+      "phosphorus": 18.5,
+      "potassium": 142.5
+    },
+    {
+      "measurementId": "m-2-13",
+      "farmId": "1",
+      "nodeId": "2",
+      "timestamp": "2026-02-15T12:00:00Z",
+      "temperature": 69.5,
+      "moisture": 41.0,
+      "nitrogen": 36.0,
+      "phosphorus": 20.5,
+      "potassium": 149.0
+    },
+    {
+      "measurementId": "m-2-14",
+      "farmId": "1",
+      "nodeId": "2",
+      "timestamp": "2026-02-15T13:00:00Z",
+      "temperature": 70.0,
+      "moisture": 40.5,
+      "nitrogen": 36.5,
+      "phosphorus": 21.0,
+      "potassium": 150.5
+    },
+    {
+      "measurementId": "m-2-15",
+      "farmId": "1",
+      "nodeId": "2",
+      "timestamp": "2026-02-15T14:00:00Z",
+      "temperature": 69.8,
+      "moisture": 40.8,
+      "nitrogen": 36.2,
+      "phosphorus": 20.8,
+      "potassium": 149.8
+    },
+
+    {
+      "measurementId": "m-3-06",
+      "farmId": "1",
+      "nodeId": "3",
+      "timestamp": "2026-02-15T05:00:00Z",
+      "temperature": 59.0,
+      "moisture": 47.0,
+      "nitrogen": 32.5,
+      "phosphorus": 19.0,
+      "potassium": 148.5
+    },
+    {
+      "measurementId": "m-3-07",
+      "farmId": "1",
+      "nodeId": "3",
+      "timestamp": "2026-02-15T06:00:00Z",
+      "temperature": 60.2,
+      "moisture": 45.8,
+      "nitrogen": 34.0,
+      "phosphorus": 19.8,
+      "potassium": 151.0
+    },
+    {
+      "measurementId": "m-3-08",
+      "farmId": "1",
+      "nodeId": "3",
+      "timestamp": "2026-02-15T07:00:00Z",
+      "temperature": 62.5,
+      "moisture": 43.5,
+      "nitrogen": 36.5,
+      "phosphorus": 21.0,
+      "potassium": 156.0
+    },
+    {
+      "measurementId": "m-3-09",
+      "farmId": "1",
+      "nodeId": "3",
+      "timestamp": "2026-02-15T08:00:00Z",
+      "temperature": 65.0,
+      "moisture": 41.0,
+      "nitrogen": 38.5,
+      "phosphorus": 22.5,
+      "potassium": 162.0
+    },
+    {
+      "measurementId": "m-3-10",
+      "farmId": "1",
+      "nodeId": "3",
+      "timestamp": "2026-02-15T09:00:00Z",
+      "temperature": 67.5,
+      "moisture": 39.0,
+      "nitrogen": 40.5,
+      "phosphorus": 24.0,
+      "potassium": 167.0
+    },
+    {
+      "measurementId": "m-3-11",
+      "farmId": "1",
+      "nodeId": "3",
+      "timestamp": "2026-02-15T10:00:00Z",
+      "temperature": 70.0,
+      "moisture": 37.0,
+      "nitrogen": 42.0,
+      "phosphorus": 25.5,
+      "potassium": 172.0
+    },
+    {
+      "measurementId": "m-3-12",
+      "farmId": "1",
+      "nodeId": "3",
+      "timestamp": "2026-02-15T11:00:00Z",
+      "temperature": 72.5,
+      "moisture": 35.5,
+      "nitrogen": 44.0,
+      "phosphorus": 26.5,
+      "potassium": 176.0
+    },
+
+    {
+      "measurementId": "m-4-01",
+      "farmId": "2",
+      "nodeId": "4",
+      "timestamp": "2026-02-16T00:00:00Z",
+      "temperature": 60.5,
+      "moisture": 44.0,
+      "nitrogen": 31.0,
+      "phosphorus": 18.0,
+      "potassium": 145.0
+    },
+    {
+      "measurementId": "m-4-02",
+      "farmId": "2",
+      "nodeId": "4",
+      "timestamp": "2026-02-16T01:00:00Z",
+      "temperature": 61.0,
+      "moisture": 43.5,
+      "nitrogen": 31.5,
+      "phosphorus": 18.2,
+      "potassium": 146.0
+    },
+    {
+      "measurementId": "m-4-03",
+      "farmId": "2",
+      "nodeId": "4",
+      "timestamp": "2026-02-16T02:00:00Z",
+      "temperature": 59.8,
+      "moisture": 45.0,
+      "nitrogen": 30.0,
+      "phosphorus": 17.5,
+      "potassium": 143.5
+    },
+    {
+      "measurementId": "m-4-04",
+      "farmId": "2",
+      "nodeId": "4",
+      "timestamp": "2026-02-16T03:00:00Z",
+      "temperature": 58.9,
+      "moisture": 46.2,
+      "nitrogen": 29.2,
+      "phosphorus": 17.0,
+      "potassium": 142.0
+    },
+    {
+      "measurementId": "m-4-05",
+      "farmId": "2",
+      "nodeId": "5",
+      "timestamp": "2026-02-16T04:00:00Z",
+      "temperature": 58.0,
+      "moisture": 47.5,
+      "nitrogen": 28.5,
+      "phosphorus": 16.8,
+      "potassium": 140.5
+    },
+    {
+      "measurementId": "m-4-06",
+      "farmId": "2",
+      "nodeId": "5",
+      "timestamp": "2026-02-16T05:00:00Z",
+      "temperature": 59.2,
+      "moisture": 46.8,
+      "nitrogen": 29.8,
+      "phosphorus": 17.3,
+      "potassium": 142.8
+    },
+    {
+      "measurementId": "m-4-07",
+      "farmId": "2",
+      "nodeId": "5",
+      "timestamp": "2026-02-16T06:00:00Z",
+      "temperature": 60.8,
+      "moisture": 45.5,
+      "nitrogen": 31.0,
+      "phosphorus": 18.0,
+      "potassium": 145.2
+    },
+    {
+      "measurementId": "m-4-08",
+      "farmId": "2",
+      "nodeId": "6",
+      "timestamp": "2026-02-16T07:00:00Z",
+      "temperature": 62.0,
+      "moisture": 44.2,
+      "nitrogen": 32.0,
+      "phosphorus": 18.5,
+      "potassium": 147.0
+    },
+    {
+      "measurementId": "m-4-09",
+      "farmId": "2",
+      "nodeId": "6",
+      "timestamp": "2026-02-16T08:00:00Z",
+      "temperature": 63.5,
+      "moisture": 43.0,
+      "nitrogen": 33.0,
+      "phosphorus": 19.0,
+      "potassium": 149.0
+    },
+    {
+      "measurementId": "m-4-10",
+      "farmId": "2",
+      "nodeId": "6",
+      "timestamp": "2026-02-16T09:00:00Z",
+      "temperature": 65.0,
+      "moisture": 41.8,
+      "nitrogen": 34.2,
+      "phosphorus": 19.8,
+      "potassium": 151.0
+    },
+
+    {
+      "measurementId": "m-5-01",
+      "farmId": "3",
+      "nodeId": "7",
+      "timestamp": "2026-02-17T00:00:00Z",
+      "temperature": 57.5,
+      "moisture": 48.0,
+      "nitrogen": 27.5,
+      "phosphorus": 16.0,
+      "potassium": 138.0
+    },
+    {
+      "measurementId": "m-5-02",
+      "farmId": "3",
+      "nodeId": "7",
+      "timestamp": "2026-02-17T01:00:00Z",
+      "temperature": 58.0,
+      "moisture": 47.2,
+      "nitrogen": 28.0,
+      "phosphorus": 16.3,
+      "potassium": 139.5
+    },
+    {
+      "measurementId": "m-5-03",
+      "farmId": "3",
+      "nodeId": "7",
+      "timestamp": "2026-02-17T02:00:00Z",
+      "temperature": 59.2,
+      "moisture": 46.5,
+      "nitrogen": 29.0,
+      "phosphorus": 16.8,
+      "potassium": 141.0
+    },
+    {
+      "measurementId": "m-5-04",
+      "farmId": "3",
+      "nodeId": "8",
+      "timestamp": "2026-02-17T03:00:00Z",
+      "temperature": 60.5,
+      "moisture": 45.0,
+      "nitrogen": 30.5,
+      "phosphorus": 17.5,
+      "potassium": 143.5
+    },
+    {
+      "measurementId": "m-5-05",
+      "farmId": "3",
+      "nodeId": "8",
+      "timestamp": "2026-02-17T04:00:00Z",
+      "temperature": 61.8,
+      "moisture": 44.0,
+      "nitrogen": 31.2,
+      "phosphorus": 18.0,
+      "potassium": 145.0
+    },
+    {
+      "measurementId": "m-5-06",
+      "farmId": "3",
+      "nodeId": "8",
+      "timestamp": "2026-02-17T05:00:00Z",
+      "temperature": 63.0,
+      "moisture": 42.8,
+      "nitrogen": 32.0,
+      "phosphorus": 18.8,
+      "potassium": 147.5
+    },
+    {
+      "measurementId": "m-5-07",
+      "farmId": "3",
+      "nodeId": "9",
+      "timestamp": "2026-02-17T06:00:00Z",
+      "temperature": 64.2,
+      "moisture": 41.5,
+      "nitrogen": 33.0,
+      "phosphorus": 19.5,
+      "potassium": 150.0
+    },
+    {
+      "measurementId": "m-5-08",
+      "farmId": "3",
+      "nodeId": "9",
+      "timestamp": "2026-02-17T07:00:00Z",
+      "temperature": 65.8,
+      "moisture": 40.2,
+      "nitrogen": 34.0,
+      "phosphorus": 20.2,
+      "potassium": 152.5
+    },
+    {
+      "measurementId": "m-5-09",
+      "farmId": "3",
+      "nodeId": "9",
+      "timestamp": "2026-02-17T08:00:00Z",
+      "temperature": 67.0,
+      "moisture": 39.0,
+      "nitrogen": 35.0,
+      "phosphorus": 21.0,
+      "potassium": 155.0
+    },
+    {
+      "measurementId": "m-5-10",
+      "farmId": "3",
+      "nodeId": "9",
+      "timestamp": "2026-02-17T09:00:00Z",
+      "temperature": 68.5,
+      "moisture": 38.0,
+      "nitrogen": 36.2,
+      "phosphorus": 21.8,
+      "potassium": 157.5
+    }
+  ]
+}
