@@ -49,7 +49,7 @@ function SidebarComponent({ user, farm = 'My Farm' }) {
       className="sidebar-container"
       sx={{
         flexShrink: 0,
-        p: 1,
+        p: 0,
         backgroundColor: '#FFFFFF',
         minHeight: '100vh',
       }}
@@ -62,7 +62,7 @@ function SidebarComponent({ user, farm = 'My Farm' }) {
           display: 'flex',
           flexDirection: 'column',
           transition: 'width 0.2s ease',
-          borderRadius: '12px',
+          borderRadius: 0,
           height: '100%',
           overflow: 'hidden',
         }}

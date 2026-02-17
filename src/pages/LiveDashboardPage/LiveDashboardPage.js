@@ -125,23 +125,32 @@ function LiveDashboardPage() {
   const { farms, nodes, measurements } = useMeasurements();
   const navigate = useNavigate();
 
-  const [selectedFarm, setSelectedFarm] = useState(farms[0]?.farmId || '');
+  const [selectedFarm, setSelectedFarm] = useState(() => farms[0]?.farmId || '');
   const [selectedTimeframe, setSelectedTimeframe] = useState('24h');
   const [activeTab, setActiveTab] = useState(0);
   const [sliderIndex, setSliderIndex] = useState(null);
   const [selectedNodeIds, setSelectedNodeIds] = useState([]);
 
-  /* --- Derived data --- */
+  /** Keep selectedFarm in sync when farms loads or when current selection is no longer in the list. */
+  useEffect(() => {
+    if (farms.length === 0) return;
+    const found = farms.some((f) => f.farmId === selectedFarm);
+    if (!selectedFarm || !found) {
+      setSelectedFarm(farms[0].farmId);
+    }
+  }, [farms, selectedFarm]);
 
+  /* --- Derived data --- */
   const farmNodes = useMemo(
     () => nodes.filter((n) => n.farmId === selectedFarm),
     [nodes, selectedFarm]
   );
 
-  const selectedFarmName = useMemo(() => {
-    const farm = farms.find((f) => f.farmId === selectedFarm);
-    return farm ? farm.farmName : '';
+  const selectedFarmData = useMemo(() => {
+    return farms.find((f) => f.farmId === selectedFarm) || null;
   }, [farms, selectedFarm]);
+
+  const selectedFarmName = selectedFarmData ? selectedFarmData.farmName : '';
 
   /** Reset selected nodes when the farm changes. */
   useEffect(() => {
@@ -175,6 +184,12 @@ function LiveDashboardPage() {
     return farmMeasurements.filter((m) => new Date(m.timestamp).getTime() >= cutoff);
   }, [farmMeasurements, selectedTimeframe, maxTimestampMs]);
 
+  /** Number of nodes with at least one measurement in the current timeframe. */
+  const activeNodeCount = useMemo(() => {
+    const nodeIdsWithData = new Set(timeFilteredMeasurements.map((m) => m.nodeId));
+    return nodeIdsWithData.size;
+  }, [timeFilteredMeasurements]);
+
   /* --- Slider timeline (hourly, min to max of time-filtered data, in epoch-ms) --- */
 
   const timeline = useMemo(() => {
@@ -203,12 +218,11 @@ function LiveDashboardPage() {
   const sliderMarks = useMemo(() => {
     return timeline.map((ms, i) => ({
       value: i,
-      label: `${i + 1} • ${formatChicagoTime(ms)}`,
+      label: String(i + 1),
     }));
   }, [timeline]);
 
   /* --- Helpers for Snapshot View --- */
-
   function getMeasurementAt(nodeId, targetMs) {
     if (targetMs == null) return null;
     return timeFilteredMeasurements.find((m) => {
@@ -236,95 +250,158 @@ function LiveDashboardPage() {
   );
 
   /* --- Render --- */
-
   return (
     <div className="live-dashboard">
-      {/* Header row */}
+      {/* Row 1: Header + Tab/Filter box */}
       <div className="live-dashboard-header-row">
-        <HeaderComponent
-          title="Live Dashboard"
-          description="Real-time farm measurement data"
-        />
-
-        <div className="live-dashboard-filters">
-          <FormControl size="small" sx={{ minWidth: 180 }}>
-            <InputLabel>Farm</InputLabel>
-            <Select
-              label="Farm"
-              value={selectedFarm}
-              onChange={(e) => setSelectedFarm(e.target.value)}
+        <div className="live-dashboard-header">
+          <div className="live-dashboard-header-container">
+            <HeaderComponent
+              title={selectedFarmData.farmName}
+              titleVariant="h4"
             >
-              {farms.map((farm) => (
-                <MenuItem key={farm.farmId} value={farm.farmId}>
-                  {farm.farmName}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <FormControl size="small" sx={{ minWidth: 200 }}>
-            <InputLabel>Node(s)</InputLabel>
-            <Select
-              label="Node(s)"
-              multiple
-              value={selectedNodeIds}
-              onChange={(e) => setSelectedNodeIds(e.target.value)}
-              renderValue={(sel) =>
-                farmNodes
-                  .filter((n) => sel.includes(n.nodeId))
-                  .map((n) => n.nodeName)
-                  .join(', ')
-              }
-            >
-              {farmNodes.map((node) => (
-                <MenuItem key={node.nodeId} value={node.nodeId}>
-                  <Checkbox checked={selectedNodeIds.includes(node.nodeId)} />
-                  <ListItemText primary={node.nodeName} />
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <FormControl size="small" sx={{ minWidth: 160 }}>
-            <InputLabel>Timeframe</InputLabel>
-            <Select
-              label="Timeframe"
-              value={selectedTimeframe}
-              onChange={(e) => setSelectedTimeframe(e.target.value)}
-            >
-              {TIMEFRAME_OPTIONS.map((tf) => (
-                <MenuItem key={tf.value} value={tf.value}>
-                  {tf.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+              {selectedFarmData && (
+                <>
+                  <div className="live-dashboard-header-meta">
+                    <div>
+                      <strong>Address: </strong> {selectedFarmData.farmAddress}, {selectedFarmData.farmCity}, {selectedFarmData.farmState} {selectedFarmData.farmZipCode}
+                    </div>
+                    <div>
+                      <strong>Crop: </strong> {selectedFarmData.farmCropType}
+                      <span className="live-dashboard-header-sep" aria-hidden="true"> | </span>
+                      <strong>Total Nodes: </strong> {selectedFarmData.numberOfNodes ?? farmNodes.length}
+                      <span className="live-dashboard-header-sep" aria-hidden="true"> | </span>
+                      <strong>Active Nodes: </strong> {selectedFarmData.numberOfNodes ?? farmNodes.length}  {/* TODO: add active nodes count */}
+                    </div>
+                  </div>
+                </>
+              )}
+            </HeaderComponent>
+          </div>
         </div>
-      </div>
+        <div className="live-dashboard-tab-filter-box">
+          <div className="live-dashboard-tabs">
+            <Tabs
+              value={activeTab}
+              onChange={(e, v) => setActiveTab(v)}
+              variant="fullWidth"
+              textColor="inherit"
+              TabIndicatorProps={{ style: { backgroundColor: '#EEBE02' } }}
+            >
+              <Tab label="Snapshot View" sx={{ fontWeight: activeTab === 0 ? 700 : 400 }} />
+              <Tab label="Timeframe Averages" sx={{ fontWeight: activeTab === 1 ? 700 : 400 }} />
+            </Tabs>
+          </div>
+          <div className="live-dashboard-filters">
+            <FormControl size="small" sx={{ minWidth: 180 }}>
+              <InputLabel>Farm</InputLabel>
+              <Select
+                label="Farm"
+                value={selectedFarm}
+                onChange={(e) => setSelectedFarm(e.target.value)}
+              >
+                {farms.map((farm) => (
+                  <MenuItem key={farm.farmId} value={farm.farmId}>
+                    {farm.farmName}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-      {/* Tabs */}
-      <div className="live-dashboard-tabs">
-        <Tabs
-          value={activeTab}
-          onChange={(e, v) => setActiveTab(v)}
-          textColor="inherit"
-          TabIndicatorProps={{ style: { backgroundColor: '#EEBE02' } }}
-        >
-          <Tab label="Snapshot View" sx={{ fontWeight: activeTab === 0 ? 700 : 400 }} />
-          <Tab label="Timeframe Averages" sx={{ fontWeight: activeTab === 1 ? 700 : 400 }} />
-        </Tabs>
+            <FormControl size="small" sx={{ minWidth: 200 }}>
+              <InputLabel>Node(s)</InputLabel>
+              <Select
+                label="Node(s)"
+                multiple
+                value={selectedNodeIds}
+                onChange={(e) => setSelectedNodeIds(e.target.value)}
+                renderValue={(sel) =>
+                  farmNodes
+                    .filter((n) => sel.includes(n.nodeId))
+                    .map((n) => n.nodeName)
+                    .join(', ')
+                }
+              >
+                {farmNodes.map((node) => (
+                  <MenuItem key={node.nodeId} value={node.nodeId}>
+                    <Checkbox checked={selectedNodeIds.includes(node.nodeId)} />
+                    <ListItemText primary={node.nodeName} />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <FormControl size="small" sx={{ minWidth: 160 }}>
+              <InputLabel>Timeframe</InputLabel>
+              <Select
+                label="Timeframe"
+                value={selectedTimeframe}
+                onChange={(e) => setSelectedTimeframe(e.target.value)}
+              >
+                {TIMEFRAME_OPTIONS.map((tf) => (
+                  <MenuItem key={tf.value} value={tf.value}>
+                    {tf.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </div>
+        </div>
       </div>
 
       {/* ===== Snapshot View tab ===== */}
       {activeTab === 0 && (
         <div className="snapshot-layout">
-          {/* Top row: Map (25%) + Measurements (75%) */}
+          {/* Top row: Snapshots slider */}
+          {timeline.length > 0 && (
+            <div className="snapshot-slider-box">
+              <HeaderComponent
+                title={`Snapshot ${effectiveSliderIndex + 1}`}
+                titleVariant="h6"
+              />
+              <Slider
+                value={effectiveSliderIndex}
+                min={0}
+                max={timeline.length - 1}
+                step={1}
+                marks={sliderMarks}
+                valueLabelDisplay="auto"
+                valueLabelFormat={(v) => `Snapshot ${v + 1}`}
+                onChange={(e, v) => setSliderIndex(v)}
+                sx={{
+                  color: '#9e9e9e',
+                  '& .MuiSlider-rail': {
+                    backgroundColor: '#bdbdbd',
+                  },
+                  '& .MuiSlider-track': {
+                    backgroundColor: '#9e9e9e',
+                  },
+                  '& .MuiSlider-thumb': {
+                    backgroundColor: '#EEBE02',
+                    '&:hover, &.Mui-focusVisible': {
+                      backgroundColor: '#d4a900',
+                    },
+                  },
+                  '& .MuiSlider-valueLabel': {
+                    backgroundColor: '#EEBE02',
+                    color: '#2D2D2D',
+                  },
+                  '& .MuiSlider-markLabel': {
+                    fontSize: '0.75rem',
+                    color: '#616161',
+                  },
+                }}
+              />
+            </div>
+          )}
+
+          {/* Map (25%) + Measurements (75%) */}
           <div className="snapshot-top-row">
             {/* Map box */}
             <div className="snapshot-left">
               <div className="snapshot-panel-box">
                 <HeaderComponent
-                  title={selectedFarmName}
+                  title="Map"
                   titleVariant="h6"
                 />
                 <div className="snapshot-map-fill">
@@ -403,58 +480,6 @@ function LiveDashboardPage() {
               </div>
             </div>
           </div>
-
-          {/* Bottom row: Snapshots slider */}
-          {timeline.length > 0 && (
-            <div className="snapshot-slider-box">
-              <HeaderComponent
-                title="Snapshots"
-                titleVariant="h6"
-              />
-              <Typography variant="subtitle2" sx={{ color: '#2D2D2D', mb: 1 }}>
-                {formatSnapshotLabel(effectiveSliderIndex, selectedTimestampMs)}
-                {selectedTimestampMs != null && !timestampsWithData.has(selectedTimestampMs) && (
-                  <span className="slider-no-data-hint"> (no data at this hour)</span>
-                )}
-              </Typography>
-              <Slider
-                value={effectiveSliderIndex}
-                min={0}
-                max={timeline.length - 1}
-                step={1}
-                marks={sliderMarks}
-                valueLabelDisplay="auto"
-                valueLabelFormat={(v) => formatSnapshotLabel(v, timeline[v])}
-                onChange={(e, v) => setSliderIndex(v)}
-                sx={{
-                  color: '#9e9e9e',
-                  '& .MuiSlider-rail': {
-                    backgroundColor: '#bdbdbd',
-                  },
-                  '& .MuiSlider-track': {
-                    backgroundColor: '#9e9e9e',
-                  },
-                  '& .MuiSlider-thumb': {
-                    backgroundColor: '#EEBE02',
-                    '&:hover, &.Mui-focusVisible': {
-                      backgroundColor: '#d4a900',
-                    },
-                  },
-                  '& .MuiSlider-valueLabel': {
-                    backgroundColor: '#EEBE02',
-                    color: '#2D2D2D',
-                  },
-                  '& .MuiSlider-markLabel': {
-                    fontSize: '0.65rem',
-                    color: '#616161',
-                    transform: 'rotate(-45deg)',
-                    transformOrigin: 'top left',
-                    mt: 1,
-                  },
-                }}
-              />
-            </div>
-          )}
         </div>
       )}
 

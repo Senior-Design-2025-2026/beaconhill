@@ -1,12 +1,25 @@
 {
+
+
   "farms": [
     {
       "farmId": "farm-1",
-      "farmName": "Farm 1",
+      "farmName": "Hubbard Park",
+      "farmCity": "Iowa City",
+      "farmState": "IA",
+      "farmAddress": "125 N Madison St",
+      "farmZipCode": "52240",
+      "farmCropType": "Corn",
+      "farmOwner": "John Doe",
+      "farmNumber": "1234567890",
       "lat": 41.6611,
-      "lon": -91.5302
+      "lon": -91.5302,
+      "numberOfNodes": 3
     }
   ],
+
+
+
   "nodes": [
     {
       "nodeId": "node-1",
@@ -30,12 +43,14 @@
       "lon": -91.5315
     }
   ],
+
+
   "measurements": [
     {
       "measurementId": "m-1-01",
       "farmId": "farm-1",
       "nodeId": "node-1",
-      "timestamp": "2026-02-15T00:00:00Z",
+      "timestamp": "2026-02-15T00:00:00Z",  
       "temperature": 62.3,
       "moisture": 45.1,
       "nitrogen": 32.5,
