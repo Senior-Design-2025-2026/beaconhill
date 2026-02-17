@@ -94,10 +94,26 @@ function formatTimestampLabel(ms) {
   return `${month}/${day} ${hours}:${mins}`;
 }
 
-/** Format just the hour portion for slider tick marks. */
-function formatHourLabel(ms) {
+/** Format timestamp in Chicago time for display (e.g. "2/15 6:00 PM CST"). */
+function formatChicagoTime(ms) {
+  if (ms == null) return '';
   const d = new Date(ms);
-  return `${String(d.getUTCHours()).padStart(2, '0')}:00`;
+  return d.toLocaleString('en-US', {
+    timeZone: 'America/Chicago',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZoneName: 'short',
+  });
+}
+
+/** Descriptive label for a snapshot: index (1-based) + Chicago time. */
+function formatSnapshotLabel(index, ms) {
+  if (ms == null) return `Snapshot ${index + 1}`;
+  const chicago = formatChicagoTime(ms);
+  return `Snapshot ${index + 1} • ${chicago}`;
 }
 
 /**
@@ -183,11 +199,11 @@ function LiveDashboardPage() {
   const effectiveSliderIndex = sliderIndex != null ? sliderIndex : Math.max(0, timeline.length - 1);
   const selectedTimestampMs = timeline[effectiveSliderIndex] || null;
 
-  /** Slider marks with the hour as the label for each tick. */
+  /** Slider marks: index (1-based) + Chicago time. */
   const sliderMarks = useMemo(() => {
     return timeline.map((ms, i) => ({
       value: i,
-      label: formatHourLabel(ms),
+      label: `${i + 1} • ${formatChicagoTime(ms)}`,
     }));
   }, [timeline]);
 
@@ -309,7 +325,6 @@ function LiveDashboardPage() {
               <div className="snapshot-panel-box">
                 <HeaderComponent
                   title={selectedFarmName}
-                  icon={<MapIcon />}
                   titleVariant="h6"
                 />
                 <div className="snapshot-map-fill">
@@ -323,7 +338,6 @@ function LiveDashboardPage() {
               <div className="snapshot-panel-box">
                 <HeaderComponent
                   title="Measurements"
-                  icon={<ScienceIcon />}
                   titleVariant="h6"
                 />
                 <div className="snapshot-nodes-scroll">
@@ -346,7 +360,6 @@ function LiveDashboardPage() {
                           <Button
                             variant="outlined"
                             size="small"
-                            startIcon={<SettingsIcon />}
                             onClick={() => navigate('/configuration')}
                             sx={{
                               borderColor: '#EEBE02',
@@ -396,11 +409,10 @@ function LiveDashboardPage() {
             <div className="snapshot-slider-box">
               <HeaderComponent
                 title="Snapshots"
-                icon={<CameraAltIcon />}
                 titleVariant="h6"
               />
               <Typography variant="subtitle2" sx={{ color: '#2D2D2D', mb: 1 }}>
-                Timestamp: {selectedTimestampMs != null ? formatTimestampLabel(selectedTimestampMs) : '—'}
+                {formatSnapshotLabel(effectiveSliderIndex, selectedTimestampMs)}
                 {selectedTimestampMs != null && !timestampsWithData.has(selectedTimestampMs) && (
                   <span className="slider-no-data-hint"> (no data at this hour)</span>
                 )}
@@ -412,12 +424,28 @@ function LiveDashboardPage() {
                 step={1}
                 marks={sliderMarks}
                 valueLabelDisplay="auto"
-                valueLabelFormat={(v) => formatTimestampLabel(timeline[v])}
+                valueLabelFormat={(v) => formatSnapshotLabel(v, timeline[v])}
                 onChange={(e, v) => setSliderIndex(v)}
                 sx={{
-                  color: '#EEBE02',
+                  color: '#9e9e9e',
+                  '& .MuiSlider-rail': {
+                    backgroundColor: '#bdbdbd',
+                  },
+                  '& .MuiSlider-track': {
+                    backgroundColor: '#9e9e9e',
+                  },
+                  '& .MuiSlider-thumb': {
+                    backgroundColor: '#EEBE02',
+                    '&:hover, &.Mui-focusVisible': {
+                      backgroundColor: '#d4a900',
+                    },
+                  },
+                  '& .MuiSlider-valueLabel': {
+                    backgroundColor: '#EEBE02',
+                    color: '#2D2D2D',
+                  },
                   '& .MuiSlider-markLabel': {
-                    fontSize: '0.6rem',
+                    fontSize: '0.65rem',
                     color: '#616161',
                     transform: 'rotate(-45deg)',
                     transformOrigin: 'top left',
