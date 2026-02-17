@@ -408,10 +408,6 @@ function LiveDashboardPage() {
             {/* Map box */}
             <div className="snapshot-left">
               <div className="snapshot-panel-box">
-                <HeaderComponent
-                  title="Map"
-                  titleVariant="h6"
-                />
                 <div className="snapshot-map-fill">
                   <MapComponent nodes={mapNodes} height="100%" />
                 </div>
