@@ -8,7 +8,7 @@
   box-sizing: border-box;
 }
 
-/* Row 1: header and tab/filter box — 50% width each */
+/* Row 1: header and tab/filter box */
 .live-dashboard-header-row {
   display: flex;
   flex-direction: row;
@@ -19,10 +19,7 @@
 }
 
 .live-dashboard-header {
-  flex: 1 1 40%;            /*  see live-dashboard-tab-filter-box for other box */
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
+  flex: 0 0 40%;
 }
 
 /* Header container box with sidebar styling */
@@ -80,9 +77,9 @@
   color: #616161;
 }
 
-/* Box containing tabs + filters — 50% width */
+/* Box containing tabs + filters */
 .live-dashboard-tab-filter-box {
-  flex: 1 1 60%;                  /*  see live-dashboard-header for other box */
+  flex: 1 1;                  /*  see live-dashboard-header for other box */
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -148,19 +145,8 @@
   overflow: auto;
 }
 
-/* ===== Snapshot View — column layout (top row + slider box) ===== */
-
-.snapshot-layout {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
 /* Top row: map + measurements side by side */
-.snapshot-top-row {
+.snapshot-row {
   display: flex;
   flex-direction: row;
   gap: 16px;
@@ -168,18 +154,17 @@
   min-height: 0;
 }
 
-/* Left panel: map — 25% */
+/* Left panel */
 .snapshot-left {
-  width: 25%;
+  width: 40%;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   min-height: 0;
 }
 
-/* Right panel: node measurements — 75% */
+/* Right panel */
 .snapshot-right {
-  width: 75%;
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -222,7 +207,7 @@
 
 /* Per-node section */
 .node-section {
-  margin-bottom: 24px;
+  margin-bottom: 0px;
 }
 
 /* Node section header: name + status left, configure button right */

@@ -41,7 +41,7 @@ const METRIC_CONFIG = [
   { key: 'moisture',    label: 'Moisture',    unit: '%',  low: 0, lowThreshold: 30, highThreshold: 70, high: 100 },
   { key: 'nitrogen',    label: 'Nitrogen',    unit: 'ppm', low: 0, lowThreshold: 25, highThreshold: 50, high: 100 },
   { key: 'phosphorus',  label: 'Phosphorus',  unit: 'ppm', low: 0, lowThreshold: 15, highThreshold: 30, high: 100 },
-  { key: 'potassium',   label: 'Potassium',   unit: 'ppm', low: 0, lowThreshold: 100, highThreshold: 200, high: 200 },
+  { key: 'potassium',   label: 'Potassium',   unit: 'ppm', low: 0, lowThreshold: 100, highThreshold: 175, high: 200 },
 ];
 
 /** Colors assigned to nodes in multi-node line charts. */
@@ -252,10 +252,14 @@ function LiveDashboardPage() {
   /** Slider marks: index (1-based) + Chicago time. */
   const sliderMarks = useMemo(() => {
     if (timeline.length === 0) return [];
-    return [
-      { value: 0, label: formatChicagoTimeLineSplit(timeline[0]) },
-      { value: timeline.length - 1, label: formatChicagoTimeLineSplit(timeline[timeline.length - 1]) },
-    ];
+    return timeline.map((ms, i) => {
+      const isFirst = i === 0;
+      const isLast = i === timeline.length - 1;
+      const label = isFirst || isLast
+        ? formatChicagoTimeLineSplit(ms)
+        : '';
+      return { value: i, label };
+    });
   }, [timeline]);
 
   /* --- Helpers for Snapshot View --- */
@@ -440,9 +444,7 @@ function LiveDashboardPage() {
 
       {/* ===== Snapshot View tab ===== */}
       {activeTab === 0 && (
-        <div className="snapshot-layout">
-          {/* Map (25%) + Measurements (75%) */}
-          <div className="snapshot-top-row">
+          <div className="snapshot-row">
             {/* Map box */}
             <div className="snapshot-left">
               <div className="snapshot-panel-box">
@@ -456,7 +458,7 @@ function LiveDashboardPage() {
             <div className="snapshot-right">
               <div className="snapshot-panel-box">
                 <HeaderComponent
-                  title={timeline.length > 0 ? `Snapshot ${effectiveSliderIndex + 1}: ${formatChicagoTime(selectedTimestampMs)}` : 'Measurements'}
+                  title={timeline.length > 0 ? `Snapshot: ${formatChicagoTime(selectedTimestampMs)}` : 'Measurements'}
                   titleVariant="h6"
                 />
                 <div className="snapshot-nodes-scroll">
@@ -523,7 +525,6 @@ function LiveDashboardPage() {
               </div>
             </div>
           </div>
-        </div>
       )}
 
       {/* ===== Timeframe Averages tab ===== */}
