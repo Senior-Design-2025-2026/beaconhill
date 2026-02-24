@@ -230,9 +230,7 @@ function LiveDashboardPage() {
     return farmNodes.map((node) => ({
       ...node,
       online: getMeasurementAt(node.nodeId, selectedTimestampMs) != null,
-      selected: nodeIds.includes(node.nodeId),
     }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [farmNodes, nodeIds, selectedTimestampMs, timeFilteredMeasurements]);
 
   /* --- Render --- */
@@ -325,7 +323,6 @@ function LiveDashboardPage() {
                 valueLabelDisplay="auto"
                 valueLabelFormat={(v) => formatChicagoTime(timeline[v])}
                 onChange={(e, v) => setSliderIndex(v)}
-                sx={{ color: '#9e9e9e' }}
               />
             </div>
           )}
@@ -419,95 +416,93 @@ function LiveDashboardPage() {
 
       {/* ===== Timeframe Averages tab ===== */}
       {activeTab === 1 && (
-        <div className="live-dashboard-tab-panel">
-          <div className="averages-bento-grid">
-            {/* Top-left: Farm Averages table */}
-            <div className="bento-box">
-              <Typography variant="h6" sx={{ color: '#2D2D2D', mb: 1 }}>
-                Farm Averages
-              </Typography>
-              <TableContainer>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ fontWeight: 700 }}>Measurement</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }} align="right">Farm Avg</TableCell>
-                      {farmNodes.map((n) => (
-                        <TableCell key={n.nodeId} sx={{ fontWeight: 700 }} align="right">
-                          {n.nodeName}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {METRIC_CONFIG.map((metric) => {
-                      const allValues = timeFilteredMeasurements.map((m) => m[metric.key]);
-                      const farmAvg = allValues.length > 0
-                        ? (allValues.reduce((s, v) => s + v, 0) / allValues.length).toFixed(1)
-                        : '—';
-                      return (
-                        <TableRow key={metric.key}>
-                          <TableCell>{metric.label} ({metric.unit.trim()})</TableCell>
-                          <TableCell align="right">{farmAvg}</TableCell>
-                          {farmNodes.map((node) => {
-                            const nodeVals = timeFilteredMeasurements
-                              .filter((m) => m.nodeId === node.nodeId)
-                              .map((m) => m[metric.key]);
-                            const avg = nodeVals.length > 0
-                              ? (nodeVals.reduce((s, v) => s + v, 0) / nodeVals.length).toFixed(1)
-                              : '—';
-                            return (
-                              <TableCell key={node.nodeId} align="right">{avg}</TableCell>
-                            );
-                          })}
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </div>
-
-            {/* 5 per-metric line charts — each plots selected nodes */}
-            {METRIC_CONFIG.map((metric) => {
-              const traces = farmNodes.map((node, idx) => {
-                const nodeMeasurements = timeFilteredMeasurements
-                  .filter((m) => m.nodeId === node.nodeId)
-                  .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-                return {
-                  x: nodeMeasurements.map((m) => m.timestamp),
-                  y: nodeMeasurements.map((m) => m[metric.key]),
-                  type: 'scatter',
-                  mode: 'lines+markers',
-                  name: node.nodeName,
-                  line: { color: NODE_COLORS[idx % NODE_COLORS.length], width: 2 },
-                  marker: { size: 4 },
-                };
-              });
-
-              const layout = {
-                title: { text: `${metric.label} (${metric.unit.trim()})`, font: { size: 13, color: '#2D2D2D' } },
-                xaxis: { type: 'date', tickformat: '%H:%M' },
-                yaxis: { title: metric.unit.trim() },
-                legend: { orientation: 'h', y: -0.3 },
-                margin: { l: 48, r: 16, t: 36, b: 72 },
-                autosize: true,
-                height: 300,
-              };
-
-              return (
-                <div key={metric.key} className="bento-box">
-                  <Plot
-                    data={traces}
-                    layout={layout}
-                    config={{ responsive: true, displayModeBar: false }}
-                    useResizeHandler
-                    style={{ width: '100%' }}
-                  />
-                </div>
-              );
-            })}
+        <div className="averages-bento-grid">
+          {/* Top-left: Farm Averages table */}
+          <div className="bento-box">
+            <Typography variant="h6" sx={{ color: '#2D2D2D', mb: 1 }}>
+              Farm Averages
+            </Typography>
+            <TableContainer>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 700 }}>Measurement</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }} align="right">Farm Avg</TableCell>
+                    {farmNodes.map((n) => (
+                      <TableCell key={n.nodeId} sx={{ fontWeight: 700 }} align="right">
+                        {n.nodeName}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {METRIC_CONFIG.map((metric) => {
+                    const allValues = timeFilteredMeasurements.map((m) => m[metric.key]);
+                    const farmAvg = allValues.length > 0
+                      ? (allValues.reduce((s, v) => s + v, 0) / allValues.length).toFixed(1)
+                      : '—';
+                    return (
+                      <TableRow key={metric.key}>
+                        <TableCell>{metric.label} ({metric.unit.trim()})</TableCell>
+                        <TableCell align="right">{farmAvg}</TableCell>
+                        {farmNodes.map((node) => {
+                          const nodeVals = timeFilteredMeasurements
+                            .filter((m) => m.nodeId === node.nodeId)
+                            .map((m) => m[metric.key]);
+                          const avg = nodeVals.length > 0
+                            ? (nodeVals.reduce((s, v) => s + v, 0) / nodeVals.length).toFixed(1)
+                            : '—';
+                          return (
+                            <TableCell key={node.nodeId} align="right">{avg}</TableCell>
+                          );
+                        })}
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </div>
+
+          {/* 5 per-metric line charts — each plots selected nodes */}
+          {METRIC_CONFIG.map((metric) => {
+            const traces = farmNodes.map((node, idx) => {
+              const nodeMeasurements = timeFilteredMeasurements
+                .filter((m) => m.nodeId === node.nodeId)
+                .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+              return {
+                x: nodeMeasurements.map((m) => m.timestamp),
+                y: nodeMeasurements.map((m) => m[metric.key]),
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: node.nodeName,
+                line: { color: NODE_COLORS[idx % NODE_COLORS.length], width: 2 },
+                marker: { size: 4 },
+              };
+            });
+
+            const layout = {
+              title: { text: `${metric.label} (${metric.unit.trim()})`, font: { size: 13, color: '#2D2D2D' } },
+              xaxis: { type: 'date', tickformat: '%H:%M' },
+              yaxis: { title: metric.unit.trim() },
+              legend: { orientation: 'h', y: -0.3 },
+              margin: { l: 48, r: 16, t: 36, b: 72 },
+              autosize: true,
+              height: 300,
+            };
+
+            return (
+              <div key={metric.key} className="bento-box">
+                <Plot
+                  data={traces}
+                  layout={layout}
+                  config={{ responsive: true, displayModeBar: false }}
+                  useResizeHandler
+                  style={{ width: '100%' }}
+                />
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
