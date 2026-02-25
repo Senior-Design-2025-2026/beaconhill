@@ -147,6 +147,7 @@ function LiveDashboardPage() {
   const [selectedTimeframe, setSelectedTimeframe] = useState('24h');
   const [activeTab, setActiveTab] = useState(0);
   const [sliderIndex, setSliderIndex] = useState(null);
+  const [selectedMetric, setSelectedMetric] = useState(METRIC_CONFIG[0]);
 
   /** Keep selectedFarm in sync when farms loads or when current selection is no longer in the list. */
   useEffect(() => {
@@ -232,6 +233,34 @@ function LiveDashboardPage() {
       online: getMeasurementAt(node.nodeId, selectedTimestampMs) != null,
     }));
   }, [farmNodes, nodeIds, selectedTimestampMs, timeFilteredMeasurements]);
+
+  const traces = useMemo(() => {
+    return farmNodes.map((node, idx) => {
+      const nodeMeasurements = timeFilteredMeasurements
+        .filter((m) => m.nodeId === node.nodeId)
+        .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+  
+      return {
+        x: nodeMeasurements.map((m) => m.timestamp),
+        y: nodeMeasurements.map((m) => m[selectedMetric.key]),
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: node.nodeName,
+        line: { color: NODE_COLORS[idx % NODE_COLORS.length], width: 2 },
+        marker: { size: 4 },
+      };
+    });
+  }, [farmNodes, timeFilteredMeasurements, selectedMetric]);
+  
+  const layout = useMemo(() => ({
+    title: { text: `${selectedMetric.label} (${selectedMetric.unit})`, font: { size: 13, color: '#2D2D2D' } },
+    xaxis: { type: 'date', tickformat: '%H:%M', title: { text: "Timestamp" } },
+    yaxis: { title: { text: selectedMetric.unit } },
+    legend: { orientation: 'h', y: -0.3 },
+    margin: { l: 40, r: 24, t: 36, b: 16 },
+    // autosize: true,
+    height: 300,
+  }), [selectedMetric]);
 
   /* --- Render --- */
   return (
@@ -416,9 +445,9 @@ function LiveDashboardPage() {
 
       {/* ===== Timeframe Averages tab ===== */}
       {activeTab === 1 && (
-        <div className="averages-bento-grid">
+        <div className="averages-row">
           {/* Top-left: Farm Averages table */}
-          <div className="bento-box">
+          <div className="table-box">
             <Typography variant="h6" sx={{ color: '#2D2D2D', mb: 1 }}>
               Farm Averages
             </Typography>
@@ -443,7 +472,7 @@ function LiveDashboardPage() {
                       : '—';
                     return (
                       <TableRow key={metric.key}>
-                        <TableCell>{metric.label} ({metric.unit.trim()})</TableCell>
+                        <TableCell>{metric.label} ({metric.unit})</TableCell>
                         <TableCell align="right">{farmAvg}</TableCell>
                         {farmNodes.map((node) => {
                           const nodeVals = timeFilteredMeasurements
@@ -464,45 +493,35 @@ function LiveDashboardPage() {
             </TableContainer>
           </div>
 
-          {/* 5 per-metric line charts — each plots selected nodes */}
-          {METRIC_CONFIG.map((metric) => {
-            const traces = farmNodes.map((node, idx) => {
-              const nodeMeasurements = timeFilteredMeasurements
-                .filter((m) => m.nodeId === node.nodeId)
-                .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-              return {
-                x: nodeMeasurements.map((m) => m.timestamp),
-                y: nodeMeasurements.map((m) => m[metric.key]),
-                type: 'scatter',
-                mode: 'lines+markers',
-                name: node.nodeName,
-                line: { color: NODE_COLORS[idx % NODE_COLORS.length], width: 2 },
-                marker: { size: 4 },
-              };
-            });
+          {/* Line charts */}
+          <div className="line-chart-box">
+            <div className="metric-filter">
+              <FormControl size="small" sx={{ minWidth: 180 }}>
+                <InputLabel>Measurement</InputLabel>
+                <Select
+                  label="Measurement"
+                  value={selectedMetric}
+                  onChange={(e) => setSelectedMetric(e.target.value)}
+                >
+                  {METRIC_CONFIG.map((metric) => (
+                    <MenuItem key={metric.key} value={metric}>
+                      {metric.label + ' (' + metric.unit + ')'}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </div>
 
-            const layout = {
-              title: { text: `${metric.label} (${metric.unit.trim()})`, font: { size: 13, color: '#2D2D2D' } },
-              xaxis: { type: 'date', tickformat: '%H:%M' },
-              yaxis: { title: metric.unit.trim() },
-              legend: { orientation: 'h', y: -0.3 },
-              margin: { l: 48, r: 16, t: 36, b: 72 },
-              autosize: true,
-              height: 300,
-            };
-
-            return (
-              <div key={metric.key} className="bento-box">
-                <Plot
-                  data={traces}
-                  layout={layout}
-                  config={{ responsive: true, displayModeBar: false }}
-                  useResizeHandler
-                  style={{ width: '100%' }}
-                />
-              </div>
-            );
-          })}
+            <div className="line-chart">
+              <Plot
+                data={traces}
+                layout={layout}
+                config={{ responsive: true, displayModeBar: false }}
+                useResizeHandler
+                style={{ width: '100%' }}
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>
