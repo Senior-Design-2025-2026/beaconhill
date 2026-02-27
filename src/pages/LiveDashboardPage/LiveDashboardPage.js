@@ -53,6 +53,12 @@ const TIMEFRAME_OPTIONS = [
   { label: 'Last 30 Days',  value: '30d' },
 ];
 
+/** Normalize timestamp (UTC ms number or ISO string) to UTC epoch milliseconds. */
+function toTimestampMs(ts) {
+  if (ts == null) return NaN;
+  return typeof ts === 'number' ? ts * 1000 : new Date(ts * 1000).getTime();
+}
+
 /** Convert a timeframe string to milliseconds. */
 function getTimeWindowMs(tf) {
   const map = {
@@ -174,14 +180,14 @@ function LiveDashboardPage() {
   /** "now" = max timestamp in farm measurements (deterministic for dummy data). */
   const maxTimestampMs = useMemo(() => {
     if (farmMeasurements.length === 0) return Date.now();
-    return Math.max(...farmMeasurements.map((m) => new Date(m.timestamp).getTime()));
+    return Math.max(...farmMeasurements.map((m) => toTimestampMs(m.timestamp)));
   }, [farmMeasurements]);
 
   /** Measurements filtered by the selected timeframe window. */
   const timeFilteredMeasurements = useMemo(() => {
     const windowMs = getTimeWindowMs(selectedTimeframe);
     const cutoff = maxTimestampMs - windowMs;
-    return farmMeasurements.filter((m) => new Date(m.timestamp).getTime() >= cutoff);
+    return farmMeasurements.filter((m) => toTimestampMs(m.timestamp) >= cutoff);
   }, [farmMeasurements, selectedTimeframe, maxTimestampMs]);
 
   /** Number of nodes with at least one measurement in the current timeframe. */
@@ -194,9 +200,10 @@ function LiveDashboardPage() {
 
   const timeline = useMemo(() => {
     if (timeFilteredMeasurements.length === 0) return [];
-    const timestamps = timeFilteredMeasurements.map((m) => new Date(m.timestamp).getTime());
+    const timestamps = timeFilteredMeasurements.map((m) => toTimestampMs(m.timestamp));
     const minTs = Math.min(...timestamps);
     const maxTs = Math.max(...timestamps);
+    console.log(buildHourlyTimeline(minTs, maxTs));
     return buildHourlyTimeline(minTs, maxTs);
   }, [timeFilteredMeasurements]);
 
@@ -204,7 +211,7 @@ function LiveDashboardPage() {
   const timestampsWithData = useMemo(() => {
     const set = new Set();
     timeFilteredMeasurements.forEach((m) => {
-      const d = new Date(m.timestamp);
+      const d = new Date(toTimestampMs(m.timestamp));
       d.setUTCMinutes(0, 0, 0);
       set.add(d.getTime());
     });
@@ -227,7 +234,7 @@ function LiveDashboardPage() {
     if (targetMs == null) return null;
     return timeFilteredMeasurements.find((m) => {
       if (m.nodeId !== nodeId) return false;
-      const mDate = new Date(m.timestamp);
+      const mDate = new Date(toTimestampMs(m.timestamp));
       mDate.setUTCMinutes(0, 0, 0);
       return mDate.getTime() === targetMs;
     }) || null;
@@ -254,7 +261,7 @@ function LiveDashboardPage() {
     if (selectedTimestampMs == null) return selectedTimeFilteredMeasurements;
     const cutoffMs = selectedTimestampMs + 60 * 60 * 1000;
     return selectedTimeFilteredMeasurements.filter(
-      (m) => new Date(m.timestamp).getTime() < cutoffMs
+      (m) => toTimestampMs(m.timestamp) < cutoffMs
     );
   }, [selectedTimeFilteredMeasurements, selectedTimestampMs]);
 
@@ -266,7 +273,7 @@ function LiveDashboardPage() {
         <div className="live-dashboard-header">
           <div className="live-dashboard-header-container">
             <HeaderComponent
-              title={selectedFarmData.farmName}
+              title={selectedFarmName}
               titleVariant="h4"
             >
               {selectedFarmData && (
@@ -543,9 +550,9 @@ function LiveDashboardPage() {
               const traces = filteredNodes.map((node, idx) => {
                 const nodeMeasurements = sliderFilteredMeasurements
                   .filter((m) => m.nodeId === node.nodeId)
-                  .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+                  .sort((a, b) => toTimestampMs(a.timestamp) - toTimestampMs(b.timestamp));
                 return {
-                  x: nodeMeasurements.map((m) => m.timestamp),
+                  x: nodeMeasurements.map((m) => toTimestampMs(m.timestamp)),
                   y: nodeMeasurements.map((m) => m[metric.key]),
                   type: 'scatter',
                   mode: 'lines+markers',
