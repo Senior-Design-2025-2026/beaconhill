@@ -2,6 +2,24 @@
   text-align: center;
 }
 
+.App-authenticated-layout {
+  display: flex;
+  flex-direction: row;
+  min-height: 100vh;
+  height: 100vh;
+  text-align: left;
+  overflow: hidden;
+}
+
+.App-main {
+  flex: 1;
+  overflow: auto;
+  padding: 0;
+  background-color: #ffffff;
+  height: 100vh;
+  box-sizing: border-box;
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
