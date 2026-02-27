@@ -37,23 +37,26 @@ function AuthenticatedApp({ signOut, user }) {
 
 function App() {
   const authenticatedContent = isTestMode ? (
-    <AuthenticatedApp
-      signOut={() => {}}
-      user={MOCK_USER}
-    />
+    <MeasurementsProvider>
+      <AuthenticatedApp
+        signOut={() => {}}
+        user={MOCK_USER}
+      />
+    </MeasurementsProvider>
   ) : (
     <Authenticator hideSignUp={true}>
-      {({ signOut, user }) => (
-        <AuthenticatedApp
-          signOut={signOut}
-          user={user}
-        />
-      )}
+      {({ signOut, user }) => 
+        <MeasurementsProvider>
+          <AuthenticatedApp
+            signOut={signOut}
+            user={user}
+          />
+        </MeasurementsProvider>
+      }
     </Authenticator>
   );
 
   return (
-    <MeasurementsProvider>
       <BrowserRouter
         future={{
           v7_startTransition: true,
@@ -62,7 +65,6 @@ function App() {
       >
         {authenticatedContent}
       </BrowserRouter>
-    </MeasurementsProvider>
   );
 }
 
