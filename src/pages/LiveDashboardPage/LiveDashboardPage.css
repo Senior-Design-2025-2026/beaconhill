@@ -2,13 +2,9 @@
 
 .live-dashboard {
   padding: 24px;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
 }
 
-/* Row 1: header and tab/filter box — 50% width each */
+/* Row 1: header and tab/filter box */
 .live-dashboard-header-row {
   display: flex;
   flex-direction: row;
@@ -19,42 +15,10 @@
 }
 
 .live-dashboard-header {
-  flex: 1 1 40%;            /*  see live-dashboard-tab-filter-box for other box */
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Header container box with sidebar styling */
-.live-dashboard-header-container {
+  flex: 0 0 40%;
   background-color: #202020;
-  border: 1px solid #202020;
   border-radius: 8px;
   padding: 16px;
-  box-shadow: var(--shadow-light);
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-/* Remove HeaderComponent bottom margin inside the header container */
-.live-dashboard-header-container > .MuiBox-root {
-  margin-bottom: 0;
-}
-
-/* Header title text - yellow like sidebar */
-.live-dashboard-header-container h1,
-.live-dashboard-header-container h4,
-.live-dashboard-header-container .MuiTypography-h4 {
-  color: #EEBE02 !important;
-}
-
-/* Header content: farm name (large dark), address (medium gray), crop | active/total (medium gray) */
-.live-dashboard-header .live-dashboard-header-address {
-  color: #616161;
-  font-size: 0.95rem;
-  margin-top: 4px;
 }
 
 .live-dashboard-header-meta {
@@ -66,50 +30,27 @@
   font-size: 1.0rem;
 }
 
-.live-dashboard-header-meta strong {
-  color: #EEBE02;
-}
-
-.live-dashboard-header-sep {
-  color: #9e9e9e;
-  font-weight: 300;
-}
-
-.live-dashboard-header-crop,
-.live-dashboard-header-nodes {
-  color: #616161;
-}
-
-/* Box containing tabs + filters — 50% width */
+/* Box containing tabs + filters */
 .live-dashboard-tab-filter-box {
-  flex: 1 1 60%;                  /*  see live-dashboard-header for other box */
+  flex: 1 1;                  /*  see live-dashboard-header for other box */
   min-width: 0;
   display: flex;
   flex-direction: column;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  overflow: hidden;
+  overflow: visible;
   flex-shrink: 0;
   box-shadow: var(--shadow-light);
 }
 
-/* Tab bar inside tab-filter box — full width of parent */
-.live-dashboard-tab-filter-box .live-dashboard-tabs {
-  width: 100%;
-  border-bottom: 1px solid #e0e0e0;
-  flex-shrink: 0;
-}
-
 /* Filter group inside tab-filter box — full width, controls share space */
-.live-dashboard-tab-filter-box .live-dashboard-filters {
+.live-dashboard-filters {
   display: flex;
   flex-direction: row;
   gap: 16px;
   align-items: center;
   flex-shrink: 0;
   padding: 16px;
-  width: 100%;
-  box-sizing: border-box;
 }
 
 .live-dashboard-tab-filter-box .live-dashboard-filters .MuiFormControl-root {
@@ -119,24 +60,37 @@
 
 /* Snapshot slider inside tab-filter box — compact, below filters */
 .live-dashboard-slider {
-  padding: 0 32px 12px 32px;
+  padding: 0 40px 12px 40px;
   flex-shrink: 0;
-  width: 100%;
-  box-sizing: border-box;
 }
 
 .live-dashboard-slider .MuiSlider-root {
   height: 4px;
+  color: #2d2d2d;
 }
 
 .live-dashboard-slider .MuiSlider-thumb {
   width: 16px;
   height: 16px;
+  background-color: #EEBE02;
+}
+
+.live-dashboard-slider .MuiSlider-thumb:hover,
+.live-dashboard-slider .MuiSlider-thumb.Mui-focusVisible {
+  background-color: #d4a900;
+}
+
+.live-dashboard-slider .MuiSlider-valueLabel {
+  background-color: #EEBE02;
+  color: #2D2D2D;
 }
 
 .live-dashboard-slider .MuiSlider-markLabel {
   font-size: 0.55rem;
   margin-top: 2px;
+  white-space: pre;
+  text-align: center;
+  color: #616161;
 }
 
 /* Content area below tabs */
@@ -146,19 +100,8 @@
   overflow: auto;
 }
 
-/* ===== Snapshot View — column layout (top row + slider box) ===== */
-
-.snapshot-layout {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
 /* Top row: map + measurements side by side */
-.snapshot-top-row {
+.snapshot-row {
   display: flex;
   flex-direction: row;
   gap: 16px;
@@ -166,21 +109,19 @@
   min-height: 0;
 }
 
-/* Left panel: map — 25% */
+/* Left panel */
 .snapshot-left {
-  width: 25%;
+  width: 40%;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  min-height: 0;
 }
 
-/* Right panel: node measurements — 75% */
+/* Right panel */
 .snapshot-right {
-  width: 75%;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 0;
 }
 
 /* Shared panel box */
@@ -220,7 +161,7 @@
 
 /* Per-node section */
 .node-section {
-  margin-bottom: 24px;
+  margin-bottom: 0px;
 }
 
 /* Node section header: name + status left, configure button right */
@@ -286,15 +227,14 @@
 
 /* ===== Timeframe Averages — Bento Grid ===== */
 
-.averages-bento-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(2, 1fr);
+.averages-row {
+  display: flex;
+  flex-direction: row;
   gap: 16px;
   margin-bottom: 24px;
 }
 
-.bento-box {
+.table-box {
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   padding: 16px;
@@ -303,4 +243,31 @@
   flex-direction: column;
   overflow: hidden;
   box-shadow: var(--shadow-light);
+  width: 40%;
+}
+
+.line-chart-box {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1; 
+  min-width: 0;
+}
+
+.metric-filter {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  flex: 1; 
+  min-width: 0;
+}
+
+.line-chart {
+  flex: 1;
+  min-height: 320px;
+  border-radius: 4px;
+  overflow: hidden;
 }
