@@ -34,8 +34,6 @@ build/
 dist/
 node_modules/
 aws-exports.js
-# Amplify-generated config used by app (src/config/); do not commit if it contains env-specific URLs or secrets
-src/config/aws-exports.json
 awsconfiguration.json
 amplifyconfiguration.json
 amplifyconfiguration.dart

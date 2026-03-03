@@ -1,37 +1,15 @@
 {
   "dev": {
     "awscloudformation": {
-      "AuthRoleName": "amplify-beaconhill-dev-6a4b1-authRole",
-      "UnauthRoleArn": "arn:aws:iam::562780096124:role/amplify-beaconhill-dev-6a4b1-unauthRole",
-      "AuthRoleArn": "arn:aws:iam::562780096124:role/amplify-beaconhill-dev-6a4b1-authRole",
+      "AuthRoleName": "amplify-beaconhill0226-dev-da524-authRole",
+      "UnauthRoleArn": "arn:aws:iam::562780096124:role/amplify-beaconhill0226-dev-da524-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::562780096124:role/amplify-beaconhill0226-dev-da524-authRole",
       "Region": "us-east-1",
-      "DeploymentBucketName": "amplify-beaconhill-dev-6a4b1-deployment",
-      "UnauthRoleName": "amplify-beaconhill-dev-6a4b1-unauthRole",
-      "StackName": "amplify-beaconhill-dev-6a4b1",
-      "StackId": "arn:aws:cloudformation:us-east-1:562780096124:stack/amplify-beaconhill-dev-6a4b1/3cd54a00-06be-11f1-b4ca-12158860be77",
-      "AmplifyAppId": "d3lv3c6ppm80xp",
-      "APIGatewayAuthURL": "https://s3.amazonaws.com/amplify-beaconhill-dev-6a4b1-deployment/amplify-cfn-templates/api/APIGatewayAuthStack.json"
-    },
-    "categories": {
-      "auth": {
-        "beaconhill56651fb6": {}
-      },
-      "function": {
-        "dbGet": {
-          "deploymentBucketName": "amplify-beaconhill-dev-6a4b1-deployment",
-          "s3Key": "amplify-builds/dbGet-7330724f47595375424f-build.zip"
-        },
-        "beaconHillDBTriggercc5a1762": {
-          "deploymentBucketName": "amplify-beaconhill-dev-6a4b1-deployment",
-          "s3Key": "amplify-builds/beaconHillDBTriggercc5a1762-536a4474654a612b426c-build.zip"
-        }
-      },
-      "api": {
-        "apiGet": {}
-      },
-      "storage": {
-        "beaconHillDB": {}
-      }
+      "DeploymentBucketName": "amplify-beaconhill0226-dev-da524-deployment",
+      "UnauthRoleName": "amplify-beaconhill0226-dev-da524-unauthRole",
+      "StackName": "amplify-beaconhill0226-dev-da524",
+      "StackId": "arn:aws:cloudformation:us-east-1:562780096124:stack/amplify-beaconhill0226-dev-da524/7b487f90-137b-11f1-8fef-0affdfc2c7a1",
+      "AmplifyAppId": "d36d9z10heefra"
     }
   }
 }

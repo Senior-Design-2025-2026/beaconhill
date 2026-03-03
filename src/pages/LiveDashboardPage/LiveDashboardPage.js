@@ -49,6 +49,12 @@ const TIMEFRAME_OPTIONS = [
   { label: 'Last 30 Days',  value: '30d' },
 ];
 
+/** Normalize timestamp (UTC ms number or ISO string) to UTC epoch milliseconds. */
+function toTimestampMs(ts) {
+  if (ts == null) return NaN;
+  return typeof ts === 'number' ? ts * 1000 : new Date(ts * 1000).getTime();
+}
+
 /** Convert a timeframe string to milliseconds. */
 function getTimeWindowMs(tf) {
   const map = {
@@ -178,24 +184,25 @@ function LiveDashboardPage() {
 
   /** "now" = max timestamp in farm measurements (deterministic for dummy data). */
   const maxTimestampMs = useMemo(() => {
-    if (farmMeasurements.length === 0) return null;
-    return Math.max(...farmMeasurements.map((m) => new Date(m.timestamp).getTime()));
+    if (farmMeasurements.length === 0) return Date.now();
+    return Math.max(...farmMeasurements.map((m) => toTimestampMs(m.timestamp)));
   }, [farmMeasurements]);
 
   /** Measurements filtered by the selected timeframe window. */
   const timeFilteredMeasurements = useMemo(() => {
     const windowMs = getTimeWindowMs(selectedTimeframe);
     const cutoff = (TEST_DATE_MS ?? Date.now()) - windowMs;
-    return farmMeasurements.filter((m) => new Date(m.timestamp).getTime() >= cutoff);
+    return farmMeasurements.filter((m) => toTimestampMs(m.timestamp) >= cutoff);
   }, [farmMeasurements, selectedTimeframe]);
 
   /* --- Slider timeline (hourly, min to max of time-filtered data, in epoch-ms) --- */
 
   const timeline = useMemo(() => {
     if (timeFilteredMeasurements.length === 0) return [];
-    const timestamps = timeFilteredMeasurements.map((m) => new Date(m.timestamp).getTime());
+    const timestamps = timeFilteredMeasurements.map((m) => toTimestampMs(m.timestamp));
     const minTs = Math.min(...timestamps);
     const maxTs = Math.max(...timestamps);
+    console.log(buildHourlyTimeline(minTs, maxTs));
     return buildHourlyTimeline(minTs, maxTs);
   }, [timeFilteredMeasurements]);
 
@@ -220,7 +227,7 @@ function LiveDashboardPage() {
     if (targetMs == null) return null;
     return timeFilteredMeasurements.find((m) => {
       if (m.nodeId !== nodeId) return false;
-      const mDate = new Date(m.timestamp);
+      const mDate = new Date(toTimestampMs(m.timestamp));
       mDate.setUTCMinutes(0, 0, 0);
       return mDate.getTime() === targetMs;
     }) || null;
