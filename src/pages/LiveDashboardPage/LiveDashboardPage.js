@@ -277,7 +277,7 @@ function LiveDashboardPage() {
         <div className="live-dashboard-header">
           <div className="live-dashboard-header-container">
             <HeaderComponent
-              title={selectedFarmName || 'Select a Farm'}
+              title={selectedFarmName}
               titleVariant="h4"
             >
               {selectedFarmData && (
