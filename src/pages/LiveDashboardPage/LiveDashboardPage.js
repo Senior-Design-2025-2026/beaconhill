@@ -25,6 +25,7 @@ import { useMeasurements } from '../../context/MeasurementsContext';
 import './LiveDashboardPage.css';
 
 const TEST_DATE_MS = null;
+// const TEST_DATE_MS = 1771164000001;
 
 /**
  * Metric configuration: maps each measurement key to display props and
@@ -174,6 +175,8 @@ function LiveDashboardPage() {
     return farms.find((f) => f.farmId === selectedFarm) || null;
   }, [farms, selectedFarm]);
 
+  const selectedFarmName = selectedFarmData ? selectedFarmData.farmName : '';
+
   const nodeIds = useMemo(() => farmNodes.map((n) => n.nodeId), [farmNodes]);
 
   /** All measurements for nodes in the selected farm. */
@@ -276,7 +279,7 @@ function LiveDashboardPage() {
       <div className="live-dashboard-header-row">
         <div className="live-dashboard-header">
           <HeaderComponent
-              title={selectedFarmData.farmName ?? ''}
+              title={selectedFarmName || 'Select a farm'}
               titleVariant="h4"
               titleSx={{ color: '#EEBE02' }}
             >
@@ -372,7 +375,7 @@ function LiveDashboardPage() {
           <div className="snapshot-left">
             <div className="snapshot-panel-box">
               <div className="snapshot-map-fill">
-                <MapComponent nodes={mapNodes} height="100%" />
+                <MapComponent nodes={mapNodes} height={400} />
               </div>
             </div>
           </div>
