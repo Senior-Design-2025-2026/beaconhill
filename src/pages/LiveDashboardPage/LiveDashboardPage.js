@@ -15,13 +15,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Checkbox,
-  ListItemText,
 } from '@mui/material';
-import SettingsIcon from '@mui/icons-material/Settings';
-import MapIcon from '@mui/icons-material/Map';
-import ScienceIcon from '@mui/icons-material/Science';
-import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import { useNavigate } from 'react-router-dom';
 import Plot from 'react-plotly.js';
 import HeaderComponent from '../../components/HeaderComponent/HeaderComponent';
@@ -30,16 +24,18 @@ import LinearGaugeComponent from '../../components/LinearGaugeComponent/LinearGa
 import { useMeasurements } from '../../context/MeasurementsContext';
 import './LiveDashboardPage.css';
 
+const TEST_DATE_MS = null;
+
 /**
  * Metric configuration: maps each measurement key to display props and
  * fixed low/mid/high ranges for LinearGaugeComponent.
  */
 const METRIC_CONFIG = [
-  { key: 'temperature', label: 'Temperature', unit: '°F', low: 0, mid: 50, high: 100 },
-  { key: 'moisture',    label: 'Moisture',    unit: '%',  low: 0, mid: 50, high: 100 },
-  { key: 'nitrogen',    label: 'Nitrogen',    unit: ' ppm', low: 0, mid: 25, high: 50 },
-  { key: 'phosphorus',  label: 'Phosphorus',  unit: ' ppm', low: 0, mid: 15, high: 30 },
-  { key: 'potassium',   label: 'Potassium',   unit: ' ppm', low: 0, mid: 100, high: 200 },
+  { key: 'temperature', label: 'Temperature', unit: '°F', low: 0, lowThreshold: 30, highThreshold: 70, high: 100 },
+  { key: 'moisture',    label: 'Moisture',    unit: '%',  low: 0, lowThreshold: 30, highThreshold: 70, high: 100 },
+  { key: 'nitrogen',    label: 'Nitrogen',    unit: 'ppm', low: 0, lowThreshold: 25, highThreshold: 50, high: 100 },
+  { key: 'phosphorus',  label: 'Phosphorus',  unit: 'ppm', low: 0, lowThreshold: 15, highThreshold: 30, high: 100 },
+  { key: 'potassium',   label: 'Potassium',   unit: 'ppm', low: 0, lowThreshold: 100, highThreshold: 175, high: 200 },
 ];
 
 /** Colors assigned to nodes in multi-node line charts. */
@@ -90,14 +86,23 @@ function buildHourlyTimeline(minMs, maxMs) {
   return timeline;
 }
 
-/** Format a UTC epoch-ms value to a short label like "02/15 08:00". */
-function formatTimestampLabel(ms) {
-  const d = new Date(ms);
-  const month = String(d.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(d.getUTCDate()).padStart(2, '0');
-  const hours = String(d.getUTCHours()).padStart(2, '0');
-  const mins = String(d.getUTCMinutes()).padStart(2, '0');
-  return `${month}/${day} ${hours}:${mins}`;
+/**
+ * Build an array of evenly spaced UTC epoch-ms values from minMs to maxMs (inclusive), with stepHour hours between each value.
+ * Each value is snapped to the top of the hour in UTC.
+ */
+function buildTimeline(minMs, maxMs, stepHour) {
+  const start = new Date(minMs);
+  start.setUTCMinutes(0, 0, 0);
+  const end = new Date(maxMs);
+  end.setUTCMinutes(0, 0, 0);
+
+  const timeline = [];
+  const cursor = new Date(start);
+  while (cursor.getTime() <= end.getTime()) {
+    timeline.push(cursor.getTime());
+    cursor.setUTCHours(cursor.getUTCHours() + stepHour);
+  }
+  return timeline;
 }
 
 /** Format timestamp in Chicago time for display (e.g. "2/15 6:00 PM CST"). */
@@ -115,11 +120,24 @@ function formatChicagoTime(ms) {
   });
 }
 
-/** Descriptive label for a snapshot: index (1-based) + Chicago time. */
-function formatSnapshotLabel(index, ms) {
-  if (ms == null) return `Snapshot ${index + 1}`;
-  const chicago = formatChicagoTime(ms);
-  return `Snapshot ${index + 1} • ${chicago}`;
+/** Format timestamp in Chicago time for display (e.g. "2/15\n6:00 PM CST"). */
+function formatChicagoTimeLineSplit(ms) {
+  if (ms == null) return '';
+  const d = new Date(ms);
+  const tz = { timeZone: 'America/Chicago' };
+  const dateStr = d.toLocaleString('en-US', {
+    ...tz,
+    month: 'numeric',
+    day: 'numeric',
+  });
+  const timeStr = d.toLocaleString('en-US', {
+    ...tz,
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZoneName: 'short',
+  });
+  return `${dateStr}\n${timeStr}`;
 }
 
 /**
@@ -135,7 +153,7 @@ function LiveDashboardPage() {
   const [selectedTimeframe, setSelectedTimeframe] = useState('24h');
   const [activeTab, setActiveTab] = useState(0);
   const [sliderIndex, setSliderIndex] = useState(null);
-  const [selectedNodeIds, setSelectedNodeIds] = useState([]);
+  const [selectedMetric, setSelectedMetric] = useState(METRIC_CONFIG[0]);
 
   /** Keep selectedFarm in sync when farms loads or when current selection is no longer in the list. */
   useEffect(() => {
@@ -156,20 +174,7 @@ function LiveDashboardPage() {
     return farms.find((f) => f.farmId === selectedFarm) || null;
   }, [farms, selectedFarm]);
 
-  const selectedFarmName = selectedFarmData ? selectedFarmData.farmName : '';
-
-  /** Reset selected nodes when the farm changes. */
-  useEffect(() => {
-    setSelectedNodeIds(farmNodes.map((n) => n.nodeId));
-  }, [farmNodes]);
-
   const nodeIds = useMemo(() => farmNodes.map((n) => n.nodeId), [farmNodes]);
-
-  /** Nodes that are currently selected via the filter. */
-  const filteredNodes = useMemo(
-    () => farmNodes.filter((n) => selectedNodeIds.includes(n.nodeId)),
-    [farmNodes, selectedNodeIds]
-  );
 
   /** All measurements for nodes in the selected farm. */
   const farmMeasurements = useMemo(
@@ -186,15 +191,9 @@ function LiveDashboardPage() {
   /** Measurements filtered by the selected timeframe window. */
   const timeFilteredMeasurements = useMemo(() => {
     const windowMs = getTimeWindowMs(selectedTimeframe);
-    const cutoff = maxTimestampMs - windowMs;
+    const cutoff = (TEST_DATE_MS ?? Date.now()) - windowMs;
     return farmMeasurements.filter((m) => toTimestampMs(m.timestamp) >= cutoff);
-  }, [farmMeasurements, selectedTimeframe, maxTimestampMs]);
-
-  /** Number of nodes with at least one measurement in the current timeframe. */
-  const activeNodeCount = useMemo(() => {
-    const nodeIdsWithData = new Set(timeFilteredMeasurements.map((m) => m.nodeId));
-    return nodeIdsWithData.size;
-  }, [timeFilteredMeasurements]);
+  }, [farmMeasurements, selectedTimeframe]);
 
   /* --- Slider timeline (hourly, min to max of time-filtered data, in epoch-ms) --- */
 
@@ -207,26 +206,20 @@ function LiveDashboardPage() {
     return buildHourlyTimeline(minTs, maxTs);
   }, [timeFilteredMeasurements]);
 
-  /** Set of epoch-ms values (snapped to hour) that have at least one measurement. */
-  const timestampsWithData = useMemo(() => {
-    const set = new Set();
-    timeFilteredMeasurements.forEach((m) => {
-      const d = new Date(toTimestampMs(m.timestamp));
-      d.setUTCMinutes(0, 0, 0);
-      set.add(d.getTime());
-    });
-    return set;
-  }, [timeFilteredMeasurements]);
-
   const effectiveSliderIndex = sliderIndex != null ? sliderIndex : Math.max(0, timeline.length - 1);
   const selectedTimestampMs = timeline[effectiveSliderIndex] || null;
 
   /** Slider marks: index (1-based) + Chicago time. */
   const sliderMarks = useMemo(() => {
-    return timeline.map((ms, i) => ({
-      value: i,
-      label: String(i + 1),
-    }));
+    if (timeline.length === 0) return [];
+    return timeline.map((ms, i) => {
+      const isFirst = i === 0;
+      const isLast = i === timeline.length - 1;
+      const label = isFirst || isLast
+        ? formatChicagoTimeLineSplit(ms)
+        : '';
+      return { value: i, label };
+    });
   }, [timeline]);
 
   /* --- Helpers for Snapshot View --- */
@@ -245,25 +238,36 @@ function LiveDashboardPage() {
     return farmNodes.map((node) => ({
       ...node,
       online: getMeasurementAt(node.nodeId, selectedTimestampMs) != null,
-      selected: selectedNodeIds.includes(node.nodeId),
     }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [farmNodes, selectedNodeIds, selectedTimestampMs, timeFilteredMeasurements]);
+  }, [farmNodes, nodeIds, selectedTimestampMs, timeFilteredMeasurements]);
 
-  /** Measurements for selected nodes only, filtered by timeframe. */
-  const selectedTimeFilteredMeasurements = useMemo(
-    () => timeFilteredMeasurements.filter((m) => selectedNodeIds.includes(m.nodeId)),
-    [timeFilteredMeasurements, selectedNodeIds]
-  );
-
-  /** Measurements for selected nodes, cumulatively filtered up to the slider timestamp. */
-  const sliderFilteredMeasurements = useMemo(() => {
-    if (selectedTimestampMs == null) return selectedTimeFilteredMeasurements;
-    const cutoffMs = selectedTimestampMs + 60 * 60 * 1000;
-    return selectedTimeFilteredMeasurements.filter(
-      (m) => toTimestampMs(m.timestamp) < cutoffMs
-    );
-  }, [selectedTimeFilteredMeasurements, selectedTimestampMs]);
+  const traces = useMemo(() => {
+    return farmNodes.map((node, idx) => {
+      const nodeMeasurements = timeFilteredMeasurements
+        .filter((m) => m.nodeId === node.nodeId)
+        .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+  
+      return {
+        x: nodeMeasurements.map((m) => m.timestamp),
+        y: nodeMeasurements.map((m) => m[selectedMetric.key]),
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: node.nodeName,
+        line: { color: NODE_COLORS[idx % NODE_COLORS.length], width: 2 },
+        marker: { size: 4 },
+      };
+    });
+  }, [farmNodes, timeFilteredMeasurements, selectedMetric]);
+  
+  const layout = useMemo(() => ({
+    title: { text: `${selectedMetric.label} (${selectedMetric.unit})`, font: { size: 13, color: '#2D2D2D' } },
+    xaxis: { type: 'date', tickformat: '%H:%M', title: { text: "Timestamp" } },
+    yaxis: { title: { text: selectedMetric.unit } },
+    legend: { orientation: 'h', y: -0.3 },
+    margin: { l: 40, r: 24, t: 36, b: 16 },
+    // autosize: true,
+    height: 300,
+  }), [selectedMetric]);
 
   /* --- Render --- */
   return (
@@ -271,47 +275,46 @@ function LiveDashboardPage() {
       {/* Row 1: Header + Tab/Filter box */}
       <div className="live-dashboard-header-row">
         <div className="live-dashboard-header">
-          <div className="live-dashboard-header-container">
-            <HeaderComponent
-              title={selectedFarmName}
-              titleVariant="h4"
-            >
-              {selectedFarmData && (
-                <>
-                  <div className="live-dashboard-header-meta">
-                    <div>
-                      <strong>Address: </strong> {selectedFarmData.farmAddress}, {selectedFarmData.farmCity}, {selectedFarmData.farmState}
-                    </div>
-                    <div>
-                      <strong>Total Nodes: </strong> {selectedFarmData.numberOfNodes ?? farmNodes.length}
-                      <span className="live-dashboard-header-sep" aria-hidden="true"> | </span>
-                      <strong>Active Nodes: </strong> {selectedFarmData.numberOfNodes ?? farmNodes.length}  {/* TODO: add active nodes count */}
-                    </div>
-                    <div>
-                      <strong>Crop: </strong> {selectedFarmData.farmCropType}
-                    </div>
-                    <div>
-                      <strong>Last Updated: </strong> {formatChicagoTime(maxTimestampMs)}
-                    </div>
-                  </div>
-                </>
-              )}
-            </HeaderComponent>
-          </div>
+          <HeaderComponent
+            title={selectedFarmData.farmName}
+            titleVariant="h4"
+            titleSx={{ color: '#EEBE02' }}
+          >
+            {selectedFarmData && (
+              <div className="live-dashboard-header-meta">
+                <div>
+                  <strong>Address: </strong> {selectedFarmData.farmAddress}, {selectedFarmData.farmCity}, {selectedFarmData.farmState}
+                </div>
+                <div>
+                  <strong>Nodes: </strong> {farmNodes.length}
+                </div>
+                <div>
+                  <strong>Crop: </strong> {selectedFarmData.farmCropType}
+                </div>
+                <div>
+                  <strong>Last Updated: </strong> {maxTimestampMs ? formatChicagoTime(maxTimestampMs) : 'No measurements'}
+                </div>
+              </div>
+            )}
+          </HeaderComponent>
         </div>
         <div className="live-dashboard-tab-filter-box">
-          <div className="live-dashboard-tabs">
-            <Tabs
-              value={activeTab}
-              onChange={(e, v) => setActiveTab(v)}
-              variant="fullWidth"
-              textColor="inherit"
-              TabIndicatorProps={{ style: { backgroundColor: '#EEBE02' } }}
-            >
-              <Tab label="Snapshot View" sx={{ fontWeight: activeTab === 0 ? 700 : 400 }} />
-              <Tab label="Timeframe Averages" sx={{ fontWeight: activeTab === 1 ? 700 : 400 }} />
-            </Tabs>
-          </div>
+          <Tabs
+            value={activeTab}
+            onChange={(e, v) => setActiveTab(v)}
+            variant="fullWidth"
+            textColor="inherit"
+            sx={{
+              borderBottom: '1px solid #e0e0e0',
+              '& .MuiTabs-indicator': {
+                backgroundColor: '#EEBE02',
+              },
+            }}
+            
+          >
+            <Tab label="Snapshot View" sx={{ fontWeight: activeTab === 0 ? 700 : 400 }} />
+            <Tab label="Timeframe Averages" sx={{ fontWeight: activeTab === 1 ? 700 : 400 }} />
+          </Tabs>
           <div className="live-dashboard-filters">
             <FormControl size="small" sx={{ minWidth: 180 }}>
               <InputLabel>Farm</InputLabel>
@@ -323,29 +326,6 @@ function LiveDashboardPage() {
                 {farms.map((farm) => (
                   <MenuItem key={farm.farmId} value={farm.farmId}>
                     {farm.farmName}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <FormControl size="small" sx={{ minWidth: 200 }}>
-              <InputLabel>Node(s)</InputLabel>
-              <Select
-                label="Node(s)"
-                multiple
-                value={selectedNodeIds}
-                onChange={(e) => setSelectedNodeIds(e.target.value)}
-                renderValue={(sel) =>
-                  farmNodes
-                    .filter((n) => sel.includes(n.nodeId))
-                    .map((n) => n.nodeName)
-                    .join(', ')
-                }
-              >
-                {farmNodes.map((node) => (
-                  <MenuItem key={node.nodeId} value={node.nodeId}>
-                    <Checkbox checked={selectedNodeIds.includes(node.nodeId)} />
-                    <ListItemText primary={node.nodeName} />
                   </MenuItem>
                 ))}
               </Select>
@@ -371,6 +351,7 @@ function LiveDashboardPage() {
             <div className="live-dashboard-slider">
               <Slider
                 value={effectiveSliderIndex}
+                track={false}
                 min={0}
                 max={timeline.length - 1}
                 step={1}
@@ -378,29 +359,6 @@ function LiveDashboardPage() {
                 valueLabelDisplay="auto"
                 valueLabelFormat={(v) => formatChicagoTime(timeline[v])}
                 onChange={(e, v) => setSliderIndex(v)}
-                sx={{
-                  color: '#9e9e9e',
-                  '& .MuiSlider-rail': {
-                    backgroundColor: '#bdbdbd',
-                  },
-                  '& .MuiSlider-track': {
-                    backgroundColor: '#9e9e9e',
-                  },
-                  '& .MuiSlider-thumb': {
-                    backgroundColor: '#EEBE02',
-                    '&:hover, &.Mui-focusVisible': {
-                      backgroundColor: '#d4a900',
-                    },
-                  },
-                  '& .MuiSlider-valueLabel': {
-                    backgroundColor: '#EEBE02',
-                    color: '#2D2D2D',
-                  },
-                  '& .MuiSlider-markLabel': {
-                    fontSize: '0.55rem',
-                    color: '#616161',
-                  },
-                }}
               />
             </div>
           )}
@@ -409,85 +367,83 @@ function LiveDashboardPage() {
 
       {/* ===== Snapshot View tab ===== */}
       {activeTab === 0 && (
-        <div className="snapshot-layout">
-          {/* Map (25%) + Measurements (75%) */}
-          <div className="snapshot-top-row">
-            {/* Map box */}
-            <div className="snapshot-left">
-              <div className="snapshot-panel-box">
-                <div className="snapshot-map-fill">
-                  <MapComponent nodes={mapNodes} height="100%" />
-                </div>
+        <div className="snapshot-row">
+          {/* Map box */}
+          <div className="snapshot-left">
+            <div className="snapshot-panel-box">
+              <div className="snapshot-map-fill">
+                <MapComponent nodes={mapNodes} height="100%" />
               </div>
             </div>
+          </div>
 
-            {/* Measurements box */}
-            <div className="snapshot-right">
-              <div className="snapshot-panel-box">
-                <HeaderComponent
-                  title={timeline.length > 0 ? `Snapshot ${effectiveSliderIndex + 1}: ${formatChicagoTime(selectedTimestampMs)}` : 'Measurements'}
-                  titleVariant="h6"
-                />
-                <div className="snapshot-nodes-scroll">
-                  {filteredNodes.map((node) => {
-                    const measurement = getMeasurementAt(node.nodeId, selectedTimestampMs);
-                    const online = measurement != null;
-                    return (
-                      <div key={node.nodeId} className="node-section">
-                        <div className="node-section-header">
-                          <div className="node-section-header-left">
-                            <Typography variant="h6" sx={{ color: '#2D2D2D' }}>
-                              {node.nodeName}
-                            </Typography>
-                            <span
-                              className={`node-status-badge ${online ? 'node-status-badge--on' : 'node-status-badge--off'}`}
-                            >
-                              {online ? 'Online' : 'Offline'}
-                            </span>
-                          </div>
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            onClick={() => navigate('/configuration')}
-                            sx={{
-                              borderColor: '#EEBE02',
-                              color: '#2D2D2D',
-                              '&:hover': { borderColor: '#d4a900', backgroundColor: 'rgba(238,190,2,0.08)' },
-                            }}
+          {/* Measurements box */}
+          <div className="snapshot-right">
+            <div className="snapshot-panel-box">
+              <HeaderComponent
+                title={timeline.length > 0 ? `Snapshot: ${formatChicagoTime(selectedTimestampMs)}` : 'Measurements'}
+                titleVariant="h6"
+              />
+              <div className="snapshot-nodes-scroll">
+                {farmNodes.map((node) => {
+                  const measurement = getMeasurementAt(node.nodeId, selectedTimestampMs);
+                  const online = measurement != null;
+                  return (
+                    <div key={node.nodeId} className="node-section">
+                      <div className="node-section-header">
+                        <div className="node-section-header-left">
+                          <Typography variant="h6" sx={{ color: '#2D2D2D' }}>
+                            {node.nodeName}
+                          </Typography>
+                          <span
+                            className={`node-status-badge ${online ? 'node-status-badge--on' : 'node-status-badge--off'}`}
                           >
-                            Configure
-                          </Button>
+                            {online ? 'Online' : 'Offline'}
+                          </span>
                         </div>
-
-                        <div className="node-gauges-row">
-                          {METRIC_CONFIG.map((metric) => (
-                            <div key={metric.key} className="node-gauge-item">
-                              {online ? (
-                                <LinearGaugeComponent
-                                  label={metric.label}
-                                  value={measurement[metric.key]}
-                                  low={metric.low}
-                                  mid={metric.mid}
-                                  high={metric.high}
-                                  unit={metric.unit}
-                                />
-                              ) : (
-                                <div className="node-gauge-placeholder">
-                                  <Typography variant="subtitle2" sx={{ color: '#2D2D2D', mb: 0.5 }}>
-                                    {metric.label}
-                                  </Typography>
-                                  <Typography variant="body2" sx={{ color: '#9e9e9e', fontStyle: 'italic' }}>
-                                    No Measurement Detected
-                                  </Typography>
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={() => navigate('/configuration')}
+                          sx={{
+                            borderColor: '#EEBE02',
+                            color: '#2D2D2D',
+                            '&:hover': { borderColor: '#d4a900', backgroundColor: 'rgba(238,190,2,0.08)' },
+                          }}
+                        >
+                          Configure
+                        </Button>
                       </div>
-                    );
-                  })}
-                </div>
+
+                      <div className="node-gauges-row">
+                        {METRIC_CONFIG.map((metric) => (
+                          <div key={metric.key} className="node-gauge-item">
+                            {online ? (
+                              <LinearGaugeComponent
+                                label={metric.label}
+                                value={measurement[metric.key]}
+                                low={metric.low}
+                                lowThreshold={metric.lowThreshold}
+                                highThreshold={metric.highThreshold}
+                                high={metric.high}
+                                unit={metric.unit}
+                              />
+                            ) : (
+                              <div className="node-gauge-placeholder">
+                                <Typography variant="subtitle2" sx={{ color: '#2D2D2D', mb: 0.5 }}>
+                                  {metric.label}
+                                </Typography>
+                                <Typography variant="body2" sx={{ color: '#9e9e9e', fontStyle: 'italic' }}>
+                                  No Measurement Detected
+                                </Typography>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -496,94 +452,82 @@ function LiveDashboardPage() {
 
       {/* ===== Timeframe Averages tab ===== */}
       {activeTab === 1 && (
-        <div className="live-dashboard-tab-panel">
-          <div className="averages-bento-grid">
-            {/* Top-left: Farm Averages table */}
-            <div className="bento-box">
-              <Typography variant="h6" sx={{ color: '#2D2D2D', mb: 1 }}>
-                Farm Averages
-              </Typography>
-              <TableContainer>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ fontWeight: 700 }}>Measurement</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }} align="right">Farm Avg</TableCell>
-                      {filteredNodes.map((n) => (
-                        <TableCell key={n.nodeId} sx={{ fontWeight: 700 }} align="right">
-                          {n.nodeName}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {METRIC_CONFIG.map((metric) => {
-                      const allValues = sliderFilteredMeasurements.map((m) => m[metric.key]);
-                      const farmAvg = allValues.length > 0
-                        ? (allValues.reduce((s, v) => s + v, 0) / allValues.length).toFixed(1)
-                        : '—';
-                      return (
-                        <TableRow key={metric.key}>
-                          <TableCell>{metric.label} ({metric.unit.trim()})</TableCell>
-                          <TableCell align="right">{farmAvg}</TableCell>
-                          {filteredNodes.map((node) => {
-                            const nodeVals = sliderFilteredMeasurements
-                              .filter((m) => m.nodeId === node.nodeId)
-                              .map((m) => m[metric.key]);
-                            const avg = nodeVals.length > 0
-                              ? (nodeVals.reduce((s, v) => s + v, 0) / nodeVals.length).toFixed(1)
-                              : '—';
-                            return (
-                              <TableCell key={node.nodeId} align="right">{avg}</TableCell>
-                            );
-                          })}
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+        <div className="averages-row">
+          {/* Top-left: Farm Averages table */}
+          <div className="table-box">
+            <Typography variant="h6" sx={{ color: '#2D2D2D', mb: 1 }}>
+              Farm Averages
+            </Typography>
+            <TableContainer>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 700 }}>Measurement</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }} align="right">Farm Avg</TableCell>
+                    {farmNodes.map((n) => (
+                      <TableCell key={n.nodeId} sx={{ fontWeight: 700 }} align="right">
+                        {n.nodeName}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {METRIC_CONFIG.map((metric) => {
+                    const allValues = timeFilteredMeasurements.map((m) => m[metric.key]);
+                    const farmAvg = allValues.length > 0
+                      ? (allValues.reduce((s, v) => s + v, 0) / allValues.length).toFixed(1)
+                      : '—';
+                    return (
+                      <TableRow key={metric.key}>
+                        <TableCell>{metric.label} ({metric.unit})</TableCell>
+                        <TableCell align="right">{farmAvg}</TableCell>
+                        {farmNodes.map((node) => {
+                          const nodeVals = timeFilteredMeasurements
+                            .filter((m) => m.nodeId === node.nodeId)
+                            .map((m) => m[metric.key]);
+                          const avg = nodeVals.length > 0
+                            ? (nodeVals.reduce((s, v) => s + v, 0) / nodeVals.length).toFixed(1)
+                            : '—';
+                          return (
+                            <TableCell key={node.nodeId} align="right">{avg}</TableCell>
+                          );
+                        })}
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </div>
+
+          {/* Line charts */}
+          <div className="line-chart-box">
+            <div className="metric-filter">
+              <FormControl size="small" sx={{ minWidth: 180 }}>
+                <InputLabel>Measurement</InputLabel>
+                <Select
+                  label="Measurement"
+                  value={selectedMetric}
+                  onChange={(e) => setSelectedMetric(e.target.value)}
+                >
+                  {METRIC_CONFIG.map((metric) => (
+                    <MenuItem key={metric.key} value={metric}>
+                      {metric.label + ' (' + metric.unit + ')'}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </div>
 
-            {/* 5 per-metric line charts — each plots selected nodes */}
-            {METRIC_CONFIG.map((metric) => {
-              const traces = filteredNodes.map((node, idx) => {
-                const nodeMeasurements = sliderFilteredMeasurements
-                  .filter((m) => m.nodeId === node.nodeId)
-                  .sort((a, b) => toTimestampMs(a.timestamp) - toTimestampMs(b.timestamp));
-                return {
-                  x: nodeMeasurements.map((m) => toTimestampMs(m.timestamp)),
-                  y: nodeMeasurements.map((m) => m[metric.key]),
-                  type: 'scatter',
-                  mode: 'lines+markers',
-                  name: node.nodeName,
-                  line: { color: NODE_COLORS[idx % NODE_COLORS.length], width: 2 },
-                  marker: { size: 4 },
-                };
-              });
-
-              const layout = {
-                title: { text: `${metric.label} (${metric.unit.trim()})`, font: { size: 13, color: '#2D2D2D' } },
-                xaxis: { type: 'date', tickformat: '%H:%M' },
-                yaxis: { title: metric.unit.trim() },
-                legend: { orientation: 'h', y: -0.3 },
-                margin: { l: 48, r: 16, t: 36, b: 72 },
-                autosize: true,
-                height: 300,
-              };
-
-              return (
-                <div key={metric.key} className="bento-box">
-                  <Plot
-                    data={traces}
-                    layout={layout}
-                    config={{ responsive: true, displayModeBar: false }}
-                    useResizeHandler
-                    style={{ width: '100%' }}
-                  />
-                </div>
-              );
-            })}
+            <div className="line-chart">
+              <Plot
+                data={traces}
+                layout={layout}
+                config={{ responsive: true, displayModeBar: false }}
+                useResizeHandler
+                style={{ width: '100%' }}
+              />
+            </div>
           </div>
         </div>
       )}
