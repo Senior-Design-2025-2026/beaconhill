@@ -275,28 +275,33 @@ function LiveDashboardPage() {
       {/* Row 1: Header + Tab/Filter box */}
       <div className="live-dashboard-header-row">
         <div className="live-dashboard-header">
-          <HeaderComponent
-            title={selectedFarmData.farmName}
-            titleVariant="h4"
-            titleSx={{ color: '#EEBE02' }}
-          >
-            {selectedFarmData && (
-              <div className="live-dashboard-header-meta">
-                <div>
-                  <strong>Address: </strong> {selectedFarmData.farmAddress}, {selectedFarmData.farmCity}, {selectedFarmData.farmState}
-                </div>
-                <div>
-                  <strong>Nodes: </strong> {farmNodes.length}
-                </div>
-                <div>
-                  <strong>Crop: </strong> {selectedFarmData.farmCropType}
-                </div>
-                <div>
-                  <strong>Last Updated: </strong> {maxTimestampMs ? formatChicagoTime(maxTimestampMs) : 'No measurements'}
-                </div>
-              </div>
-            )}
-          </HeaderComponent>
+          <div className="live-dashboard-header-container">
+            <HeaderComponent
+              title={selectedFarmName || 'Select a Farm'}
+              titleVariant="h4"
+            >
+              {selectedFarmData && (
+                <>
+                  <div className="live-dashboard-header-meta">
+                    <div>
+                      <strong>Address: </strong> {selectedFarmData.farmAddress}, {selectedFarmData.farmCity}, {selectedFarmData.farmState}
+                    </div>
+                    <div>
+                      <strong>Total Nodes: </strong> {selectedFarmData.numberOfNodes ?? farmNodes.length}
+                      <span className="live-dashboard-header-sep" aria-hidden="true"> | </span>
+                      <strong>Active Nodes: </strong> {selectedFarmData.numberOfNodes ?? farmNodes.length}  {/* TODO: add active nodes count */}
+                    </div>
+                    <div>
+                      <strong>Crop: </strong> {selectedFarmData.farmCropType}
+                    </div>
+                    <div>
+                      <strong>Last Updated: </strong> {formatChicagoTime(maxTimestampMs)}
+                    </div>
+                  </div>
+                </>
+              )}
+            </HeaderComponent>
+          </div>
         </div>
         <div className="live-dashboard-tab-filter-box">
           <Tabs
