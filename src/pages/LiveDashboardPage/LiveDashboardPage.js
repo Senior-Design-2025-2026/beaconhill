@@ -24,7 +24,7 @@ import LinearGaugeComponent from '../../components/LinearGaugeComponent/LinearGa
 import { useMeasurements } from '../../context/MeasurementsContext';
 import './LiveDashboardPage.css';
 
-const TEST_DATE_MS = 1771164000001;
+const TEST_DATE_MS = null;
 
 /**
  * Metric configuration: maps each measurement key to display props and
