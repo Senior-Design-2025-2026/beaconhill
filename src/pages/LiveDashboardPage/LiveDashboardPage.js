@@ -174,6 +174,8 @@ function LiveDashboardPage() {
     return farms.find((f) => f.farmId === selectedFarm) || null;
   }, [farms, selectedFarm]);
 
+  const selectedFarmName = selectedFarmData ? selectedFarmData.farmName : '';
+
   const nodeIds = useMemo(() => farmNodes.map((n) => n.nodeId), [farmNodes]);
 
   /** All measurements for nodes in the selected farm. */
@@ -276,7 +278,7 @@ function LiveDashboardPage() {
       <div className="live-dashboard-header-row">
         <div className="live-dashboard-header">
           <HeaderComponent
-            title={selectedFarmData.farmName}
+            title={selectedFarmName || 'Select a farm'}
             titleVariant="h4"
             titleSx={{ color: '#EEBE02' }}
           >
@@ -372,7 +374,7 @@ function LiveDashboardPage() {
           <div className="snapshot-left">
             <div className="snapshot-panel-box">
               <div className="snapshot-map-fill">
-                <MapComponent nodes={mapNodes} height="100%" />
+                <MapComponent nodes={mapNodes} height={400} />
               </div>
             </div>
           </div>

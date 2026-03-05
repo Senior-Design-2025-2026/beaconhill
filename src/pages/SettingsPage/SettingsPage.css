@@ -1,7 +1,8 @@
 .settings {
+    width: 100%;
     padding: 24px;
-  }
-  
-.user-data {
-    
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
