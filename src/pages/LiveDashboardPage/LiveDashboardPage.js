@@ -24,7 +24,8 @@ import LinearGaugeComponent from '../../components/LinearGaugeComponent/LinearGa
 import { useMeasurements } from '../../context/MeasurementsContext';
 import './LiveDashboardPage.css';
 
-const TEST_DATE_MS = 1771164000001;
+const TEST_DATE_MS = null;
+// const TEST_DATE_MS = 1771164000001;
 
 /**
  * Metric configuration: maps each measurement key to display props and
@@ -278,27 +279,27 @@ function LiveDashboardPage() {
       <div className="live-dashboard-header-row">
         <div className="live-dashboard-header">
           <HeaderComponent
-            title={selectedFarmName || 'Select a farm'}
-            titleVariant="h4"
-            titleSx={{ color: '#EEBE02' }}
-          >
-            {selectedFarmData && (
-              <div className="live-dashboard-header-meta">
-                <div>
-                  <strong>Address: </strong> {selectedFarmData.farmAddress}, {selectedFarmData.farmCity}, {selectedFarmData.farmState}
+              title={selectedFarmName || 'Select a farm'}
+              titleVariant="h4"
+              titleSx={{ color: '#EEBE02' }}
+            >
+              {selectedFarmData && (
+                <div className="live-dashboard-header-meta">
+                  <div>
+                    <strong>Address: </strong> {selectedFarmData.farmAddress}, {selectedFarmData.farmCity}, {selectedFarmData.farmState}
+                  </div>
+                  <div>
+                    <strong>Nodes: </strong> {farmNodes.length}
+                  </div>
+                  <div>
+                    <strong>Crop: </strong> {selectedFarmData.farmCropType}
+                  </div>
+                  <div>
+                    <strong>Last Updated: </strong> {maxTimestampMs ? formatChicagoTime(maxTimestampMs) : 'No measurements'}
+                  </div>
                 </div>
-                <div>
-                  <strong>Nodes: </strong> {farmNodes.length}
-                </div>
-                <div>
-                  <strong>Crop: </strong> {selectedFarmData.farmCropType}
-                </div>
-                <div>
-                  <strong>Last Updated: </strong> {maxTimestampMs ? formatChicagoTime(maxTimestampMs) : 'No measurements'}
-                </div>
-              </div>
-            )}
-          </HeaderComponent>
+              )}
+            </HeaderComponent>
         </div>
         <div className="live-dashboard-tab-filter-box">
           <Tabs
