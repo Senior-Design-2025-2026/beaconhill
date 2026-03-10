@@ -1,8 +1,10 @@
 .settings {
-    width: 100%;
+    width: 95%;
+    height: 95%;  
+    margin: 16px;
     padding: 24px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    border-radius: 8px;
+    box-shadow: var(--shadow-light);
 }
