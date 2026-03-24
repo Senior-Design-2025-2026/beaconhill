@@ -1,9 +1,13 @@
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from '../App';
 
 jest.mock('../hooks/useFarmWeather', () => {
   return function useFarmWeather() {
+    const hourly = Array.from({ length: 24 }, (_, idx) => ({
+      x: `${String(idx).padStart(2, '0')}:00`,
+      y: idx < 12 ? 72.5 : 72.5,
+    }));
     return {
       ambientValues: {
         temperatureF: 72.5,
@@ -11,6 +15,13 @@ jest.mock('../hooks/useFarmWeather', () => {
         rainfallIn: 0.1,
         windMph: 8.3,
         uvIndex: 5,
+      },
+      ambientTrend: {
+        temperatureF: hourly,
+        humidity: hourly.map((p) => ({ ...p, y: 55 })),
+        rainfallIn: hourly.map((p) => ({ ...p, y: 0.1 })),
+        windMph: hourly.map((p) => ({ ...p, y: 8.3 })),
+        uvIndex: hourly.map((p) => ({ ...p, y: 5 })),
       },
       forecast: {
         days: [
@@ -23,6 +34,29 @@ jest.mock('../hooks/useFarmWeather', () => {
     };
   };
 });
+
+const MOCK_WEATHER_RESPONSE = {
+  current: {
+    temperature_2m: 18.5,
+    relative_humidity_2m: 65,
+    precipitation: 0.2,
+    evapotranspiration: 0.8,
+    vapour_pressure_deficit: 1.2,
+    soil_temperature_0cm: 16.3,
+    soil_moisture_0_to_1cm: 0.32,
+  },
+};
+
+const MOCK_AIR_QUALITY_RESPONSE = {
+  current: {
+    ammonia: 5.2,
+    nitrogen_dioxide: 12.1,
+  },
+};
+
+const MOCK_ELEVATION_RESPONSE = {
+  elevation: [220],
+};
 
 async function navigateToAnalytics() {
   render(<App />);
@@ -39,10 +73,9 @@ describe('AnalyticsPage', () => {
 
   test('shows Farm and Ambient section titles', async () => {
     await navigateToAnalytics();
-    expect(screen.getByText(/Farm — Values/)).toBeInTheDocument();
-    expect(screen.getByText(/Ambient — Values/)).toBeInTheDocument();
-    expect(screen.getByText(/Farm — Projections/)).toBeInTheDocument();
-    expect(screen.getByText(/Ambient — Projections/)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /^Farm$/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Ambient/i })).toBeInTheDocument();
+    expect(screen.getByText('via Open Meteo')).toBeInTheDocument();
   });
 
   test('farm dropdown defaults to first farm and shows options', async () => {
@@ -50,10 +83,11 @@ describe('AnalyticsPage', () => {
     expect(screen.getByText('Hubbard Park')).toBeInTheDocument();
   });
 
-  test('displays dummy farm metric values', async () => {
+  test('displays farm metric cards', async () => {
     await navigateToAnalytics();
-    expect(screen.getByText('72.4')).toBeInTheDocument();
-    expect(screen.getByText('48.1')).toBeInTheDocument();
+    expect(screen.getAllByText('Temperature').length).toBeGreaterThan(0);
+    expect(screen.getByText('Moisture')).toBeInTheDocument();
+    expect(screen.getByText('Nitrogen')).toBeInTheDocument();
   });
 
   test('displays mocked ambient metric values', async () => {
@@ -62,9 +96,39 @@ describe('AnalyticsPage', () => {
     expect(screen.getByText('55')).toBeInTheDocument();
   });
 
-  test('Current / Week toggle is present', async () => {
+  test('Day / Week / Forecast toggle is present', async () => {
     await navigateToAnalytics();
-    expect(screen.getByRole('button', { name: /Current/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Day/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Week/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Forecast/i })).toBeInTheDocument();
+  });
+
+  test('Forecast tab shows comparison table after data loads', async () => {
+    global.fetch = jest.fn((url) => {
+      if (url.includes('air-quality')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve(MOCK_AIR_QUALITY_RESPONSE) });
+      }
+      if (url.includes('elevation')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve(MOCK_ELEVATION_RESPONSE) });
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve(MOCK_WEATHER_RESPONSE) });
+    });
+
+    await navigateToAnalytics();
+
+    await act(async () => {
+      await userEvent.click(screen.getByRole('button', { name: /Forecast/i }));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Soil & Weather Comparison')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('Air Quality')).toBeInTheDocument();
+    expect(screen.getByText('Site Info')).toBeInTheDocument();
+    expect(screen.getByText('Ground Temperature')).toBeInTheDocument();
+    expect(screen.getByText(/220 m/)).toBeInTheDocument();
+
+    global.fetch.mockRestore();
   });
 });
