@@ -9,7 +9,8 @@ import AnalyticsViewShell from '../../components/AnalyticsViewShell/AnalyticsVie
 import AnalyticsTopControlsLayout from '../../components/AnalyticsTopControlsLayout/AnalyticsTopControlsLayout';
 import AnalyticsFarmSelect from '../../components/AnalyticsFarmSelect/AnalyticsFarmSelect';
 import AnalyticsModeTabs from '../../components/AnalyticsModeTabs/AnalyticsModeTabs';
-import AnalyticsDaySlider from '../../components/AnalyticsDaySlider/AnalyticsDaySlider';
+import AnalyticsForecastCalendar from '../../components/AnalyticsForecastCalendar/AnalyticsForecastCalendar';
+import FarmMetadata from '../../components/FarmMetadata/FarmMetadata';
 import AnalyticsSection from '../../components/AnalyticsSection/AnalyticsSection';
 import AnalyticsBentoGrid from '../../components/AnalyticsBentoGrid/AnalyticsBentoGrid';
 import AnalyticsMetricTrendCard from '../../components/AnalyticsMetricTrendCard/AnalyticsMetricTrendCard';
@@ -61,6 +62,7 @@ function buildFarmDayTrend(measurements, farmId, dateISO) {
  *  farms: Array,
  *  nodes: Array,
  *  cropType?: string,
+ *  selectedFarm: object|null,
  *  selectedFarmId: string,
  *  onSelectedFarmIdChange: (value: string) => void,
  *  mode: 'day'|'week'|'forecast',
@@ -73,6 +75,7 @@ export default function AnalyticsDay({
   lat,
   lon,
   cropType,
+  selectedFarm,
   selectedFarmId,
   onSelectedFarmIdChange,
   mode,
@@ -88,13 +91,13 @@ export default function AnalyticsDay({
     return Array.from(dates).sort((a, b) => a.localeCompare(b));
   }, [measurements, selectedFarmId]);
 
-  const [dayIndex, setDayIndex] = React.useState(0);
+  const [selectedDate, setSelectedDate] = React.useState(null);
   React.useEffect(() => {
-    if (availableDates.length) setDayIndex(availableDates.length - 1);
-    else setDayIndex(0);
+    if (availableDates.length) setSelectedDate(availableDates[availableDates.length - 1]);
+    else setSelectedDate(null);
   }, [availableDates]);
 
-  const activeDate = availableDates[dayIndex] || null;
+  const activeDate = selectedDate;
   const { ambientTrend, loading, error } = useFarmWeather(lat, lon, 'day', activeDate);
   const farmTrend = useMemo(
     () => buildFarmDayTrend(measurements || [], selectedFarmId, activeDate),
@@ -106,19 +109,22 @@ export default function AnalyticsDay({
       <AnalyticsTopControlsLayout
         left={
           <>
-            <AnalyticsFarmSelect
-              farms={farms}
-              value={selectedFarmId}
-              onChange={onSelectedFarmIdChange}
-            />
-            <AnalyticsModeTabs value={mode} onChange={onModeChange} />
+            <div className="analytics-day-toprow-controls">
+              <AnalyticsFarmSelect
+                farms={farms}
+                value={selectedFarmId}
+                onChange={onSelectedFarmIdChange}
+              />
+              <AnalyticsModeTabs value={mode} onChange={onModeChange} />
+            </div>
+            <FarmMetadata farm={selectedFarm} />
           </>
         }
         right={
-          <AnalyticsDaySlider
-            items={availableDates}
-            index={dayIndex}
-            onIndexChange={setDayIndex}
+          <AnalyticsForecastCalendar
+            selectedDate={selectedDate}
+            onDateSelect={setSelectedDate}
+            availableDates={availableDates}
           />
         }
       />

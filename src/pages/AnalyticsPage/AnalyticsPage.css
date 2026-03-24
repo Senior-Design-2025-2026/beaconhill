@@ -32,15 +32,23 @@
   box-sizing: border-box;
 }
 
-/* First 50%: farm + tabs, each equal width (1/4 of viewport each). */
+/* First 50%: filters/tabs + farm metadata stacked vertically. */
 .analytics-day-toprow-left {
   flex: 1 1 50%;
   min-width: 0;
   display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+/* Horizontal row for farm select + mode tabs. */
+.analytics-day-toprow-controls {
+  display: flex;
   flex-direction: row;
   align-items: center;
   gap: 12px;
-  box-sizing: border-box;
+  width: 100%;
 }
 
 .analytics-day-toprow-farm,
@@ -436,6 +444,9 @@
 
   .analytics-day-toprow-left {
     flex: 1 1 auto;
+  }
+
+  .analytics-day-toprow-controls {
     flex-direction: column;
     align-items: stretch;
   }

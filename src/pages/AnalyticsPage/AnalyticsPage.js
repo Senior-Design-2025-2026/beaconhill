@@ -3,7 +3,7 @@ import HeaderComponent from '../../components/HeaderComponent/HeaderComponent';
 import { useMeasurements } from '../../context/MeasurementsContext';
 import AnalyticsDay from './AnalyticsDay';
 import AnalyticsWeek from './AnalyticsWeek';
-import AnalyticsProjection from './AnalyticsProjection';
+import AnalyticsForecast from './AnalyticsForecast';
 import './AnalyticsPage.css';
 
 function AnalyticsPage() {
@@ -38,6 +38,7 @@ function AnalyticsPage() {
           lat={lat}
           lon={lon}
           cropType={selectedFarm?.farmCropType}
+          selectedFarm={selectedFarm}
           selectedFarmId={selectedFarmId}
           onSelectedFarmIdChange={setSelectedFarmId}
           mode={mode}
@@ -46,9 +47,29 @@ function AnalyticsPage() {
         />
       )}
       {mode === 'week' && (
-        <AnalyticsWeek lat={lat} lon={lon} cropType={selectedFarm?.farmCropType} />
+        <AnalyticsWeek
+          farms={farms}
+          lat={lat}
+          lon={lon}
+          cropType={selectedFarm?.farmCropType}
+          selectedFarm={selectedFarm}
+          selectedFarmId={selectedFarmId}
+          onSelectedFarmIdChange={setSelectedFarmId}
+          mode={mode}
+          onModeChange={setMode}
+          measurements={measurements}
+        />
       )}
-      {mode === 'forecast' && <AnalyticsProjection lat={lat} lon={lon} />}
+      {mode === 'forecast' && (
+        <AnalyticsForecast
+          farms={farms}
+          selectedFarm={selectedFarm}
+          selectedFarmId={selectedFarmId}
+          onSelectedFarmIdChange={setSelectedFarmId}
+          mode={mode}
+          onModeChange={setMode}
+        />
+      )}
     </div>
   );
 }

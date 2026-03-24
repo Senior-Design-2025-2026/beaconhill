@@ -103,32 +103,14 @@ describe('AnalyticsPage', () => {
     expect(screen.getByRole('button', { name: /Forecast/i })).toBeInTheDocument();
   });
 
-  test('Forecast tab shows comparison table after data loads', async () => {
-    global.fetch = jest.fn((url) => {
-      if (url.includes('air-quality')) {
-        return Promise.resolve({ ok: true, json: () => Promise.resolve(MOCK_AIR_QUALITY_RESPONSE) });
-      }
-      if (url.includes('elevation')) {
-        return Promise.resolve({ ok: true, json: () => Promise.resolve(MOCK_ELEVATION_RESPONSE) });
-      }
-      return Promise.resolve({ ok: true, json: () => Promise.resolve(MOCK_WEATHER_RESPONSE) });
-    });
-
+  test('Forecast tab shows placeholder content', async () => {
     await navigateToAnalytics();
 
     await act(async () => {
       await userEvent.click(screen.getByRole('button', { name: /Forecast/i }));
     });
 
-    await waitFor(() => {
-      expect(screen.getByText('Soil & Weather Comparison')).toBeInTheDocument();
-    });
-
-    expect(screen.getByText('Air Quality')).toBeInTheDocument();
-    expect(screen.getByText('Site Info')).toBeInTheDocument();
-    expect(screen.getByText('Ground Temperature')).toBeInTheDocument();
-    expect(screen.getByText(/220 m/)).toBeInTheDocument();
-
-    global.fetch.mockRestore();
+    expect(screen.getByRole('heading', { name: /Forecast/i })).toBeInTheDocument();
+    expect(screen.getByText('Forecast content coming soon.')).toBeInTheDocument();
   });
 });

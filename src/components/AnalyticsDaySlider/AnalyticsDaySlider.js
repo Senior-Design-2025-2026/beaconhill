@@ -39,8 +39,8 @@ export default function AnalyticsDaySlider({
         marks={
           items.length
             ? [
-                { value: 0, label: items[0] },
-                { value: items.length - 1, label: items[items.length - 1] },
+                { value: 0, label: labelFormatter ? labelFormatter(items[0]) : items[0] },
+                { value: items.length - 1, label: labelFormatter ? labelFormatter(items[items.length - 1]) : items[items.length - 1] },
               ]
             : []
         }
