@@ -76,11 +76,62 @@ function buildFarmWeekTrend(measurements, farmId, mondayISO) {
 }
 
 /**
+ * Build per-node daily trends for a single week (Mon-Sun).
+ * Returns { [metricKey]: [ { nodeId, nodeName, trend: [{x,y}] }, ... ] }
+ */
+function buildNodeWeekTrends(measurements, nodes, farmId, mondayISO) {
+  const farmNodes = nodes.filter((n) => String(n.farmId) === String(farmId));
+  if (!mondayISO || !farmNodes.length) {
+    return FARM_METRICS.reduce((acc, metric) => {
+      acc[metric.key] = [];
+      return acc;
+    }, {});
+  }
+
+  const mon = new Date(mondayISO + 'T00:00:00');
+  const weekDates = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(mon);
+    d.setDate(d.getDate() + i);
+    return toLocalDateISO(d);
+  });
+  const byDay = {};
+  weekDates.forEach((iso, idx) => { byDay[iso] = idx; });
+
+  const byNodeDay = {};
+  (measurements || [])
+    .filter((m) => String(m.farmId) === String(farmId))
+    .forEach((m) => {
+      const iso = toLocalDateISO(new Date((m.timestamp || 0) * 1000));
+      const dayIdx = byDay[iso];
+      if (dayIdx == null) return;
+      const nid = String(m.nodeId);
+      if (!byNodeDay[nid]) byNodeDay[nid] = Array.from({ length: 7 }, () => []);
+      byNodeDay[nid][dayIdx].push(m);
+    });
+
+  return FARM_METRICS.reduce((acc, metric) => {
+    acc[metric.key] = farmNodes.map((node) => {
+      const nid = String(node.nodeId);
+      const buckets = byNodeDay[nid] || Array.from({ length: 7 }, () => []);
+      const trend = DAY_NAMES.map((label, dayIdx) => {
+        const samples = buckets[dayIdx] || [];
+        const vals = samples.map((s) => s[metric.key]).filter((v) => typeof v === 'number');
+        const value = vals.length ? +(vals.reduce((s, v) => s + v, 0) / vals.length).toFixed(1) : null;
+        return { x: label, y: value };
+      });
+      return { nodeId: nid, nodeName: node.nodeName || `Node ${nid}`, trend };
+    });
+    return acc;
+  }, {});
+}
+
+/**
  * Week tab: farm weekly metrics (aggregated by day) + ambient weekly weather.
  * @param {{
  *  lat: number|null,
  *  lon: number|null,
  *  farms: Array,
+ *  nodes: Array,
  *  cropType?: string,
  *  selectedFarm: object|null,
  *  selectedFarmId: string,
@@ -92,6 +143,7 @@ function buildFarmWeekTrend(measurements, farmId, mondayISO) {
  */
 export default function AnalyticsWeek({
   farms,
+  nodes = [],
   lat,
   lon,
   cropType,
@@ -136,6 +188,10 @@ export default function AnalyticsWeek({
     () => buildFarmWeekTrend(measurements || [], selectedFarmId, activeMonday),
     [measurements, selectedFarmId, activeMonday],
   );
+  const nodeTrends = useMemo(
+    () => buildNodeWeekTrends(measurements || [], nodes, selectedFarmId, activeMonday),
+    [measurements, nodes, selectedFarmId, activeMonday],
+  );
 
   return (
     <AnalyticsViewShell variant="week">
@@ -169,6 +225,7 @@ export default function AnalyticsWeek({
               key={m.key}
               metric={m}
               trend={farmTrend[m.key]}
+              nodeTrends={nodeTrends[m.key]}
               cropType={cropType}
               source="farm"
             />

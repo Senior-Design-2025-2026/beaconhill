@@ -7,7 +7,7 @@ import AnalyticsForecast from './AnalyticsForecast';
 import './AnalyticsPage.css';
 
 function AnalyticsPage() {
-  const { farms, measurements } = useMeasurements();
+  const { farms, nodes, measurements } = useMeasurements();
 
   const [selectedFarmId, setSelectedFarmId] = useState('');
   const [mode, setMode] = useState('day');
@@ -35,6 +35,7 @@ function AnalyticsPage() {
       {mode === 'day' && (
         <AnalyticsDay
           farms={farms}
+          nodes={nodes}
           lat={lat}
           lon={lon}
           cropType={selectedFarm?.farmCropType}
@@ -49,6 +50,7 @@ function AnalyticsPage() {
       {mode === 'week' && (
         <AnalyticsWeek
           farms={farms}
+          nodes={nodes}
           lat={lat}
           lon={lon}
           cropType={selectedFarm?.farmCropType}

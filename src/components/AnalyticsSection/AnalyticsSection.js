@@ -1,8 +1,7 @@
 import React from 'react';
-import { Typography } from '@mui/material';
 
 /**
- * AnalyticsSection — titled section wrapper for analytics content groups.
+ * AnalyticsSection — titled section wrapper with inline subtitle and rule line.
  *
  * @param {{
  *  title: string,
@@ -13,8 +12,11 @@ import { Typography } from '@mui/material';
 export default function AnalyticsSection({ title, subtitle, children }) {
   return (
     <section className="analytics-section">
-      <Typography className="analytics-section-title" variant="h6">{title}</Typography>
-      {subtitle && <span className="analytics-ambient-subtitle">{subtitle}</span>}
+      <div className="analytics-section-header">
+        <span className="analytics-section-title">{title}</span>
+        {subtitle && <span className="analytics-section-subtitle">{subtitle}</span>}
+        <span className="analytics-section-rule" />
+      </div>
       {children}
     </section>
   );

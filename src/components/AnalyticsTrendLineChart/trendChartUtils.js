@@ -2,6 +2,27 @@
  * Pure math/data helpers shared by AnalyticsTrendLineChart and AnalyticsMetricTrendCard.
  */
 
+const BULLET_COLORS = {
+  excellent: '#4caf50',
+  good: '#8bc34a',
+  fair: '#ff9800',
+  poor: '#f44336',
+  na: '#bdbdbd',
+};
+
+export function classifyValue(value, threshold) {
+  if (value == null || !threshold) return 'na';
+  for (const key of ['excellent', 'good', 'fair']) {
+    const band = threshold[key];
+    if (band && value >= band.min && value <= band.max) return key;
+  }
+  return 'poor';
+}
+
+export function getBulletColor(classification) {
+  return BULLET_COLORS[classification] || BULLET_COLORS.na;
+}
+
 export function average(values) {
   if (!values?.length) return null;
   const valid = values.filter((v) => v != null);

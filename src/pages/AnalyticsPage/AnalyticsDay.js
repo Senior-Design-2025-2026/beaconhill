@@ -55,6 +55,47 @@ function buildFarmDayTrend(measurements, farmId, dateISO) {
 }
 
 /**
+ * Build per-node hourly trends for a single day.
+ * Returns { [metricKey]: [ { nodeId, nodeName, trend: [{x,y}] }, ... ] }
+ */
+function buildNodeDayTrends(measurements, nodes, farmId, dateISO) {
+  const farmNodes = nodes.filter((n) => String(n.farmId) === String(farmId));
+  if (!dateISO || !farmNodes.length) {
+    return FARM_METRICS.reduce((acc, metric) => {
+      acc[metric.key] = [];
+      return acc;
+    }, {});
+  }
+
+  const byNodeHour = {};
+  measurements
+    .filter((m) => String(m.farmId) === String(farmId))
+    .forEach((m) => {
+      const dt = new Date((m.timestamp || 0) * 1000);
+      if (toLocalDateISO(dt) !== dateISO) return;
+      const hour = dt.getHours();
+      const nid = String(m.nodeId);
+      if (!byNodeHour[nid]) byNodeHour[nid] = {};
+      if (!byNodeHour[nid][hour]) byNodeHour[nid][hour] = [];
+      byNodeHour[nid][hour].push(m);
+    });
+
+  return FARM_METRICS.reduce((acc, metric) => {
+    acc[metric.key] = farmNodes.map((node) => {
+      const nid = String(node.nodeId);
+      const trend = HOURS.map((label, hour) => {
+        const samples = byNodeHour[nid]?.[hour] || [];
+        const vals = samples.map((s) => s[metric.key]).filter((v) => typeof v === 'number');
+        const value = vals.length ? +(vals.reduce((s, v) => s + v, 0) / vals.length).toFixed(1) : null;
+        return { x: label, y: value };
+      });
+      return { nodeId: nid, nodeName: node.nodeName || `Node ${nid}`, trend };
+    });
+    return acc;
+  }, {});
+}
+
+/**
  * Day tab: farm daily hourly metrics + ambient hourly weather values.
  * @param {{
  *  lat: number|null,
@@ -72,6 +113,7 @@ function buildFarmDayTrend(measurements, farmId, dateISO) {
  */
 export default function AnalyticsDay({
   farms,
+  nodes = [],
   lat,
   lon,
   cropType,
@@ -103,6 +145,10 @@ export default function AnalyticsDay({
     () => buildFarmDayTrend(measurements || [], selectedFarmId, activeDate),
     [measurements, selectedFarmId, activeDate],
   );
+  const nodeTrends = useMemo(
+    () => buildNodeDayTrends(measurements || [], nodes, selectedFarmId, activeDate),
+    [measurements, nodes, selectedFarmId, activeDate],
+  );
 
   return (
     <AnalyticsViewShell variant="day">
@@ -129,13 +175,14 @@ export default function AnalyticsDay({
         }
       />
 
-      <AnalyticsSection title="Farm" subtitle="via Sensor Data">
+      <AnalyticsSection title="Farm Metrics" subtitle='(via Sensor Data)'>
         <AnalyticsBentoGrid variant="farm">
           {FARM_METRICS.map((m) => (
             <AnalyticsMetricTrendCard
               key={m.key}
               metric={m}
               trend={farmTrend[m.key]}
+              nodeTrends={nodeTrends[m.key]}
               cropType={cropType}
               source="farm"
             />
@@ -143,7 +190,7 @@ export default function AnalyticsDay({
         </AnalyticsBentoGrid>
       </AnalyticsSection>
 
-      <AnalyticsSection title="Ambient" subtitle="via Open Meteo">
+      <AnalyticsSection title="Ambient Metrics" subtitle='(via Open Meteo)'>
         {loading && <CircularProgress size={24} />}
         {error && <p className="analytics-error">{error}</p>}
         {!loading && !error && !ambientTrend && (
