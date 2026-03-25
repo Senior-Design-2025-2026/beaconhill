@@ -28,7 +28,7 @@ function AuthenticatedApp({ signOut, user }) {
           <Route path="/" element={<LiveDashboardPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/configuration" element={<ConfigurationPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/settings" element={<SettingsPage  user={user} signOut={signOut}/>} />
         </Routes>
       </main>
     </div>
