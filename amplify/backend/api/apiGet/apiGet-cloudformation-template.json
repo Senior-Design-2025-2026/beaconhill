@@ -1,0 +1,259 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "apiGet — REST API Gateway with Lambda proxy integration to dbGet.",
+  "Parameters": {
+    "env": {
+      "Type": "String",
+      "Default": "dev"
+    },
+    "functiondbGetName": {
+      "Type": "String"
+    },
+    "functiondbGetArn": {
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "ApiGateway": {
+      "Type": "AWS::ApiGateway::RestApi",
+      "Properties": {
+        "Name": { "Fn::Sub": "apiGet-${env}" },
+        "Description": "REST API for beaconhill data access"
+      }
+    },
+
+    "FarmItemsResource": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "RestApiId": { "Ref": "ApiGateway" },
+        "ParentId": { "Fn::GetAtt": ["ApiGateway", "RootResourceId"] },
+        "PathPart": "farmItems"
+      }
+    },
+    "FarmItemsANY": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "RestApiId": { "Ref": "ApiGateway" },
+        "ResourceId": { "Ref": "FarmItemsResource" },
+        "HttpMethod": "ANY",
+        "AuthorizationType": "AWS_IAM",
+        "Integration": {
+          "Type": "AWS_PROXY",
+          "IntegrationHttpMethod": "POST",
+          "Uri": {
+            "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${functiondbGetArn}/invocations"
+          }
+        }
+      }
+    },
+    "FarmItemsOPTIONS": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "RestApiId": { "Ref": "ApiGateway" },
+        "ResourceId": { "Ref": "FarmItemsResource" },
+        "HttpMethod": "OPTIONS",
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "Type": "MOCK",
+          "RequestTemplates": { "application/json": "{\"statusCode\": 200}" },
+          "IntegrationResponses": [
+            {
+              "StatusCode": "200",
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+                "method.response.header.Access-Control-Allow-Methods": "'GET,POST,PUT,DELETE,OPTIONS'"
+              }
+            }
+          ]
+        },
+        "MethodResponses": [
+          {
+            "StatusCode": "200",
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Origin": true,
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Methods": true
+            }
+          }
+        ]
+      }
+    },
+
+    "NodeItemsResource": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "RestApiId": { "Ref": "ApiGateway" },
+        "ParentId": { "Fn::GetAtt": ["ApiGateway", "RootResourceId"] },
+        "PathPart": "nodeItems"
+      }
+    },
+    "NodeItemsANY": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "RestApiId": { "Ref": "ApiGateway" },
+        "ResourceId": { "Ref": "NodeItemsResource" },
+        "HttpMethod": "ANY",
+        "AuthorizationType": "AWS_IAM",
+        "Integration": {
+          "Type": "AWS_PROXY",
+          "IntegrationHttpMethod": "POST",
+          "Uri": {
+            "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${functiondbGetArn}/invocations"
+          }
+        }
+      }
+    },
+    "NodeItemsOPTIONS": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "RestApiId": { "Ref": "ApiGateway" },
+        "ResourceId": { "Ref": "NodeItemsResource" },
+        "HttpMethod": "OPTIONS",
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "Type": "MOCK",
+          "RequestTemplates": { "application/json": "{\"statusCode\": 200}" },
+          "IntegrationResponses": [
+            {
+              "StatusCode": "200",
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+                "method.response.header.Access-Control-Allow-Methods": "'GET,POST,PUT,DELETE,OPTIONS'"
+              }
+            }
+          ]
+        },
+        "MethodResponses": [
+          {
+            "StatusCode": "200",
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Origin": true,
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Methods": true
+            }
+          }
+        ]
+      }
+    },
+
+    "DummyItemsResource": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "RestApiId": { "Ref": "ApiGateway" },
+        "ParentId": { "Fn::GetAtt": ["ApiGateway", "RootResourceId"] },
+        "PathPart": "dummyItems"
+      }
+    },
+    "DummyItemsGET": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "RestApiId": { "Ref": "ApiGateway" },
+        "ResourceId": { "Ref": "DummyItemsResource" },
+        "HttpMethod": "GET",
+        "AuthorizationType": "AWS_IAM",
+        "Integration": {
+          "Type": "AWS_PROXY",
+          "IntegrationHttpMethod": "POST",
+          "Uri": {
+            "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${functiondbGetArn}/invocations"
+          }
+        }
+      }
+    },
+    "DummyItemsOPTIONS": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "RestApiId": { "Ref": "ApiGateway" },
+        "ResourceId": { "Ref": "DummyItemsResource" },
+        "HttpMethod": "OPTIONS",
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "Type": "MOCK",
+          "RequestTemplates": { "application/json": "{\"statusCode\": 200}" },
+          "IntegrationResponses": [
+            {
+              "StatusCode": "200",
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+                "method.response.header.Access-Control-Allow-Methods": "'GET,OPTIONS'"
+              }
+            }
+          ]
+        },
+        "MethodResponses": [
+          {
+            "StatusCode": "200",
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Origin": true,
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Methods": true
+            }
+          }
+        ]
+      }
+    },
+
+    "ItemsResource": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "RestApiId": { "Ref": "ApiGateway" },
+        "ParentId": { "Fn::GetAtt": ["ApiGateway", "RootResourceId"] },
+        "PathPart": "items"
+      }
+    },
+    "ItemsGET": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "RestApiId": { "Ref": "ApiGateway" },
+        "ResourceId": { "Ref": "ItemsResource" },
+        "HttpMethod": "GET",
+        "AuthorizationType": "AWS_IAM",
+        "Integration": {
+          "Type": "AWS_PROXY",
+          "IntegrationHttpMethod": "POST",
+          "Uri": {
+            "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${functiondbGetArn}/invocations"
+          }
+        }
+      }
+    },
+
+    "Deployment": {
+      "Type": "AWS::ApiGateway::Deployment",
+      "DependsOn": [
+        "FarmItemsANY", "FarmItemsOPTIONS",
+        "NodeItemsANY", "NodeItemsOPTIONS",
+        "DummyItemsGET", "DummyItemsOPTIONS",
+        "ItemsGET"
+      ],
+      "Properties": {
+        "RestApiId": { "Ref": "ApiGateway" },
+        "StageName": { "Ref": "env" }
+      }
+    },
+
+    "LambdaInvokePermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": { "Ref": "functiondbGetName" },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "ApiName": { "Value": { "Ref": "ApiGateway" } },
+    "RootUrl": {
+      "Value": {
+        "Fn::Sub": "https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${env}"
+      }
+    },
+    "ApiId": { "Value": { "Ref": "ApiGateway" } }
+  }
+}

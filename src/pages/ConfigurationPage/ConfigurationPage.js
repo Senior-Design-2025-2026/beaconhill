@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box } from '@mui/material';
+import { Alert, Box, CircularProgress } from '@mui/material';
 import HeaderComponent from '../../components/HeaderComponent/HeaderComponent';
 import ConfigurationTableSection from './ConfigurationTableSection';
 import { useMeasurements } from '../../context/MeasurementsContext';
@@ -37,10 +37,18 @@ function nextId(rows, key) {
 
 function ConfigurationPage() {
   const {
-    farms, nodes,
+    farms, nodes, loading, error,
     addFarm, updateFarm, deleteFarm,
     addNode, updateNode, deleteNode,
   } = useMeasurements();
+
+  if (loading) {
+    return (
+      <Box sx={{ p: 2, display: 'flex', justifyContent: 'center', mt: 8 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ p: 2 }}>
@@ -48,6 +56,9 @@ function ConfigurationPage() {
         title="Configuration"
         description="Manage farm and node settings"
       />
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
+      )}
 
       <ConfigurationTableSection
         title="Farms"
