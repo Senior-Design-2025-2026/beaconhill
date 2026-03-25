@@ -3,6 +3,21 @@ import { getAuthHeader, readJsonPayload } from './amplifyRest';
 
 const API_NAME = 'apiGet';
 
+const FARM_NUMBER_KEYS = ['lat', 'lon', 'numberOfNodes'];
+const NODE_NUMBER_KEYS = ['lat', 'lon'];
+
+/** Coerce known numeric fields from string → number so DynamoDB N types match. */
+function coerceNumbers(obj, keys) {
+  const out = { ...obj };
+  for (const k of keys) {
+    if (k in out && out[k] !== null && out[k] !== undefined) {
+      const n = Number(out[k]);
+      if (!Number.isNaN(n)) out[k] = n;
+    }
+  }
+  return out;
+}
+
 /**
  * Fetches the current farms and nodes from the API (lighter than getMeasurements).
  * @returns {Promise<{ farms: Array, nodes: Array }>}
@@ -32,7 +47,7 @@ export async function createFarm(farm) {
     const res = await post({
       apiName: API_NAME,
       path: '/farmItems',
-      options: { headers: authHeader, body: farm },
+      options: { headers: authHeader, body: coerceNumbers(farm, FARM_NUMBER_KEYS) },
     }).response;
     return readJsonPayload(res);
   } catch (err) {
@@ -48,7 +63,7 @@ export async function updateFarm(farm) {
     const res = await put({
       apiName: API_NAME,
       path: '/farmItems',
-      options: { headers: authHeader, body: farm },
+      options: { headers: authHeader, body: coerceNumbers(farm, FARM_NUMBER_KEYS) },
     }).response;
     return readJsonPayload(res);
   } catch (err) {
@@ -82,7 +97,7 @@ export async function createNode(node) {
     const res = await post({
       apiName: API_NAME,
       path: '/nodeItems',
-      options: { headers: authHeader, body: node },
+      options: { headers: authHeader, body: coerceNumbers(node, NODE_NUMBER_KEYS) },
     }).response;
     return readJsonPayload(res);
   } catch (err) {
@@ -98,7 +113,7 @@ export async function updateNode(node) {
     const res = await put({
       apiName: API_NAME,
       path: '/nodeItems',
-      options: { headers: authHeader, body: node },
+      options: { headers: authHeader, body: coerceNumbers(node, NODE_NUMBER_KEYS) },
     }).response;
     return readJsonPayload(res);
   } catch (err) {

@@ -39,8 +39,10 @@ function MeasurementsProvider({ children }) {
     getMeasurements()
       .then((data) => {
         if (!cancelled) {
-          setFarms(data.farms ?? []);
-          setNodes(data.nodes ?? []);
+          const f = data.farms ?? [];
+          const n = data.nodes ?? [];
+          setFarms(recomputeNodeCounts(f, n));
+          setNodes(n);
           setMeasurements(data.measurements ?? []);
           setError(null);
         }
@@ -67,8 +69,10 @@ function MeasurementsProvider({ children }) {
     if (isTestMode) return;
     try {
       const data = await configApi.refreshFarmsAndNodes();
-      setFarms(data.farms ?? []);
-      setNodes(data.nodes ?? []);
+      const f = data.farms ?? [];
+      const n = data.nodes ?? [];
+      setFarms(recomputeNodeCounts(f, n));
+      setNodes(n);
     } catch (err) {
       console.error('refreshFarmsAndNodes failed:', err);
       throw err;
