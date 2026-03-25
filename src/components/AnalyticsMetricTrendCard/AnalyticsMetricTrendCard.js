@@ -43,6 +43,9 @@ export default function AnalyticsMetricTrendCard({
   nodeTrends = [],
   cropType,
   source,
+  lat = null,
+  lon = null,
+  farmName = null,
 }) {
   const [open, setOpen] = useState(false);
   const [viewMode, setViewMode] = useState('average');
@@ -159,6 +162,9 @@ export default function AnalyticsMetricTrendCard({
             <div className="analytics-dialog-sidebar">
               {hasNodes && (
                 <div className="analytics-dialog-view-toggle">
+                  {farmName && (
+                    <span className="analytics-dialog-view-toggle-title">{farmName}</span>
+                  )}
                   <RadioGroup
                     value={viewMode}
                     onChange={(e) => setViewMode(e.target.value)}
@@ -176,6 +182,28 @@ export default function AnalyticsMetricTrendCard({
                       className="analytics-dialog-radio-label"
                     />
                   </RadioGroup>
+                </div>
+              )}
+
+              {!isFarm && (
+                <div className="analytics-dialog-api-info">
+                  <span className="analytics-dialog-api-info-type">Open Meteo Weather API</span>
+                  <span className="analytics-dialog-api-info-row">
+                    <span className="analytics-dialog-api-info-label">Latitude:</span>{' '}
+                    {lat != null ? lat : '—'}
+                  </span>
+                  <span className="analytics-dialog-api-info-row">
+                    <span className="analytics-dialog-api-info-label">Longitude:</span>{' '}
+                    {lon != null ? lon : '—'}
+                  </span>
+                  <a
+                    href="https://open-meteo.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="analytics-dialog-api-info-link"
+                  >
+                    Open Meteo →
+                  </a>
                 </div>
               )}
 

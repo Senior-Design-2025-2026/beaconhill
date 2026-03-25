@@ -4,7 +4,6 @@ import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 const DEFAULT_OPTIONS = [
   { value: 'day', label: 'Day' },
   { value: 'week', label: 'Week' },
-  { value: 'forecast', label: 'Forecast' },
 ];
 
 /**

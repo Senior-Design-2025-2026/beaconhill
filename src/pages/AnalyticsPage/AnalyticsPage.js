@@ -3,7 +3,6 @@ import HeaderComponent from '../../components/HeaderComponent/HeaderComponent';
 import { useMeasurements } from '../../context/MeasurementsContext';
 import AnalyticsDay from './AnalyticsDay';
 import AnalyticsWeek from './AnalyticsWeek';
-import AnalyticsForecast from './AnalyticsForecast';
 import './AnalyticsPage.css';
 
 function AnalyticsPage() {
@@ -60,16 +59,6 @@ function AnalyticsPage() {
           mode={mode}
           onModeChange={setMode}
           measurements={measurements}
-        />
-      )}
-      {mode === 'forecast' && (
-        <AnalyticsForecast
-          farms={farms}
-          selectedFarm={selectedFarm}
-          selectedFarmId={selectedFarmId}
-          onSelectedFarmIdChange={setSelectedFarmId}
-          mode={mode}
-          onModeChange={setMode}
         />
       )}
     </div>

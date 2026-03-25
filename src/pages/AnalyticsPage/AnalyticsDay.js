@@ -185,6 +185,7 @@ export default function AnalyticsDay({
               nodeTrends={nodeTrends[m.key]}
               cropType={cropType}
               source="farm"
+              farmName={selectedFarm?.farmName}
             />
           ))}
         </AnalyticsBentoGrid>
@@ -206,6 +207,8 @@ export default function AnalyticsDay({
               trend={ambientTrend?.[m.key] || []}
               cropType={cropType}
               source="ambient"
+              lat={lat}
+              lon={lon}
             />
           ))}
         </AnalyticsBentoGrid>

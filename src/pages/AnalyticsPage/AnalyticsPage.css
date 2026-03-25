@@ -141,15 +141,14 @@
 /* Bento row for metric cards — horizontal, all five fit on screen */
 .analytics-bento {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 12px;
 }
 
 .analytics-bento--farm .analytics-card,
 .analytics-bento--ambient .analytics-card {
   flex: 1 1 0;
-  min-width: 110px;
-  max-width: 180px;
+  min-width: 0;
 }
 
 /* Individual metric card — compact */
@@ -271,10 +270,19 @@
 }
 
 .analytics-dialog-view-toggle {
-  padding: 12px 16px;
+  padding: 14px 16px;
   background: #f9fafb;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.analytics-dialog-view-toggle-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #374151;
 }
 
 .analytics-dialog-radio-label .MuiFormControlLabel-label {
@@ -331,6 +339,47 @@
 
 .analytics-dialog-detail-link:hover {
   text-decoration: underline;
+}
+
+/* Ambient API info box (mirrors the view-toggle box position in farm cards) */
+.analytics-dialog-api-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.analytics-dialog-api-info-type {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.analytics-dialog-api-info-row {
+  font-size: 0.84rem;
+  color: #4b5563;
+}
+
+.analytics-dialog-api-info-label {
+  font-weight: 600;
+  color: #374151;
+}
+
+.analytics-dialog-api-info-link {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #2563eb;
+  text-decoration: none;
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+.analytics-dialog-api-info-link:hover {
+  text-decoration: underline;
+  color: #1d4ed8;
 }
 
 @media (max-width: 700px) {
@@ -693,8 +742,12 @@
     max-width: none;
   }
 
+  .analytics-bento {
+    flex-wrap: wrap;
+  }
+
   .analytics-bento--farm .analytics-card,
   .analytics-bento--ambient .analytics-card {
-    max-width: none;
+    min-width: 140px;
   }
 }
