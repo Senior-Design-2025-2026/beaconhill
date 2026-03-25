@@ -1,0 +1,125 @@
+/* calendar size — adjust these values to change overall calendar dimensions */
+.forecast-calendar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+  user-select: none;
+}
+
+.forecast-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 1px;
+}
+
+.forecast-calendar-month {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  text-align: center;
+}
+
+.forecast-calendar-header .MuiIconButton-root {
+  padding: 2px;
+}
+
+.forecast-calendar-header .MuiSvgIcon-root {
+  font-size: 0.9rem;
+}
+
+.forecast-calendar-grid {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.forecast-calendar-day-header {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-align: center;
+  padding: 1px 0;
+}
+
+/* calendar size — cell height controls row spacing */
+.forecast-calendar-cell {
+  text-align: center;
+  padding: 0;
+  position: relative;
+  height: 18px;
+  vertical-align: middle;
+}
+
+/* calendar size — width/height here control the date circle */
+.forecast-calendar-date {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  font-size: 0.6rem;
+  color: #1f2937;
+  line-height: 1;
+}
+
+.forecast-calendar-cell--outside .forecast-calendar-date {
+  color: #d1d5db;
+}
+
+/* Today: solid dark yellow dot */
+.forecast-calendar-cell--today .forecast-calendar-date {
+  background: #d97706;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Forecast range: transparent yellow highlight */
+.forecast-calendar-cell--forecast .forecast-calendar-date {
+  background: rgba(250, 204, 21, 0.3);
+  cursor: pointer;
+}
+
+/* Available data dates: subtle highlight */
+.forecast-calendar-cell--available .forecast-calendar-date {
+  background: rgba(250, 204, 21, 0.2);
+  cursor: pointer;
+}
+
+/* Today takes precedence over available/forecast */
+.forecast-calendar-cell--today.forecast-calendar-cell--available .forecast-calendar-date,
+.forecast-calendar-cell--today.forecast-calendar-cell--forecast .forecast-calendar-date {
+  background: #d97706;
+  color: #fff;
+}
+
+/* Hover for clickable cells */
+.forecast-calendar-cell--today:hover .forecast-calendar-date,
+.forecast-calendar-cell--forecast:hover .forecast-calendar-date,
+.forecast-calendar-cell--available:hover .forecast-calendar-date {
+  box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.45);
+}
+
+/* Selected day: ring + stronger fill */
+.forecast-calendar-cell--selected .forecast-calendar-date {
+  background: rgba(250, 204, 21, 0.55);
+  box-shadow: 0 0 0 2px #d97706;
+  font-weight: 700;
+}
+
+.forecast-calendar-cell--selected.forecast-calendar-cell--today .forecast-calendar-date {
+  background: #d97706;
+  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.5);
+  color: #fff;
+}
+
+/* Keyboard focus */
+.forecast-calendar-cell:focus-visible .forecast-calendar-date {
+  outline: 2px solid #2563eb;
+  outline-offset: 1px;
+}
