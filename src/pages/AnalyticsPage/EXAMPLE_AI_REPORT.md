@@ -1,15 +1,16 @@
 <!--
 TEMPLATE PURPOSE
 Use this file as the “required output structure” for Gemini.
-When generating a report, keep the same headings and table formats.
+When generating a report, the assistant must produce PDF-ready content (do not output a standalone markdown document).
+Keep the same headings and table formats shown in this file.
 Replace placeholders like {{reportDateTime}} and {{farm.name}} with real values.
 
-This file will be downloaded as a pdf using the md-to-pdf node package
+The app will convert the assistant output into a PDF, so output should be compatible with an HTML/renderer pipeline (no markdown code fences, no surrounding wrapper text).
 -->
 
 
 <div style="display: flex; align-items: flex-start; gap: 2rem;">
-  <img src="../../../img/BeaconHill.svg" alt="Farm Analytics Visualization" width="200"/>
+  <img src="/img/BeaconHill.png" alt="Farm Analytics Visualization" width="200"/>
   <div style="display: flex; flex-direction: column; justify-content: center; gap: 0.5rem;">
     <div>
       <strong>Farm Name:</strong> {{farm.name}}
@@ -52,7 +53,7 @@ This file will be downloaded as a pdf using the md-to-pdf node package
 | {{metric5.name}} | {{metric5.latestValue}} {{metric5.unit}} | {{metric5.condition}} | {{metric5.whyItMatters}} | {{metric5.concernLevel}} | {{metric5.action}} |
 
 | Ambient Metric |  Condition Classification | Why this matters (farmer-friendly) | Concern Level | What to do / monitor |
-|---|---:|---|---|---|---|
+|---|---:|---|---|---|
 | {{metric1.name}} | {{metric1.condition}} | {{metric1.whyItMatters}} | {{metric1.concernLevel}} | {{metric1.action}} |
 | {{metric2.name}} | {{metric2.condition}} | {{metric2.whyItMatters}} | {{metric2.concernLevel}} | {{metric2.action}} |
 | {{metric3.name}} | {{metric3.condition}} | {{metric3.whyItMatters}} | {{metric3.concernLevel}} | {{metric3.action}} |
