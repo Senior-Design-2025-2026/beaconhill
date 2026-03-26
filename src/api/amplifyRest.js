@@ -1,17 +1,18 @@
 import { fetchAuthSession } from 'aws-amplify/auth';
 
 /**
- * Returns an Authorization header object with the current Cognito id token.
- * @returns {Promise<{ Authorization: string }>}
- * @throws if the user is not authenticated.
+ * Ensures Cognito has delivered temporary AWS credentials (Identity Pool) so the
+ * Amplify REST client can SigV4-sign requests. apiGet uses API Gateway IAM auth;
+ * sending a JWT in `Authorization` overrides signing and produces IncompleteSignature errors.
+ * @returns {Promise<void>}
+ * @throws if there are no credentials for signing.
  */
-export async function getAuthHeader() {
+export async function ensureAwsCredentials() {
   const session = await fetchAuthSession();
-  const token = session.tokens?.idToken;
-  if (!token) {
-    throw new Error('Not authenticated');
+  const creds = session.credentials;
+  if (!creds?.accessKeyId || !creds?.secretAccessKey || !creds?.sessionToken) {
+    throw new Error('Not authenticated or missing AWS credentials for API (Identity Pool)');
   }
-  return { Authorization: token.toString() };
 }
 
 /**

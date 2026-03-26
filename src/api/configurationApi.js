@@ -1,5 +1,5 @@
 import { get, post, put, del } from 'aws-amplify/api';
-import { getAuthHeader, readJsonPayload } from './amplifyRest';
+import { ensureAwsCredentials, readJsonPayload } from './amplifyRest';
 
 const API_NAME = 'apiGet';
 
@@ -23,10 +23,10 @@ function coerceNumbers(obj, keys) {
  * @returns {Promise<{ farms: Array, nodes: Array }>}
  */
 export async function refreshFarmsAndNodes() {
-  const authHeader = await getAuthHeader();
+  await ensureAwsCredentials();
   const [farmRes, nodeRes] = await Promise.all([
-    get({ apiName: API_NAME, path: '/farmItems', options: { headers: authHeader } }).response,
-    get({ apiName: API_NAME, path: '/nodeItems', options: { headers: authHeader } }).response,
+    get({ apiName: API_NAME, path: '/farmItems' }).response,
+    get({ apiName: API_NAME, path: '/nodeItems' }).response,
   ]);
   const [farms, nodes] = await Promise.all([
     readJsonPayload(farmRes),
@@ -43,11 +43,11 @@ export async function refreshFarmsAndNodes() {
 /** @param {Object} farm - full farm object including farmId */
 export async function createFarm(farm) {
   try {
-    const authHeader = await getAuthHeader();
+    await ensureAwsCredentials();
     const res = await post({
       apiName: API_NAME,
       path: '/farmItems',
-      options: { headers: authHeader, body: coerceNumbers(farm, FARM_NUMBER_KEYS) },
+      options: { body: coerceNumbers(farm, FARM_NUMBER_KEYS) },
     }).response;
     return readJsonPayload(res);
   } catch (err) {
@@ -59,11 +59,11 @@ export async function createFarm(farm) {
 /** @param {Object} farm - full farm object including farmId */
 export async function updateFarm(farm) {
   try {
-    const authHeader = await getAuthHeader();
+    await ensureAwsCredentials();
     const res = await put({
       apiName: API_NAME,
       path: '/farmItems',
-      options: { headers: authHeader, body: coerceNumbers(farm, FARM_NUMBER_KEYS) },
+      options: { body: coerceNumbers(farm, FARM_NUMBER_KEYS) },
     }).response;
     return readJsonPayload(res);
   } catch (err) {
@@ -75,11 +75,11 @@ export async function updateFarm(farm) {
 /** @param {string} farmId */
 export async function deleteFarm(farmId) {
   try {
-    const authHeader = await getAuthHeader();
+    await ensureAwsCredentials();
     const res = await del({
       apiName: API_NAME,
       path: '/farmItems',
-      options: { headers: authHeader, body: { farmId } },
+      options: { body: { farmId } },
     }).response;
     return readJsonPayload(res);
   } catch (err) {
@@ -93,11 +93,11 @@ export async function deleteFarm(farmId) {
 /** @param {Object} node - full node object including nodeId */
 export async function createNode(node) {
   try {
-    const authHeader = await getAuthHeader();
+    await ensureAwsCredentials();
     const res = await post({
       apiName: API_NAME,
       path: '/nodeItems',
-      options: { headers: authHeader, body: coerceNumbers(node, NODE_NUMBER_KEYS) },
+      options: { body: coerceNumbers(node, NODE_NUMBER_KEYS) },
     }).response;
     return readJsonPayload(res);
   } catch (err) {
@@ -109,11 +109,11 @@ export async function createNode(node) {
 /** @param {Object} node - full node object including nodeId */
 export async function updateNode(node) {
   try {
-    const authHeader = await getAuthHeader();
+    await ensureAwsCredentials();
     const res = await put({
       apiName: API_NAME,
       path: '/nodeItems',
-      options: { headers: authHeader, body: coerceNumbers(node, NODE_NUMBER_KEYS) },
+      options: { body: coerceNumbers(node, NODE_NUMBER_KEYS) },
     }).response;
     return readJsonPayload(res);
   } catch (err) {
@@ -125,11 +125,11 @@ export async function updateNode(node) {
 /** @param {string} nodeId */
 export async function deleteNode(nodeId) {
   try {
-    const authHeader = await getAuthHeader();
+    await ensureAwsCredentials();
     const res = await del({
       apiName: API_NAME,
       path: '/nodeItems',
-      options: { headers: authHeader, body: { nodeId } },
+      options: { body: { nodeId } },
     }).response;
     return readJsonPayload(res);
   } catch (err) {

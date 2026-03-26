@@ -23,6 +23,6 @@ Centralize all outbound HTTP and Amplify API calls. This directory is the single
 
 - **One concern per file** - e.g. `weatherApi.js` for weather, a separate file for items/farm data.
 - **Export named functions** that return promises (or use async/await). Example: `export async function fetchItems() { ... }`.
-- **Use Amplify REST client** - `get({ apiName: 'apiGet', path: '...', options: { headers: { Authorization: token.toString() } } })`. Get the token via `fetchAuthSession()` from `aws-amplify/auth` inside the API layer.
+- **Use Amplify REST client** - `get({ apiName: 'apiGet', path: '...' })` after `ensureAwsCredentials()` in `amplifyRest.js`. apiGet uses API Gateway **IAM** auth; Amplify SigV4-signs with Identity Pool credentials. Do **not** set `Authorization` to a Cognito JWT (that causes IncompleteSignature).
 - **Wrap all external calls in try/catch**; log errors and either rethrow or return a consistent error shape for the UI.
 - **No UI imports** - API modules must not import React components or hooks that depend on the DOM.

@@ -1,5 +1,5 @@
 import { get } from 'aws-amplify/api';
-import { getAuthHeader, readJsonPayload } from './amplifyRest';
+import { ensureAwsCredentials, readJsonPayload } from './amplifyRest';
 
 /**
  * Fetches farms, nodes, and measurements from the API.
@@ -7,12 +7,12 @@ import { getAuthHeader, readJsonPayload } from './amplifyRest';
  * @throws on network/auth failure or invalid response.
  */
 export async function getMeasurements() {
-  const authHeader = await getAuthHeader();
+  await ensureAwsCredentials();
 
   const [farmRes, nodeRes, measurementRes] = await Promise.all([
-    get({ apiName: 'apiGet', path: '/farmItems', options: { headers: authHeader } }).response,
-    get({ apiName: 'apiGet', path: '/nodeItems', options: { headers: authHeader } }).response,
-    get({ apiName: 'apiGet', path: '/dummyItems', options: { headers: authHeader } }).response,
+    get({ apiName: 'apiGet', path: '/farmItems' }).response,
+    get({ apiName: 'apiGet', path: '/nodeItems' }).response,
+    get({ apiName: 'apiGet', path: '/dummyItems' }).response,
   ]);
 
   const [farms, nodes, measurements] = await Promise.all([
