@@ -170,17 +170,20 @@ function SidebarComponent({ user, farm = 'My Farm' }) {
           p: 1.5,
         }}
       >
-        <Avatar
-          className="sidebar-avatar"
-          sx={{
-            width: 40,
-            height: 40,
-            bgcolor: '#EEBE02',
-            color: '#202020',
-          }}
-        >
-          {initial !== 'U' ? initial : <PersonIcon />}
-        </Avatar>
+        <Link to="/settings" style={{ textDecoration: 'none' }}>
+          <Avatar
+            className="sidebar-avatar"
+            sx={{
+              width: 40,
+              height: 40,
+              bgcolor: '#EEBE02',
+              color: '#202020',
+            }}
+          >
+            
+            {initial !== 'U' ? initial : <PersonIcon />}
+          </Avatar>
+        </Link>
         {expanded && (
           <Box sx={{ minWidth: 0, flex: 1 }}>
             <Typography
