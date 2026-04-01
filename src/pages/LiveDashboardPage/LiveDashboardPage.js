@@ -26,41 +26,41 @@ import './LiveDashboardPage.css';
 
 const TEST_DATE_MS = null;
 // const TEST_DATE_MS = 1771164000001;
+// const TEST_DATE_MS = 1771318800001;
+const HOUR_MS = 60 * 60 * 1000;
 
-/**
- * Metric configuration: maps each measurement key to display props and
- * fixed low/mid/high ranges for LinearGaugeComponent.
- */
-const METRIC_CONFIG = [
-  { key: 'temperature', label: 'Temperature', unit: '°F', low: 0, lowThreshold: 30, highThreshold: 70, high: 100 },
-  { key: 'moisture',    label: 'Moisture',    unit: '%',  low: 0, lowThreshold: 30, highThreshold: 70, high: 100 },
-  { key: 'nitrogen',    label: 'Nitrogen',    unit: 'ppm', low: 0, lowThreshold: 25, highThreshold: 50, high: 100 },
-  { key: 'phosphorus',  label: 'Phosphorus',  unit: 'ppm', low: 0, lowThreshold: 15, highThreshold: 30, high: 100 },
-  { key: 'potassium',   label: 'Potassium',   unit: 'ppm', low: 0, lowThreshold: 100, highThreshold: 175, high: 200 },
-];
+const METRIC_CONFIG = {
+  corn: [
+    { key: 'temperature', label: 'Temperature', unit: '°F', low: 50, lowThreshold: 65, highThreshold: 86, high: 95 },
+    { key: 'moisture',    label: 'Moisture',    unit: '%',  low: 15, lowThreshold: 20, highThreshold: 35, high: 45 },
+    { key: 'nitrogen',    label: 'Nitrogen',    unit: 'ppm', low: 50, lowThreshold: 80, highThreshold: 150, high: 200 },
+    { key: 'phosphorus',  label: 'Phosphorus',  unit: 'ppm', low: 15, lowThreshold: 25, highThreshold: 50, high: 80 },
+    { key: 'potassium',   label: 'Potassium',   unit: 'ppm', low: 80, lowThreshold: 120, highThreshold: 200, high: 300 },
+  ],
+  soybean: [
+    { key: 'temperature', label: 'Temperature', unit: '°F', low: 59, lowThreshold: 68, highThreshold: 86, high: 95 },
+    { key: 'moisture',    label: 'Moisture',    unit: '%',  low: 15, lowThreshold: 20, highThreshold: 30, high: 40 },
+    { key: 'nitrogen',    label: 'Nitrogen',    unit: 'ppm', low: 20, lowThreshold: 50, highThreshold: 100, high: 150 },
+    { key: 'phosphorus',  label: 'Phosphorus',  unit: 'ppm', low: 10, lowThreshold: 20, highThreshold: 40, high: 70 },
+    { key: 'potassium',   label: 'Potassium',   unit: 'ppm', low: 80, lowThreshold: 120, highThreshold: 200, high: 300 },
+  ],
+};
 
-/** Colors assigned to nodes in multi-node line charts. */
 const NODE_COLORS = ['#1976d2', '#e53935', '#43a047', '#fb8c00', '#8e24aa', '#00acc1'];
 
 const TIMEFRAME_OPTIONS = [
-  { label: 'Last 6 Hours',  value: '6h' },
-  { label: 'Last 12 Hours', value: '12h' },
   { label: 'Last 24 Hours', value: '24h' },
   { label: 'Last 7 Days',   value: '7d' },
   { label: 'Last 30 Days',  value: '30d' },
 ];
 
-/** Normalize timestamp (UTC ms number or ISO string) to UTC epoch milliseconds. */
-function toTimestampMs(ts) {
+function epochToDate(ts) {
   if (ts == null) return NaN;
   return typeof ts === 'number' ? ts * 1000 : new Date(ts * 1000).getTime();
 }
 
-/** Convert a timeframe string to milliseconds. */
-function getTimeWindowMs(tf) {
+function getTimeWindowMilliseconds(tf) {
   const map = {
-    '6h':  6 * 60 * 60 * 1000,
-    '12h': 12 * 60 * 60 * 1000,
     '24h': 24 * 60 * 60 * 1000,
     '7d':  7 * 24 * 60 * 60 * 1000,
     '30d': 30 * 24 * 60 * 60 * 1000,
@@ -69,13 +69,12 @@ function getTimeWindowMs(tf) {
 }
 
 /**
- * Build an array of hourly UTC epoch-ms values from minMs to maxMs (inclusive).
  * Each value is snapped to the top of the hour in UTC.
  */
-function buildHourlyTimeline(minMs, maxMs) {
+function buildHourlyTimeline(minMs) {
   const start = new Date(minMs);
   start.setUTCMinutes(0, 0, 0);
-  const end = new Date(maxMs);
+  const end = TEST_DATE_MS ? new Date(TEST_DATE_MS) : new Date.now();
   end.setUTCMinutes(0, 0, 0);
 
   const timeline = [];
@@ -83,25 +82,6 @@ function buildHourlyTimeline(minMs, maxMs) {
   while (cursor.getTime() <= end.getTime()) {
     timeline.push(cursor.getTime());
     cursor.setUTCHours(cursor.getUTCHours() + 1);
-  }
-  return timeline;
-}
-
-/**
- * Build an array of evenly spaced UTC epoch-ms values from minMs to maxMs (inclusive), with stepHour hours between each value.
- * Each value is snapped to the top of the hour in UTC.
- */
-function buildTimeline(minMs, maxMs, stepHour) {
-  const start = new Date(minMs);
-  start.setUTCMinutes(0, 0, 0);
-  const end = new Date(maxMs);
-  end.setUTCMinutes(0, 0, 0);
-
-  const timeline = [];
-  const cursor = new Date(start);
-  while (cursor.getTime() <= end.getTime()) {
-    timeline.push(cursor.getTime());
-    cursor.setUTCHours(cursor.getUTCHours() + stepHour);
   }
   return timeline;
 }
@@ -154,7 +134,7 @@ function LiveDashboardPage() {
   const [selectedTimeframe, setSelectedTimeframe] = useState('24h');
   const [activeTab, setActiveTab] = useState(0);
   const [sliderIndex, setSliderIndex] = useState(null);
-  const [selectedMetric, setSelectedMetric] = useState(METRIC_CONFIG[0]);
+  const [selectedMetric, setSelectedMetric] = useState(METRIC_CONFIG['corn']);
 
   /** Keep selectedFarm in sync when farms loads or when current selection is no longer in the list. */
   useEffect(() => {
@@ -179,34 +159,28 @@ function LiveDashboardPage() {
 
   const nodeIds = useMemo(() => farmNodes.map((n) => n.nodeId), [farmNodes]);
 
-  /** All measurements for nodes in the selected farm. */
   const farmMeasurements = useMemo(
     () => measurements.filter((m) => nodeIds.includes(m.nodeId)),
     [measurements, nodeIds]
   );
 
-  /** "now" = max timestamp in farm measurements (deterministic for dummy data). */
   const maxTimestampMs = useMemo(() => {
     if (farmMeasurements.length === 0) return Date.now();
-    return Math.max(...farmMeasurements.map((m) => toTimestampMs(m.timestamp)));
+    return Math.max(...farmMeasurements.map((m) => epochToDate(m.timestamp)));
   }, [farmMeasurements]);
 
   /** Measurements filtered by the selected timeframe window. */
   const timeFilteredMeasurements = useMemo(() => {
-    const windowMs = getTimeWindowMs(selectedTimeframe);
+    const windowMs = getTimeWindowMilliseconds(selectedTimeframe);
     const cutoff = (TEST_DATE_MS ?? Date.now()) - windowMs;
-    return farmMeasurements.filter((m) => toTimestampMs(m.timestamp) >= cutoff);
+    return farmMeasurements.filter((m) => epochToDate(m.timestamp) >= cutoff);
   }, [farmMeasurements, selectedTimeframe]);
 
   /* --- Slider timeline (hourly, min to max of time-filtered data, in epoch-ms) --- */
 
   const timeline = useMemo(() => {
-    if (timeFilteredMeasurements.length === 0) return [];
-    const timestamps = timeFilteredMeasurements.map((m) => toTimestampMs(m.timestamp));
-    const minTs = Math.min(...timestamps);
-    const maxTs = Math.max(...timestamps);
-    console.log(buildHourlyTimeline(minTs, maxTs));
-    return buildHourlyTimeline(minTs, maxTs);
+    const minimumTime = (TEST_DATE_MS ? new Date(TEST_DATE_MS) : new Date.now()) - getTimeWindowMilliseconds(selectedTimeframe);
+    return buildHourlyTimeline(minimumTime);
   }, [timeFilteredMeasurements]);
 
   const effectiveSliderIndex = sliderIndex != null ? sliderIndex : Math.max(0, timeline.length - 1);
@@ -230,7 +204,7 @@ function LiveDashboardPage() {
     if (targetMs == null) return null;
     return timeFilteredMeasurements.find((m) => {
       if (m.nodeId !== nodeId) return false;
-      const mDate = new Date(toTimestampMs(m.timestamp));
+      const mDate = new Date(epochToDate(m.timestamp));
       mDate.setUTCMinutes(0, 0, 0);
       return mDate.getTime() === targetMs;
     }) || null;
@@ -268,7 +242,6 @@ function LiveDashboardPage() {
     yaxis: { title: { text: selectedMetric.unit } },
     legend: { orientation: 'h', y: -0.3 },
     margin: { l: 40, r: 24, t: 36, b: 16 },
-    // autosize: true,
     height: 300,
   }), [selectedMetric]);
 
@@ -419,7 +392,7 @@ function LiveDashboardPage() {
                       </div>
 
                       <div className="node-gauges-row">
-                        {METRIC_CONFIG.map((metric) => (
+                        {METRIC_CONFIG[selectedFarmData?.farmCropType?.toLowerCase()]?.map((metric) => (
                           <div key={metric.key} className="node-gauge-item">
                             {online ? (
                               <LinearGaugeComponent
@@ -475,7 +448,7 @@ function LiveDashboardPage() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {METRIC_CONFIG.map((metric) => {
+                  {METRIC_CONFIG[selectedFarmData?.farmCropType?.toLowerCase()]?.map((metric) => {
                     const allValues = timeFilteredMeasurements.map((m) => m[metric.key]);
                     const farmAvg = allValues.length > 0
                       ? (allValues.reduce((s, v) => s + v, 0) / allValues.length).toFixed(1)
@@ -513,7 +486,7 @@ function LiveDashboardPage() {
                   value={selectedMetric}
                   onChange={(e) => setSelectedMetric(e.target.value)}
                 >
-                  {METRIC_CONFIG.map((metric) => (
+                  {METRIC_CONFIG[selectedFarmData?.farmCropType?.toLowerCase()]?.map((metric) => (
                     <MenuItem key={metric.key} value={metric}>
                       {metric.label + ' (' + metric.unit + ')'}
                     </MenuItem>
