@@ -4,6 +4,16 @@
   padding: 24px;
 }
 
+.analytics-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.analytics-page-header .MuiBox-root {
+  margin-bottom: 0;
+}
+
 /* Filter row */
 .analytics-filters {
   display: flex;

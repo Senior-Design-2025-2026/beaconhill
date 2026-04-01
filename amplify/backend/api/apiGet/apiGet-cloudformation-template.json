@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "apiGet — REST API Gateway with Lambda proxy integration to dbGet.",
+  "Description": "apiGet — REST API Gateway with Lambda proxy integration to dbGet and analyticsGemini.",
   "Parameters": {
     "env": {
       "Type": "String",
@@ -10,6 +10,12 @@
       "Type": "String"
     },
     "functiondbGetArn": {
+      "Type": "String"
+    },
+    "functionanalyticsGeminiName": {
+      "Type": "String"
+    },
+    "functionanalyticsGeminiArn": {
       "Type": "String"
     }
   },
@@ -221,13 +227,72 @@
       }
     },
 
+    "AnalyticsReportResource": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "RestApiId": { "Ref": "ApiGateway" },
+        "ParentId": { "Fn::GetAtt": ["ApiGateway", "RootResourceId"] },
+        "PathPart": "analyticsReport"
+      }
+    },
+    "AnalyticsReportPOST": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "RestApiId": { "Ref": "ApiGateway" },
+        "ResourceId": { "Ref": "AnalyticsReportResource" },
+        "HttpMethod": "POST",
+        "AuthorizationType": "AWS_IAM",
+        "Integration": {
+          "Type": "AWS_PROXY",
+          "IntegrationHttpMethod": "POST",
+          "Uri": {
+            "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${functionanalyticsGeminiArn}/invocations"
+          }
+        }
+      }
+    },
+    "AnalyticsReportOPTIONS": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "RestApiId": { "Ref": "ApiGateway" },
+        "ResourceId": { "Ref": "AnalyticsReportResource" },
+        "HttpMethod": "OPTIONS",
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "Type": "MOCK",
+          "RequestTemplates": { "application/json": "{\"statusCode\": 200}" },
+          "IntegrationResponses": [
+            {
+              "StatusCode": "200",
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+                "method.response.header.Access-Control-Allow-Methods": "'POST,OPTIONS'"
+              }
+            }
+          ]
+        },
+        "MethodResponses": [
+          {
+            "StatusCode": "200",
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Origin": true,
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Methods": true
+            }
+          }
+        ]
+      }
+    },
+
     "Deployment": {
       "Type": "AWS::ApiGateway::Deployment",
       "DependsOn": [
         "FarmItemsANY", "FarmItemsOPTIONS",
         "NodeItemsANY", "NodeItemsOPTIONS",
         "DummyItemsGET", "DummyItemsOPTIONS",
-        "ItemsGET"
+        "ItemsGET",
+        "AnalyticsReportPOST", "AnalyticsReportOPTIONS"
       ],
       "Properties": {
         "RestApiId": { "Ref": "ApiGateway" },
@@ -239,6 +304,18 @@
       "Type": "AWS::Lambda::Permission",
       "Properties": {
         "FunctionName": { "Ref": "functiondbGetName" },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*"
+        }
+      }
+    },
+
+    "GeminiLambdaInvokePermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": { "Ref": "functionanalyticsGeminiName" },
         "Action": "lambda:InvokeFunction",
         "Principal": "apigateway.amazonaws.com",
         "SourceArn": {
