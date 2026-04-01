@@ -1,0 +1,20 @@
+.generate-report-button.MuiButton-root {
+  text-transform: none;
+  font-weight: 700;
+  font-size: 0.85rem;
+  background-color: #EEBE02;
+  color: #1a1a1a;
+  border-radius: 8px;
+  padding: 8px 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.generate-report-button.MuiButton-root:hover {
+  background-color: #d4a900;
+}
+
+.generate-report-button.MuiButton-root.Mui-disabled {
+  background-color: #f5e17a;
+  color: #6b6b6b;
+}

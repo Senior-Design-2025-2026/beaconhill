@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import { CircularProgress } from '@mui/material';
 import useFarmWeather from '../../hooks/useFarmWeather';
 import {
@@ -14,6 +14,7 @@ import FarmMetadata from '../../components/FarmMetadata/FarmMetadata';
 import AnalyticsSection from '../../components/AnalyticsSection/AnalyticsSection';
 import AnalyticsBentoGrid from '../../components/AnalyticsBentoGrid/AnalyticsBentoGrid';
 import AnalyticsMetricTrendCard from '../../components/AnalyticsMetricTrendCard/AnalyticsMetricTrendCard';
+import buildAnalyticsReportPayload from './buildAnalyticsReportPayload';
 
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -153,6 +154,7 @@ export default function AnalyticsWeek({
   mode,
   onModeChange,
   measurements,
+  onPayloadReady,
 }) {
   const availableWeeks = useMemo(() => {
     const mondays = new Set(
@@ -192,6 +194,23 @@ export default function AnalyticsWeek({
     () => buildNodeWeekTrends(measurements || [], nodes, selectedFarmId, activeMonday),
     [measurements, nodes, selectedFarmId, activeMonday],
   );
+
+  const getReportPayload = useCallback(
+    () => buildAnalyticsReportPayload({
+      viewMode: 'week',
+      selectedFarm,
+      selectedDate: activeMonday,
+      nodes,
+      farmTrend,
+      nodeTrends,
+      ambientTrend,
+    }),
+    [selectedFarm, activeMonday, nodes, farmTrend, nodeTrends, ambientTrend],
+  );
+
+  useEffect(() => {
+    onPayloadReady?.(getReportPayload);
+  }, [onPayloadReady, getReportPayload]);
 
   return (
     <AnalyticsViewShell variant="week">

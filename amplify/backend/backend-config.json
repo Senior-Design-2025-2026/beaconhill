@@ -23,6 +23,11 @@
         }
       ]
     },
+    "analyticsGemini": {
+      "service": "Lambda",
+      "providerPlugin": "awscloudformation",
+      "build": true
+    },
     "beaconHillDBTriggercc5a1762": {
       "service": "Lambda",
       "providerPlugin": "awscloudformation",
@@ -44,6 +49,11 @@
         {
           "category": "function",
           "resourceName": "dbGet",
+          "attributes": ["Name", "Arn"]
+        },
+        {
+          "category": "function",
+          "resourceName": "analyticsGemini",
           "attributes": ["Name", "Arn"]
         }
       ]
