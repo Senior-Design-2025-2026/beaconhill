@@ -31,14 +31,14 @@ const HOUR_MS = 60 * 60 * 1000;
 
 const METRIC_CONFIG = {
   corn: [
-    { key: 'temperature', label: 'Temperature', unit: '°F', low: 50, lowThreshold: 65, highThreshold: 86, high: 95 },
+    { key: 'temperature', label: 'Temperature', unit: '°C', low: 10, lowThreshold: 18, highThreshold: 30, high: 35 },
     { key: 'moisture',    label: 'Moisture',    unit: '%',  low: 15, lowThreshold: 20, highThreshold: 35, high: 45 },
     { key: 'nitrogen',    label: 'Nitrogen',    unit: 'ppm', low: 50, lowThreshold: 80, highThreshold: 150, high: 200 },
     { key: 'phosphorus',  label: 'Phosphorus',  unit: 'ppm', low: 15, lowThreshold: 25, highThreshold: 50, high: 80 },
     { key: 'potassium',   label: 'Potassium',   unit: 'ppm', low: 80, lowThreshold: 120, highThreshold: 200, high: 300 },
   ],
   soybean: [
-    { key: 'temperature', label: 'Temperature', unit: '°F', low: 59, lowThreshold: 68, highThreshold: 86, high: 95 },
+    { key: 'temperature', label: 'Temperature', unit: '°C', low: 15, lowThreshold: 20, highThreshold: 30, high: 35 },
     { key: 'moisture',    label: 'Moisture',    unit: '%',  low: 15, lowThreshold: 20, highThreshold: 30, high: 40 },
     { key: 'nitrogen',    label: 'Nitrogen',    unit: 'ppm', low: 20, lowThreshold: 50, highThreshold: 100, high: 150 },
     { key: 'phosphorus',  label: 'Phosphorus',  unit: 'ppm', low: 10, lowThreshold: 20, highThreshold: 40, high: 70 },
@@ -74,7 +74,7 @@ function getTimeWindowMilliseconds(tf) {
 function buildHourlyTimeline(minMs) {
   const start = new Date(minMs);
   start.setUTCMinutes(0, 0, 0);
-  const end = TEST_DATE_MS ? new Date(TEST_DATE_MS) : new Date.now();
+  const end = TEST_DATE_MS ? new Date(TEST_DATE_MS) : new Date();
   end.setUTCMinutes(0, 0, 0);
 
   const timeline = [];
@@ -179,7 +179,7 @@ function LiveDashboardPage() {
   /* --- Slider timeline (hourly, min to max of time-filtered data, in epoch-ms) --- */
 
   const timeline = useMemo(() => {
-    const minimumTime = (TEST_DATE_MS ? new Date(TEST_DATE_MS) : new Date.now()) - getTimeWindowMilliseconds(selectedTimeframe);
+    const minimumTime = (TEST_DATE_MS ? new Date(TEST_DATE_MS) : new Date()) - getTimeWindowMilliseconds(selectedTimeframe);
     return buildHourlyTimeline(minimumTime);
   }, [timeFilteredMeasurements]);
 
