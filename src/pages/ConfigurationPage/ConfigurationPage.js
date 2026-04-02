@@ -94,9 +94,12 @@ function ConfigurationPage() {
 
   return (
     <div>
+      <Typography variant='h1' fontSize='50px' align='center'>
+        Configuration
+      </Typography>
       <Box
         sx={{
-          width: '95%',
+          width: '100%',
           height: '50%',
           margin: '16px',
           padding: '24px',
@@ -110,7 +113,7 @@ function ConfigurationPage() {
       </Box>
       <Box
         sx={{
-          width: '95%',
+          width: '100%',
           height: '50%',
           margin: '16px',
           padding: '24px',
