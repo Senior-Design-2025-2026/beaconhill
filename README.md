@@ -6,7 +6,7 @@ BeaconHill’s dashboard web application empowers farmers with real-time insight
 
 The application focuses on two core objectives: collecting real-time field measurements and providing historical data visualizations to uncover trends and predict future farm conditions. By making even incremental improvements in crop yield and resource allocation, BeaconHill helps farmers enhance profitability and sustainability at scale. As agriculture evolves, this solution equips producers with the tools needed to thrive in a data-driven future.
 
-
+ 
 # Authors
 
 <table>
