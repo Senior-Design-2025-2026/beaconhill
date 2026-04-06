@@ -18,7 +18,6 @@ import BugReportIcon from '@mui/icons-material/BugReport';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import PersonIcon from '@mui/icons-material/Person';
-import { theme } from '../../theme/theme';
 import './SidebarComponent.css';
 
 const NAV_ITEMS = [
@@ -57,7 +56,7 @@ function SidebarComponent({ user, farm = 'My Farm' }) {
         className="sidebar-component"
         sx={{
           width: expanded ? 240 : 56,
-          backgroundColor: theme.sidebar.primary,
+          backgroundColor: '#202020',
           display: 'flex',
           flexDirection: 'column',
           transition: 'width 0.2s ease',

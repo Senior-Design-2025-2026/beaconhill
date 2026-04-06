@@ -139,7 +139,10 @@
 
 /* Map container fills remaining space in its panel box */
 .snapshot-map-fill {
+  display: flex;
+  flex-direction: column;
   flex: 1;
+  gap: 16px;
   min-height: 0;
   border-radius: 4px;
   overflow: hidden;
