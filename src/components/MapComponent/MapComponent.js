@@ -42,11 +42,11 @@ const redIcon = createColoredIcon('#c62828');
 function DisableMapInteractions() {
   const map = useMap();
   useEffect(() => {
-    map.dragging.disable();
+    // map.dragging.disable();
     map.scrollWheelZoom.disable();
     map.doubleClickZoom.disable();
     map.touchZoom.disable();
-    map.zoomControl.remove();
+    // map.zoomControl.remove();
   }, [map]);
   return null;
 }

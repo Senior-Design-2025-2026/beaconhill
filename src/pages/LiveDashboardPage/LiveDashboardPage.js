@@ -22,12 +22,11 @@ import HeaderComponent from '../../components/HeaderComponent/HeaderComponent';
 import MapComponent from '../../components/MapComponent/MapComponent';
 import LinearGaugeComponent from '../../components/LinearGaugeComponent/LinearGaugeComponent';
 import { useMeasurements } from '../../context/MeasurementsContext';
+import { isTestMode } from '../../config';
+import beaconLogo from '../../assets/BeaconHill.svg';
 import './LiveDashboardPage.css';
 
-const TEST_DATE_MS = null;
-// const TEST_DATE_MS = 1771164000001;
-// const TEST_DATE_MS = 1771318800001;
-const HOUR_MS = 60 * 60 * 1000;
+const TEST_DATE_MS = isTestMode ? 1771164000001 : null;
 
 const METRIC_CONFIG = {
   corn: [
@@ -130,32 +129,35 @@ function LiveDashboardPage() {
   const { farms, nodes, measurements } = useMeasurements();
   const navigate = useNavigate();
 
-  const [selectedFarm, setSelectedFarm] = useState(() => farms[0]?.farmId || '');
+  const [selectedFarm, setSelectedFarm] = useState(() => farms[0] || null);
   const [selectedTimeframe, setSelectedTimeframe] = useState('24h');
   const [activeTab, setActiveTab] = useState(0);
   const [sliderIndex, setSliderIndex] = useState(null);
   const [selectedMetric, setSelectedMetric] = useState(METRIC_CONFIG['corn']);
 
+  function changeSelectedFarm(farmId) {
+    const newFarm = farms.find((f) => f.farmId === farmId);
+    if (newFarm) {
+      setSelectedFarm(newFarm);
+    } else {
+      setSelectedFarm(farms[0] || null);
+    }
+  }
+
   /** Keep selectedFarm in sync when farms loads or when current selection is no longer in the list. */
   useEffect(() => {
     if (farms.length === 0) return;
-    const found = farms.some((f) => f.farmId === selectedFarm);
+    const found = farms.some((f) => f.farmId === selectedFarm.farmId);
     if (!selectedFarm || !found) {
-      setSelectedFarm(farms[0].farmId);
+      setSelectedFarm(farms[0]);
     }
   }, [farms, selectedFarm]);
 
   /* --- Derived data --- */
   const farmNodes = useMemo(
-    () => nodes.filter((n) => n.farmId === selectedFarm),
+    () => nodes.filter((n) => n.farmId === selectedFarm.farmId),
     [nodes, selectedFarm]
   );
-
-  const selectedFarmData = useMemo(() => {
-    return farms.find((f) => f.farmId === selectedFarm) || null;
-  }, [farms, selectedFarm]);
-
-  const selectedFarmName = selectedFarmData ? selectedFarmData.farmName : '';
 
   const nodeIds = useMemo(() => farmNodes.map((n) => n.nodeId), [farmNodes]);
 
@@ -252,20 +254,20 @@ function LiveDashboardPage() {
       <div className="live-dashboard-header-row">
         <div className="live-dashboard-header">
           <HeaderComponent
-              title={selectedFarmName || 'Select a farm'}
+              title={selectedFarm.farmName || 'Select a farm'}
               titleVariant="h4"
               titleSx={{ color: '#EEBE02' }}
             >
-              {selectedFarmData && (
+              {selectedFarm && (
                 <div className="live-dashboard-header-meta">
                   <div>
-                    <strong>Address: </strong> {selectedFarmData.farmAddress}, {selectedFarmData.farmCity}, {selectedFarmData.farmState}
+                    <strong>Address: </strong> {selectedFarm.farmAddress}, {selectedFarm.farmCity}, {selectedFarm.farmState}
                   </div>
                   <div>
                     <strong>Nodes: </strong> {farmNodes.length}
                   </div>
                   <div>
-                    <strong>Crop: </strong> {selectedFarmData.farmCropType}
+                    <strong>Crop: </strong> {selectedFarm.farmCropType}
                   </div>
                   <div>
                     <strong>Last Updated: </strong> {maxTimestampMs ? formatChicagoTime(maxTimestampMs) : 'No measurements'}
@@ -296,8 +298,8 @@ function LiveDashboardPage() {
               <InputLabel>Farm</InputLabel>
               <Select
                 label="Farm"
-                value={selectedFarm}
-                onChange={(e) => setSelectedFarm(e.target.value)}
+                value={selectedFarm.farmId}
+                onChange={(e) => changeSelectedFarm(e.target.value)}
               >
                 {farms.map((farm) => (
                   <MenuItem key={farm.farmId} value={farm.farmId}>
@@ -349,6 +351,12 @@ function LiveDashboardPage() {
             <div className="snapshot-panel-box">
               <div className="snapshot-map-fill">
                 <MapComponent nodes={mapNodes} height={400} />
+                <img
+                  src={beaconLogo}
+                  alt=""
+                  height={40}
+                  style={{ display: 'block', width: 'auto', alignSelf: 'flex-start' }}
+                />
               </div>
             </div>
           </div>
@@ -392,7 +400,7 @@ function LiveDashboardPage() {
                       </div>
 
                       <div className="node-gauges-row">
-                        {METRIC_CONFIG[selectedFarmData?.farmCropType?.toLowerCase()]?.map((metric) => (
+                        {METRIC_CONFIG[selectedFarm?.farmCropType?.toLowerCase()]?.map((metric) => (
                           <div key={metric.key} className="node-gauge-item">
                             {online ? (
                               <LinearGaugeComponent
@@ -448,7 +456,7 @@ function LiveDashboardPage() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {METRIC_CONFIG[selectedFarmData?.farmCropType?.toLowerCase()]?.map((metric) => {
+                  {METRIC_CONFIG[selectedFarm?.farmCropType?.toLowerCase()]?.map((metric) => {
                     const allValues = timeFilteredMeasurements.map((m) => m[metric.key]);
                     const farmAvg = allValues.length > 0
                       ? (allValues.reduce((s, v) => s + v, 0) / allValues.length).toFixed(1)
@@ -486,7 +494,7 @@ function LiveDashboardPage() {
                   value={selectedMetric}
                   onChange={(e) => setSelectedMetric(e.target.value)}
                 >
-                  {METRIC_CONFIG[selectedFarmData?.farmCropType?.toLowerCase()]?.map((metric) => (
+                  {METRIC_CONFIG[selectedFarm?.farmCropType?.toLowerCase()]?.map((metric) => (
                     <MenuItem key={metric.key} value={metric}>
                       {metric.label + ' (' + metric.unit + ')'}
                     </MenuItem>

@@ -94,7 +94,7 @@ function ConfigurationPage() {
 
   return (
     <div>
-      <Typography variant='h1' fontSize='50px' align='center'>
+      <Typography variant='h1' fontSize='50px' align='center' fontWeight="bold">
         Configuration
       </Typography>
       <Box
