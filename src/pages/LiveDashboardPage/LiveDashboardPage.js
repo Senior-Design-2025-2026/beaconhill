@@ -70,12 +70,17 @@ function getTimeWindowMilliseconds(tf) {
 /**
  * Each value is snapped to the top of the hour in UTC.
  */
-function buildHourlyTimeline(minMs) {
+function buildHourlyTimeline(minMs, maxMs) {
   const start = new Date(minMs);
   start.setUTCMinutes(0, 0, 0);
   const end = TEST_DATE_MS ? new Date(TEST_DATE_MS) : new Date();
   end.setUTCMinutes(0, 0, 0);
 
+  // This covers the one hour interval issue
+  if (end > maxMs && end.getUTCHours()-1 < maxMs) {
+    end.setUTCHours(end.getUTCHours() - 1);
+  }
+  
   const timeline = [];
   const cursor = new Date(start);
   while (cursor.getTime() <= end.getTime()) {
@@ -147,7 +152,7 @@ function LiveDashboardPage() {
   /** Keep selectedFarm in sync when farms loads or when current selection is no longer in the list. */
   useEffect(() => {
     if (farms.length === 0) return;
-    const found = farms.some((f) => f.farmId === selectedFarm.farmId);
+    const found = farms.some((f) => f.farmId === selectedFarm?.farmId);
     if (!selectedFarm || !found) {
       setSelectedFarm(farms[0]);
     }
@@ -155,7 +160,7 @@ function LiveDashboardPage() {
 
   /* --- Derived data --- */
   const farmNodes = useMemo(
-    () => nodes.filter((n) => n.farmId === selectedFarm.farmId),
+    () => nodes.filter((n) => n.farmId === selectedFarm?.farmId),
     [nodes, selectedFarm]
   );
 
@@ -178,11 +183,17 @@ function LiveDashboardPage() {
     return farmMeasurements.filter((m) => epochToDate(m.timestamp) >= cutoff);
   }, [farmMeasurements, selectedTimeframe]);
 
-  /* --- Slider timeline (hourly, min to max of time-filtered data, in epoch-ms) --- */
 
   const timeline = useMemo(() => {
     const minimumTime = (TEST_DATE_MS ? new Date(TEST_DATE_MS) : new Date()) - getTimeWindowMilliseconds(selectedTimeframe);
-    return buildHourlyTimeline(minimumTime);
+    // Get the maximum timestamp time
+    if (timeFilteredMeasurements.length > 0) {
+      let maximumTime = timeFilteredMeasurements.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()).at(-1).timestamp;
+      maximumTime = maximumTime * 1000;
+      return buildHourlyTimeline(minimumTime, maximumTime);
+    }
+
+    return buildHourlyTimeline(minimumTime, TEST_DATE_MS ? new Date(TEST_DATE_MS) : new Date());
   }, [timeFilteredMeasurements]);
 
   const effectiveSliderIndex = sliderIndex != null ? sliderIndex : Math.max(0, timeline.length - 1);
@@ -254,7 +265,7 @@ function LiveDashboardPage() {
       <div className="live-dashboard-header-row">
         <div className="live-dashboard-header">
           <HeaderComponent
-              title={selectedFarm.farmName || 'Select a farm'}
+              title={selectedFarm?.farmName || 'Select a farm'}
               titleVariant="h4"
               titleSx={{ color: '#EEBE02' }}
             >
@@ -298,7 +309,7 @@ function LiveDashboardPage() {
               <InputLabel>Farm</InputLabel>
               <Select
                 label="Farm"
-                value={selectedFarm.farmId}
+                value={selectedFarm?.farmId ?? ''}
                 onChange={(e) => changeSelectedFarm(e.target.value)}
               >
                 {farms.map((farm) => (
