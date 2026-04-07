@@ -1,8 +1,4 @@
-import { post } from 'aws-amplify/api';
-import { ensureAwsCredentials, readJsonPayload } from './amplifyRest';
-
-const API_NAME = 'apiGet';
-const LOCAL_GEMINI_KEY = process.env.REACT_APP_GEMINI_API_KEY || '';
+const GEMINI_API_KEY = process.env.REACT_APP_GEMINI_API_KEY || '';
 const GEMINI_MODEL = process.env.REACT_APP_GEMINI_MODEL || 'gemini-2.0-flash';
 
 const REPORT_TEMPLATE_INSTRUCTIONS = `You are an agricultural analytics assistant for BeaconHill, a farm monitoring platform.
@@ -155,16 +151,13 @@ function injectMetadata(reportContent, model) {
     .replace('<strong>Model Used:</strong>', `<strong>Model Used:</strong> ${model}`);
 }
 
-/**
- * Call Gemini directly from the browser (local dev only).
- */
-async function callGeminiDirect(payload) {
+async function callGemini(payload) {
   const summaryData = buildSummaryData(payload);
   const userPrompt = `Here is the farm analytics data to analyze:\n\n${JSON.stringify(summaryData, null, 2)}`;
   const fullPrompt = `${REPORT_TEMPLATE_INSTRUCTIONS}\n\n${userPrompt}`;
 
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${LOCAL_GEMINI_KEY}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -193,22 +186,16 @@ async function callGeminiDirect(payload) {
 
 /**
  * Request an AI-generated analytics report.
- * Uses direct Gemini call when REACT_APP_GEMINI_API_KEY is set (local dev),
- * otherwise routes through the Lambda via API Gateway (production).
+ * Calls the Gemini API directly using the key from REACT_APP_GEMINI_API_KEY.
  *
  * @param {Object} payload - built by buildAnalyticsReportPayload
  * @returns {Promise<{ report: string, modelUsed: string, generatedAt: string }>}
  */
 export async function generateAnalyticsReport(payload) {
-  if (LOCAL_GEMINI_KEY && LOCAL_GEMINI_KEY !== 'REPLACE_ME_WITH_YOUR_KEY') {
-    return callGeminiDirect(payload);
+  if (!GEMINI_API_KEY || GEMINI_API_KEY === 'REPLACE_ME_WITH_YOUR_KEY') {
+    throw new Error(
+      'REACT_APP_GEMINI_API_KEY is not set. Add it to your .env.local file.',
+    );
   }
-
-  await ensureAwsCredentials();
-  const res = await post({
-    apiName: API_NAME,
-    path: '/analyticsReport',
-    options: { body: payload },
-  }).response;
-  return readJsonPayload(res);
+  return callGemini(payload);
 }

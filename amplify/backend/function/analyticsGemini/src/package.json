@@ -1,6 +1,0 @@
-{
-  "name": "analytics-gemini",
-  "version": "1.0.0",
-  "description": "Lambda that calls Gemini API to generate farm analytics reports",
-  "main": "index.js"
-}
