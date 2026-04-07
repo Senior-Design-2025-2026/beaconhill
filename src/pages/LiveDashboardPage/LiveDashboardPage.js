@@ -70,7 +70,7 @@ function getTimeWindowMilliseconds(tf) {
 /**
  * Each value is snapped to the top of the hour in UTC.
  */
-function buildHourlyTimeline(minMs) {
+function buildHourlyTimeline(minMs, maxMs) {
   const start = new Date(minMs);
   start.setUTCMinutes(0, 0, 0);
   const end = TEST_DATE_MS ? new Date(TEST_DATE_MS) : new Date();
