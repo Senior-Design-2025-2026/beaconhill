@@ -5,42 +5,42 @@ import ConfigurationTableSection from './ConfigurationTableSection';
 import { useMeasurements } from '../../context/MeasurementsContext';
 
 const FARM_COLUMNS = [
-  { key: 'farmId',       label: 'Farm ID',        editable: false },
-  { key: 'farmName',     label: 'Name' },
-  { key: 'farmOwner',    label: 'Owner' },
-  { key: 'farmAddress',  label: 'Address' },
-  { key: 'farmCity',     label: 'City' },
-  { key: 'farmState',    label: 'State' },
-  { key: 'farmZipCode',  label: 'Zip Code' },
-  { key: 'farmCropType', label: 'Crop Type' },
-  { key: 'farmNumber',   label: 'Farm Number' },
-  { key: 'lat',          label: 'Latitude',  type: 'number' },
-  { key: 'lon',          label: 'Longitude', type: 'number' },
-  { key: 'numberOfNodes', label: 'Nodes',    editable: false },
+  { key: 'farmId',        label: 'Farm ID' },
+  { key: 'farmName',      label: 'Name' },
+  { key: 'farmOwner',     label: 'Owner' },
+  { key: 'farmAddress',   label: 'Address' },
+  { key: 'farmCity',      label: 'City' },
+  { key: 'farmState',     label: 'State' },
+  { key: 'farmZipCode',   label: 'Zip Code' },
+  { key: 'farmCropType',  label: 'Crop Type' },
+  { key: 'farmNumber',    label: 'Farm Number' },
+  { key: 'lat',           label: 'Latitude' },
+  { key: 'lon',           label: 'Longitude' },
+  { key: 'numberOfNodes', label: 'Nodes' },
 ];
 
 const NODE_COLUMNS = [
-  { key: 'nodeId',   label: 'Node ID',  editable: false },
+  { key: 'nodeId',   label: 'Node ID' },
   { key: 'nodeName', label: 'Name' },
   { key: 'farmId',   label: 'Farm ID' },
-  { key: 'lat',      label: 'Latitude',  type: 'number' },
-  { key: 'lon',      label: 'Longitude', type: 'number' },
+  { key: 'lat',      label: 'Latitude' },
+  { key: 'lon',      label: 'Longitude' },
 ];
 
-function nextId(rows, key) {
-  const maxId = rows.reduce((max, r) => {
-    const n = parseInt(r[key], 10);
-    return Number.isNaN(n) ? max : Math.max(max, n);
-  }, 0);
-  return String(maxId + 1);
-}
+const MEASUREMENT_COLUMNS = [
+  { key: 'measurementId', label: 'Measurement ID' },
+  { key: 'farmId',        label: 'Farm ID' },
+  { key: 'nodeId',        label: 'Node ID' },
+  { key: 'timestamp',     label: 'Timestamp' },
+  { key: 'temperature',   label: 'Temperature' },
+  { key: 'moisture',      label: 'Moisture' },
+  { key: 'nitrogen',      label: 'Nitrogen' },
+  { key: 'phosphorus',    label: 'Phosphorus' },
+  { key: 'potassium',     label: 'Potassium' },
+];
 
 function ConfigurationPage() {
-  const {
-    farms, nodes, loading, error,
-    addFarm, updateFarm, deleteFarm,
-    addNode, updateNode, deleteNode,
-  } = useMeasurements();
+  const { farms, nodes, measurements, loading, error } = useMeasurements();
 
   if (loading) {
     return (
@@ -51,55 +51,17 @@ function ConfigurationPage() {
   }
 
   return (
-    <Box sx={{ p: 2 }}>
+    <Box sx={{ p: 3 }}>
       <HeaderComponent
-        title="Configuration"
-        description="Manage farm and node settings"
+        title="Database"
       />
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
       )}
 
-      <ConfigurationTableSection
-        title="Farms"
-        columns={FARM_COLUMNS}
-        rows={farms}
-        idKey="farmId"
-        onAdd={addFarm}
-        onUpdate={updateFarm}
-        onDelete={deleteFarm}
-        createEmptyRow={(rows) => ({
-          farmId: nextId(rows, 'farmId'),
-          farmName: '',
-          farmOwner: '',
-          farmAddress: '',
-          farmCity: '',
-          farmState: '',
-          farmZipCode: '',
-          farmCropType: '',
-          farmNumber: '',
-          lat: 0,
-          lon: 0,
-          numberOfNodes: 0,
-        })}
-      />
-
-      <ConfigurationTableSection
-        title="Nodes"
-        columns={NODE_COLUMNS}
-        rows={nodes}
-        idKey="nodeId"
-        onAdd={addNode}
-        onUpdate={updateNode}
-        onDelete={deleteNode}
-        createEmptyRow={(rows) => ({
-          nodeId: nextId(rows, 'nodeId'),
-          nodeName: '',
-          farmId: '',
-          lat: 0,
-          lon: 0,
-        })}
-      />
+      <ConfigurationTableSection title="Farms" columns={FARM_COLUMNS} rows={farms} />
+      <ConfigurationTableSection title="Nodes" columns={NODE_COLUMNS} rows={nodes} />
+      <ConfigurationTableSection title="Measurements" columns={MEASUREMENT_COLUMNS} rows={measurements} />
     </Box>
   );
 }

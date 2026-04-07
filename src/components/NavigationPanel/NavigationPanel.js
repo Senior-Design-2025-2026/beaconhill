@@ -5,7 +5,7 @@ import { Button, Stack } from '@mui/material';
 const navItems = [
   { label: 'Live Dashboard', path: '/' },
   { label: 'Analytics', path: '/analytics' },
-  { label: 'Configuration', path: '/configuration' },
+  { label: 'Database', path: '/configuration' },
   { label: 'Settings', path: '/settings' },
 ];
 

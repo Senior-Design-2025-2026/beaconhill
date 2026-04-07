@@ -194,7 +194,7 @@ export default function AnalyticsDay({
         }
       />
 
-      <AnalyticsSection title="Farm Metrics" subtitle='(via Sensor Data)'>
+      <AnalyticsSection title="Farm" subtitle='(via Sensor Data)'>
         <AnalyticsBentoGrid variant="farm">
           {FARM_METRICS.map((m) => (
             <AnalyticsMetricTrendCard
@@ -210,7 +210,7 @@ export default function AnalyticsDay({
         </AnalyticsBentoGrid>
       </AnalyticsSection>
 
-      <AnalyticsSection title="Ambient Metrics" subtitle='(via Open Meteo)'>
+      <AnalyticsSection title="Ambient" subtitle='(via Open Meteo)'>
         {loading && <CircularProgress size={24} />}
         {error && <p className="analytics-error">{error}</p>}
         {!loading && !error && !ambientTrend && (
