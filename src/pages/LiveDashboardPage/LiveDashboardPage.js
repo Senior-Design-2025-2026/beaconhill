@@ -26,7 +26,7 @@ import { isTestMode } from '../../config';
 import beaconLogo from '../../assets/BeaconHill.svg';
 import './LiveDashboardPage.css';
 
-const TEST_DATE_MS = isTestMode ? 1771164000001 : null;
+const TEST_DATE_MS = isTestMode ? 1771318800000 - 60 * 60 * 1000 : null;
 
 const METRIC_CONFIG = {
   corn: [
@@ -75,11 +75,7 @@ function buildHourlyTimeline(minMs, maxMs) {
   start.setUTCMinutes(0, 0, 0);
   const end = TEST_DATE_MS ? new Date(TEST_DATE_MS) : new Date();
   end.setUTCMinutes(0, 0, 0);
-
-  // This covers the one hour interval issue
-  if (end > maxMs && end.getUTCHours()-1 < maxMs) {
-    end.setUTCHours(end.getUTCHours() - 1);
-  }
+  end.setUTCHours(end.getUTCHours() - 1);
   
   const timeline = [];
   const cursor = new Date(start);
@@ -186,12 +182,6 @@ function LiveDashboardPage() {
 
   const timeline = useMemo(() => {
     const minimumTime = (TEST_DATE_MS ? new Date(TEST_DATE_MS) : new Date()) - getTimeWindowMilliseconds(selectedTimeframe);
-    // Get the maximum timestamp time
-    if (timeFilteredMeasurements.length > 0) {
-      let maximumTime = timeFilteredMeasurements.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()).at(-1).timestamp;
-      maximumTime = maximumTime * 1000;
-      return buildHourlyTimeline(minimumTime, maximumTime);
-    }
 
     return buildHourlyTimeline(minimumTime, TEST_DATE_MS ? new Date(TEST_DATE_MS) : new Date());
   }, [timeFilteredMeasurements]);
@@ -238,7 +228,7 @@ function LiveDashboardPage() {
         .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
   
       return {
-        x: nodeMeasurements.map((m) => m.timestamp),
+        x: nodeMeasurements.map((m) => epochToDate(m.timestamp)),
         y: nodeMeasurements.map((m) => m[selectedMetric.key]),
         type: 'scatter',
         mode: 'lines+markers',
