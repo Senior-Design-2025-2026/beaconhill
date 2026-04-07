@@ -37,19 +37,31 @@ export default function useFarmWeather(lat, lon, mode, dateISO = null) {
     setLoading(true);
     setError(null);
     try {
-      const [cur, fc, pw] = await Promise.all([
+      const promises = [
         fetchCurrentWeather(lat, lon),
         fetchForecast(lat, lon),
         fetchPastWeekWeather(lat, lon),
-      ]);
-      setCurrentWeather(cur);
-      setForecast(fc);
-      setPastWeek(pw);
+      ];
       if (dateISO) {
-        const day = await fetchDayHourlyWeather(lat, lon, dateISO);
-        setDayHourly(day);
+        promises.push(fetchDayHourlyWeather(lat, lon, dateISO));
+      }
+
+      const results = await Promise.allSettled(promises);
+      const errors = results.filter((r) => r.status === 'rejected');
+
+      if (results[0].status === 'fulfilled') setCurrentWeather(results[0].value);
+      if (results[1].status === 'fulfilled') setForecast(results[1].value);
+      if (results[2].status === 'fulfilled') setPastWeek(results[2].value);
+      if (dateISO && results[3]?.status === 'fulfilled') {
+        setDayHourly(results[3].value);
       } else {
         setDayHourly(null);
+      }
+
+      if (errors.length === results.length) {
+        throw errors[0].reason;
+      } else if (errors.length > 0) {
+        console.warn('Some weather fetches failed:', errors.map((e) => e.reason?.message));
       }
     } catch (err) {
       console.error('Weather fetch failed:', err);

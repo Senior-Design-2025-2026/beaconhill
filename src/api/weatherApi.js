@@ -1,5 +1,8 @@
 const BASE_URL = 'https://api.open-meteo.com/v1/forecast';
 const ARCHIVE_BASE_URL = 'https://archive-api.open-meteo.com/v1/archive';
+const FETCH_TIMEOUT_MS = 10000;
+const MAX_RETRIES = 2;
+const RETRY_BASE_MS = 800;
 
 function cToF(c) {
   return (c * 9) / 5 + 32;
@@ -14,6 +17,32 @@ function kmhToMph(kmh) {
 }
 
 /**
+ * Fetch with timeout and automatic retries (exponential back-off).
+ * @param {string} url
+ * @param {object} [opts]
+ * @returns {Promise<Response>}
+ */
+async function resilientFetch(url, opts = {}) {
+  let lastErr;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+      const res = await fetch(url, { ...opts, signal: controller.signal });
+      clearTimeout(timer);
+      if (!res.ok) throw new Error(`Open-Meteo API error: ${res.status}`);
+      return res;
+    } catch (err) {
+      lastErr = err;
+      if (attempt < MAX_RETRIES) {
+        await new Promise((r) => setTimeout(r, RETRY_BASE_MS * 2 ** attempt));
+      }
+    }
+  }
+  throw lastErr;
+}
+
+/**
  * Fetch current conditions for a lat/lon.
  * @param {number} lat
  * @param {number} lon
@@ -22,9 +51,7 @@ function kmhToMph(kmh) {
 export async function fetchCurrentWeather(lat, lon) {
   const url = `${BASE_URL}?latitude=${lat}&longitude=${lon}` +
     '&current=temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,uv_index';
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Open-Meteo API error: ${res.status}`);
-
+  const res = await resilientFetch(url);
   const data = await res.json();
   return normalizeCurrent(data);
 }
@@ -39,9 +66,7 @@ export async function fetchForecast(lat, lon) {
   const url = `${BASE_URL}?latitude=${lat}&longitude=${lon}` +
     '&daily=temperature_2m_max,temperature_2m_min,temperature_2m_mean,relative_humidity_2m_mean,precipitation_sum,wind_speed_10m_max,uv_index_max' +
     '&forecast_days=7';
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Open-Meteo API error: ${res.status}`);
-
+  const res = await resilientFetch(url);
   const data = await res.json();
   return normalizeForecast(data);
 }
@@ -56,9 +81,7 @@ export async function fetchPastWeekWeather(lat, lon) {
   const url = `${BASE_URL}?latitude=${lat}&longitude=${lon}` +
     '&daily=temperature_2m_mean,relative_humidity_2m_mean,precipitation_sum,wind_speed_10m_max,uv_index_max' +
     '&past_days=7&forecast_days=0';
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Open-Meteo API error: ${res.status}`);
-
+  const res = await resilientFetch(url);
   const data = await res.json();
   return normalizePastWeek(data);
 }
@@ -75,9 +98,7 @@ export async function fetchDayHourlyWeather(lat, lon, dateISO) {
     `&start_date=${dateISO}&end_date=${dateISO}` +
     '&hourly=temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,uv_index' +
     '&timezone=auto';
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Open-Meteo API error: ${res.status}`);
-
+  const res = await resilientFetch(url);
   const data = await res.json();
   return normalizeDayHourly(data);
 }
