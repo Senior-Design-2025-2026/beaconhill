@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
-import BuildIcon from '@mui/icons-material/Build';
+import StorageIcon from '@mui/icons-material/Storage';
 import SettingsIcon from '@mui/icons-material/Settings';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -23,7 +23,7 @@ import './SidebarComponent.css';
 const NAV_ITEMS = [
   { label: 'Dashboard', path: '/', Icon: DashboardIcon },
   { label: 'Analytics', path: '/analytics', Icon: AnalyticsIcon },
-  { label: 'Configuration', path: '/configuration', Icon: BuildIcon },
+  { label: 'Database', path: '/configuration', Icon: StorageIcon },
   { label: 'Settings', path: '/settings', Icon: SettingsIcon },
 ];
 

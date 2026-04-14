@@ -1,0 +1,120 @@
+{
+  "classifications": {
+    "excellent": { "label": "Excellent", "color": "green" },
+    "good": { "label": "Good", "color": "green-yellow" },
+    "fair": { "label": "Fair", "color": "yellow-orange" },
+    "poor": { "label": "Poor", "color": "red" }
+  },
+  "corn": {
+    "farm": {
+      "temperature": {
+        "excellent": { "min": 68, "max": 78 },
+        "good": { "min": 62, "max": 67.9 },
+        "fair": { "min": 56, "max": 61.9 }
+      },
+      "moisture": {
+        "excellent": { "min": 44, "max": 54 },
+        "good": { "min": 38, "max": 43.9 },
+        "fair": { "min": 32, "max": 37.9 }
+      },
+      "nitrogen": {
+        "excellent": { "min": 38, "max": 52 },
+        "good": { "min": 30, "max": 37.9 },
+        "fair": { "min": 22, "max": 29.9 }
+      },
+      "phosphorus": {
+        "excellent": { "min": 20, "max": 28 },
+        "good": { "min": 15, "max": 19.9 },
+        "fair": { "min": 11, "max": 14.9 }
+      },
+      "potassium": {
+        "excellent": { "min": 145, "max": 190 },
+        "good": { "min": 125, "max": 144.9 },
+        "fair": { "min": 110, "max": 124.9 }
+      }
+    },
+    "ambient": {
+      "temperatureF": {
+        "excellent": { "min": 67, "max": 79 },
+        "good": { "min": 60, "max": 66.9 },
+        "fair": { "min": 52, "max": 59.9 }
+      },
+      "humidity": {
+        "excellent": { "min": 50, "max": 65 },
+        "good": { "min": 40, "max": 49.9 },
+        "fair": { "min": 30, "max": 39.9 }
+      },
+      "rainfallIn": {
+        "excellent": { "min": 0.1, "max": 0.6 },
+        "good": { "min": 0.61, "max": 1.2 },
+        "fair": { "min": 0.01, "max": 0.09 }
+      },
+      "nitrogenDioxide": {
+        "excellent": { "min": 0, "max": 10 },
+        "good": { "min": 10.1, "max": 25 },
+        "fair": { "min": 25.1, "max": 40 }
+      },
+      "airQuality": {
+        "excellent": { "min": 0, "max": 25 },
+        "good": { "min": 26, "max": 50 },
+        "fair": { "min": 51, "max": 100 }
+      }
+    }
+  },
+  "soybean": {
+    "farm": {
+      "temperature": {
+        "excellent": { "min": 66, "max": 77 },
+        "good": { "min": 60, "max": 65.9 },
+        "fair": { "min": 54, "max": 59.9 }
+      },
+      "moisture": {
+        "excellent": { "min": 42, "max": 52 },
+        "good": { "min": 53, "max": 60 },
+        "fair": { "min": 35, "max": 41.9 }
+      },
+      "nitrogen": {
+        "excellent": { "min": 38, "max": 48 },
+        "good": { "min": 30, "max": 37.9 },
+        "fair": { "min": 22, "max": 29.9 }
+      },
+      "phosphorus": {
+        "excellent": { "min": 18, "max": 24 },
+        "good": { "min": 14, "max": 17.9 },
+        "fair": { "min": 10, "max": 13.9 }
+      },
+      "potassium": {
+        "excellent": { "min": 130, "max": 180 },
+        "good": { "min": 110, "max": 129.9 },
+        "fair": { "min": 95, "max": 109.9 }
+      }
+    },
+    "ambient": {
+      "temperatureF": {
+        "excellent": { "min": 65, "max": 77 },
+        "good": { "min": 58, "max": 64.9 },
+        "fair": { "min": 50, "max": 57.9 }
+      },
+      "humidity": {
+        "excellent": { "min": 48, "max": 64 },
+        "good": { "min": 38, "max": 47.9 },
+        "fair": { "min": 28, "max": 37.9 }
+      },
+      "rainfallIn": {
+        "excellent": { "min": 0.08, "max": 0.55 },
+        "good": { "min": 0.56, "max": 1.1 },
+        "fair": { "min": 0.01, "max": 0.07 }
+      },
+      "nitrogenDioxide": {
+        "excellent": { "min": 0, "max": 10 },
+        "good": { "min": 10.1, "max": 25 },
+        "fair": { "min": 25.1, "max": 40 }
+      },
+      "airQuality": {
+        "excellent": { "min": 0, "max": 25 },
+        "good": { "min": 26, "max": 50 },
+        "fair": { "min": 51, "max": 100 }
+      }
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "FarmData DynamoDB table — stores farm configuration data.",
+  "Parameters": {
+    "env": {
+      "Type": "String",
+      "Default": "dev"
+    },
+    "tableName": {
+      "Type": "String",
+      "Default": "FarmData"
+    }
+  },
+  "Resources": {
+    "FarmDataTable": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "TableName": { "Ref": "tableName" },
+        "AttributeDefinitions": [
+          { "AttributeName": "farmId", "AttributeType": "S" }
+        ],
+        "KeySchema": [
+          { "AttributeName": "farmId", "KeyType": "HASH" }
+        ],
+        "BillingMode": "PAY_PER_REQUEST"
+      }
+    }
+  },
+  "Outputs": {
+    "Name": {
+      "Value": { "Ref": "FarmDataTable" }
+    },
+    "Arn": {
+      "Value": { "Fn::GetAtt": ["FarmDataTable", "Arn"] }
+    }
+  }
+}

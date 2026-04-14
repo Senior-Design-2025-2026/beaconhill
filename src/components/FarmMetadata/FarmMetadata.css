@@ -1,0 +1,83 @@
+.farm-metadata {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 20px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.farm-metadata-heading {
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  color: #9ca3af;
+  margin: 0 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.farm-metadata-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 10px 24px;
+}
+
+.farm-metadata-item:nth-child(4) {
+  grid-column: 1;
+}
+
+.farm-metadata-item:nth-child(5) {
+  grid-column: 2 / 4;
+}
+
+.farm-metadata-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+}
+
+.farm-metadata-icon {
+  color: #9ca3af;
+  display: inline-flex;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.farm-metadata-icon .MuiSvgIcon-root {
+  font-size: 0.95rem;
+}
+
+.farm-metadata-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.farm-metadata-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+}
+
+.farm-metadata-value {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #1f2937;
+  line-height: 1.3;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+@media (max-width: 700px) {
+  .farm-metadata-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
