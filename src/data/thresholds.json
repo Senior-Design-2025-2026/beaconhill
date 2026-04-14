@@ -49,15 +49,15 @@
         "good": { "min": 0.61, "max": 1.2 },
         "fair": { "min": 0.01, "max": 0.09 }
       },
-      "windMph": {
-        "excellent": { "min": 3, "max": 10 },
-        "good": { "min": 10.1, "max": 15 },
-        "fair": { "min": 15.1, "max": 22 }
+      "nitrogenDioxide": {
+        "excellent": { "min": 0, "max": 10 },
+        "good": { "min": 10.1, "max": 25 },
+        "fair": { "min": 25.1, "max": 40 }
       },
-      "uvIndex": {
-        "excellent": { "min": 3, "max": 6 },
-        "good": { "min": 2, "max": 2.9 },
-        "fair": { "min": 6.1, "max": 8 }
+      "airQuality": {
+        "excellent": { "min": 0, "max": 25 },
+        "good": { "min": 26, "max": 50 },
+        "fair": { "min": 51, "max": 100 }
       }
     }
   },
@@ -105,15 +105,15 @@
         "good": { "min": 0.56, "max": 1.1 },
         "fair": { "min": 0.01, "max": 0.07 }
       },
-      "windMph": {
-        "excellent": { "min": 3, "max": 9 },
-        "good": { "min": 9.1, "max": 14 },
-        "fair": { "min": 14.1, "max": 21 }
+      "nitrogenDioxide": {
+        "excellent": { "min": 0, "max": 10 },
+        "good": { "min": 10.1, "max": 25 },
+        "fair": { "min": 25.1, "max": 40 }
       },
-      "uvIndex": {
-        "excellent": { "min": 3, "max": 6 },
-        "good": { "min": 2, "max": 2.9 },
-        "fair": { "min": 6.1, "max": 8 }
+      "airQuality": {
+        "excellent": { "min": 0, "max": 25 },
+        "good": { "min": 26, "max": 50 },
+        "fair": { "min": 51, "max": 100 }
       }
     }
   }

@@ -187,7 +187,7 @@ export default function AnalyticsMetricTrendCard({
 
               {!isFarm && (
                 <div className="analytics-dialog-api-info">
-                  <span className="analytics-dialog-api-info-type">Open Meteo Weather API</span>
+                  <span className="analytics-dialog-api-info-type">Open Meteo Weather &amp; Air Quality API</span>
                   <span className="analytics-dialog-api-info-row">
                     <span className="analytics-dialog-api-info-label">Latitude:</span>{' '}
                     {lat != null ? lat : '—'}

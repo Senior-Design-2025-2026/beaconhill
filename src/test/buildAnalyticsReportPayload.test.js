@@ -31,8 +31,8 @@ const MOCK_AMBIENT_TREND = {
   temperatureF: [{ x: '00:00', y: 72.5 }],
   humidity: [{ x: '00:00', y: 55 }],
   rainfallIn: [{ x: '00:00', y: 0.1 }],
-  windMph: [{ x: '00:00', y: 8 }],
-  uvIndex: [{ x: '00:00', y: 5 }],
+  nitrogenDioxide: [{ x: '00:00', y: 8.5 }],
+  airQuality: [{ x: '00:00', y: 34 }],
 };
 
 describe('buildAnalyticsReportPayload', () => {
@@ -122,7 +122,7 @@ describe('buildAnalyticsReportPayload', () => {
       expect.arrayContaining(['temperature', 'moisture', 'nitrogen', 'phosphorus', 'potassium']),
     );
     expect(Object.keys(payload.ambientMetrics)).toEqual(
-      expect.arrayContaining(['temperatureF', 'humidity', 'rainfallIn', 'windMph', 'uvIndex']),
+      expect.arrayContaining(['temperatureF', 'humidity', 'rainfallIn', 'nitrogenDioxide', 'airQuality']),
     );
   });
 });

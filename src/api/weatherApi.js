@@ -1,5 +1,6 @@
 const BASE_URL = 'https://api.open-meteo.com/v1/forecast';
 const ARCHIVE_BASE_URL = 'https://archive-api.open-meteo.com/v1/archive';
+const AIR_QUALITY_URL = 'https://air-quality-api.open-meteo.com/v1/air-quality';
 const FETCH_TIMEOUT_MS = 10000;
 const MAX_RETRIES = 2;
 const RETRY_BASE_MS = 800;
@@ -10,10 +11,6 @@ function cToF(c) {
 
 function mmToIn(mm) {
   return mm / 25.4;
-}
-
-function kmhToMph(kmh) {
-  return kmh * 0.621371;
 }
 
 /**
@@ -43,17 +40,23 @@ async function resilientFetch(url, opts = {}) {
 }
 
 /**
- * Fetch current conditions for a lat/lon.
+ * Fetch current conditions + air quality for a lat/lon.
  * @param {number} lat
  * @param {number} lon
  * @returns {Promise<Object>} Normalized current-weather object.
  */
 export async function fetchCurrentWeather(lat, lon) {
-  const url = `${BASE_URL}?latitude=${lat}&longitude=${lon}` +
-    '&current=temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,uv_index';
-  const res = await resilientFetch(url);
-  const data = await res.json();
-  return normalizeCurrent(data);
+  const weatherUrl = `${BASE_URL}?latitude=${lat}&longitude=${lon}` +
+    '&current=temperature_2m,relative_humidity_2m,precipitation';
+  const aqUrl = `${AIR_QUALITY_URL}?latitude=${lat}&longitude=${lon}` +
+    '&current=us_aqi,nitrogen_dioxide';
+  const [weatherRes, aqRes] = await Promise.all([
+    resilientFetch(weatherUrl),
+    resilientFetch(aqUrl).catch(() => null),
+  ]);
+  const weather = await weatherRes.json();
+  const aq = aqRes ? await aqRes.json() : null;
+  return normalizeCurrent(weather, aq);
 }
 
 /**
@@ -63,12 +66,18 @@ export async function fetchCurrentWeather(lat, lon) {
  * @returns {Promise<Object>} Normalized forecast object with daily array.
  */
 export async function fetchForecast(lat, lon) {
-  const url = `${BASE_URL}?latitude=${lat}&longitude=${lon}` +
-    '&daily=temperature_2m_max,temperature_2m_min,temperature_2m_mean,relative_humidity_2m_mean,precipitation_sum,wind_speed_10m_max,uv_index_max' +
-    '&forecast_days=7';
-  const res = await resilientFetch(url);
-  const data = await res.json();
-  return normalizeForecast(data);
+  const weatherUrl = `${BASE_URL}?latitude=${lat}&longitude=${lon}` +
+    '&daily=temperature_2m_max,temperature_2m_min,temperature_2m_mean,relative_humidity_2m_mean,precipitation_sum' +
+    '&forecast_days=7&timezone=auto';
+  const aqUrl = `${AIR_QUALITY_URL}?latitude=${lat}&longitude=${lon}` +
+    '&hourly=us_aqi,nitrogen_dioxide&forecast_days=7&timezone=auto';
+  const [weatherRes, aqRes] = await Promise.all([
+    resilientFetch(weatherUrl),
+    resilientFetch(aqUrl).catch(() => null),
+  ]);
+  const weather = await weatherRes.json();
+  const aq = aqRes ? await aqRes.json() : null;
+  return normalizeForecast(weather, aq);
 }
 
 /**
@@ -78,53 +87,71 @@ export async function fetchForecast(lat, lon) {
  * @returns {Promise<Object>} Normalized historical daily weather object.
  */
 export async function fetchPastWeekWeather(lat, lon) {
-  const url = `${BASE_URL}?latitude=${lat}&longitude=${lon}` +
-    '&daily=temperature_2m_mean,relative_humidity_2m_mean,precipitation_sum,wind_speed_10m_max,uv_index_max' +
-    '&past_days=7&forecast_days=0';
-  const res = await resilientFetch(url);
-  const data = await res.json();
-  return normalizePastWeek(data);
+  const weatherUrl = `${BASE_URL}?latitude=${lat}&longitude=${lon}` +
+    '&daily=temperature_2m_mean,relative_humidity_2m_mean,precipitation_sum' +
+    '&past_days=7&forecast_days=0&timezone=auto';
+  const aqUrl = `${AIR_QUALITY_URL}?latitude=${lat}&longitude=${lon}` +
+    '&hourly=us_aqi,nitrogen_dioxide&past_days=7&forecast_days=0&timezone=auto';
+  const [weatherRes, aqRes] = await Promise.all([
+    resilientFetch(weatherUrl),
+    resilientFetch(aqUrl).catch(() => null),
+  ]);
+  const weather = await weatherRes.json();
+  const aq = aqRes ? await aqRes.json() : null;
+  return normalizePastWeek(weather, aq);
 }
 
 /**
- * Fetch historical hourly weather for a specific date.
+ * Fetch historical hourly weather + air quality for a specific date.
  * @param {number} lat
  * @param {number} lon
  * @param {string} dateISO - YYYY-MM-DD
  * @returns {Promise<Object>} Normalized hourly weather object.
  */
 export async function fetchDayHourlyWeather(lat, lon, dateISO) {
-  const url = `${ARCHIVE_BASE_URL}?latitude=${lat}&longitude=${lon}` +
+  const weatherUrl = `${ARCHIVE_BASE_URL}?latitude=${lat}&longitude=${lon}` +
     `&start_date=${dateISO}&end_date=${dateISO}` +
-    '&hourly=temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,uv_index' +
+    '&hourly=temperature_2m,relative_humidity_2m,precipitation' +
     '&timezone=auto';
-  const res = await resilientFetch(url);
-  const data = await res.json();
-  return normalizeDayHourly(data);
+  const aqUrl = `${AIR_QUALITY_URL}?latitude=${lat}&longitude=${lon}` +
+    `&hourly=us_aqi,nitrogen_dioxide&start_date=${dateISO}&end_date=${dateISO}&timezone=auto`;
+  const [weatherRes, aqRes] = await Promise.all([
+    resilientFetch(weatherUrl),
+    resilientFetch(aqUrl).catch(() => null),
+  ]);
+  const weather = await weatherRes.json();
+  const aq = aqRes ? await aqRes.json() : null;
+  return normalizeDayHourly(weather, aq);
 }
 
 /**
  * Normalize Open-Meteo current response into a flat object.
- * @param {Object} raw - Raw API response.
+ * @param {Object} raw - Raw weather API response.
+ * @param {Object|null} aqRaw - Raw air quality API response.
  */
-function normalizeCurrent(raw) {
+function normalizeCurrent(raw, aqRaw) {
   const c = raw.current || {};
+  const aq = aqRaw?.current || {};
   return {
     temperatureF: c.temperature_2m != null ? +cToF(c.temperature_2m).toFixed(1) : null,
     humidity: c.relative_humidity_2m ?? null,
     rainfallIn: c.precipitation != null ? +mmToIn(c.precipitation).toFixed(2) : null,
-    windMph: c.wind_speed_10m != null ? +kmhToMph(c.wind_speed_10m).toFixed(1) : null,
-    uvIndex: c.uv_index ?? null,
+    nitrogenDioxide: aq.nitrogen_dioxide != null ? +aq.nitrogen_dioxide.toFixed(1) : null,
+    airQuality: aq.us_aqi ?? null,
   };
 }
 
 /**
  * Normalize Open-Meteo daily response into a daily array.
- * @param {Object} raw - Raw API response.
+ * Computes daily averages from hourly air-quality data.
+ * @param {Object} raw - Raw weather API response.
+ * @param {Object|null} aqRaw - Raw air quality API response (hourly).
  */
-function normalizeForecast(raw) {
+function normalizeForecast(raw, aqRaw) {
   const daily = raw.daily || {};
   const dates = daily.time || [];
+  const dailyAqi = computeDailyAvg(aqRaw, 'us_aqi', dates);
+  const dailyNo2 = computeDailyAvg(aqRaw, 'nitrogen_dioxide', dates);
   const days = dates.map((date, idx) => ({
     date,
     maxTempF: daily.temperature_2m_max?.[idx] != null ? +cToF(daily.temperature_2m_max[idx]).toFixed(1) : null,
@@ -132,8 +159,8 @@ function normalizeForecast(raw) {
     avgTempF: daily.temperature_2m_mean?.[idx] != null ? +cToF(daily.temperature_2m_mean[idx]).toFixed(1) : null,
     avgHumidity: daily.relative_humidity_2m_mean?.[idx] ?? null,
     totalPrecipIn: daily.precipitation_sum?.[idx] != null ? +mmToIn(daily.precipitation_sum[idx]).toFixed(2) : null,
-    maxWindMph: daily.wind_speed_10m_max?.[idx] != null ? +kmhToMph(daily.wind_speed_10m_max[idx]).toFixed(1) : null,
-    uvIndex: daily.uv_index_max?.[idx] ?? null,
+    nitrogenDioxide: dailyNo2[date] ?? null,
+    airQuality: dailyAqi[date] ?? null,
   }));
 
   return { days };
@@ -141,18 +168,21 @@ function normalizeForecast(raw) {
 
 /**
  * Normalize historical daily response into a daily array.
- * @param {Object} raw - Raw API response.
+ * @param {Object} raw - Raw weather API response.
+ * @param {Object|null} aqRaw - Raw air quality API response (hourly).
  */
-function normalizePastWeek(raw) {
+function normalizePastWeek(raw, aqRaw) {
   const daily = raw.daily || {};
   const dates = daily.time || [];
+  const dailyAqi = computeDailyAvg(aqRaw, 'us_aqi', dates);
+  const dailyNo2 = computeDailyAvg(aqRaw, 'nitrogen_dioxide', dates);
   const days = dates.map((date, idx) => ({
     date,
     avgTempF: daily.temperature_2m_mean?.[idx] != null ? +cToF(daily.temperature_2m_mean[idx]).toFixed(1) : null,
     avgHumidity: daily.relative_humidity_2m_mean?.[idx] ?? null,
     totalPrecipIn: daily.precipitation_sum?.[idx] != null ? +mmToIn(daily.precipitation_sum[idx]).toFixed(2) : null,
-    maxWindMph: daily.wind_speed_10m_max?.[idx] != null ? +kmhToMph(daily.wind_speed_10m_max[idx]).toFixed(1) : null,
-    uvIndex: daily.uv_index_max?.[idx] ?? null,
+    nitrogenDioxide: dailyNo2[date] ?? null,
+    airQuality: dailyAqi[date] ?? null,
   }));
 
   return { days };
@@ -160,10 +190,12 @@ function normalizePastWeek(raw) {
 
 /**
  * Normalize historical hourly response into an hourly array.
- * @param {Object} raw - Raw API response.
+ * @param {Object} raw - Raw weather API response.
+ * @param {Object|null} aqRaw - Raw air quality API response (hourly).
  */
-function normalizeDayHourly(raw) {
+function normalizeDayHourly(raw, aqRaw) {
   const hourly = raw.hourly || {};
+  const aqHourly = aqRaw?.hourly || {};
   const times = hourly.time || [];
   const hours = times.map((time, idx) => ({
     time,
@@ -171,11 +203,39 @@ function normalizeDayHourly(raw) {
     temperatureF: hourly.temperature_2m?.[idx] != null ? +cToF(hourly.temperature_2m[idx]).toFixed(1) : null,
     humidity: hourly.relative_humidity_2m?.[idx] ?? null,
     rainfallIn: hourly.precipitation?.[idx] != null ? +mmToIn(hourly.precipitation[idx]).toFixed(2) : null,
-    windMph: hourly.wind_speed_10m?.[idx] != null ? +kmhToMph(hourly.wind_speed_10m[idx]).toFixed(1) : null,
-    uvIndex: hourly.uv_index?.[idx] ?? null,
+    nitrogenDioxide: aqHourly.nitrogen_dioxide?.[idx] != null ? +aqHourly.nitrogen_dioxide[idx].toFixed(1) : null,
+    airQuality: aqHourly.us_aqi?.[idx] ?? null,
   }));
 
   return { hours };
+}
+
+/**
+ * Aggregate hourly values for a given field into daily averages keyed by date.
+ * @param {Object|null} aqRaw - Raw air quality API response with hourly data.
+ * @param {string} field - Field name in the hourly object (e.g. 'us_aqi', 'nitrogen_dioxide').
+ * @param {string[]} dates - List of date strings (YYYY-MM-DD) to compute.
+ * @returns {Object} Map of date → average value (rounded to 1 decimal).
+ */
+function computeDailyAvg(aqRaw, field, dates) {
+  const arr = aqRaw?.hourly?.[field];
+  if (!arr) return {};
+  const times = aqRaw.hourly.time || [];
+  const buckets = {};
+  times.forEach((t, i) => {
+    const date = t?.slice(0, 10);
+    if (arr[i] == null) return;
+    if (!buckets[date]) buckets[date] = [];
+    buckets[date].push(arr[i]);
+  });
+  const result = {};
+  for (const date of dates) {
+    const vals = buckets[date];
+    if (vals?.length) {
+      result[date] = +(vals.reduce((s, v) => s + v, 0) / vals.length).toFixed(1);
+    }
+  }
+  return result;
 }
 
 /**
@@ -193,8 +253,8 @@ export function aggregateForecastWeek(forecast) {
     temperatureF: +avg(days.map((d) => d.avgTempF).filter((v) => v != null)).toFixed(1),
     humidity: +avg(days.map((d) => d.avgHumidity).filter((v) => v != null)).toFixed(1),
     rainfallIn: +days.map((d) => d.totalPrecipIn).filter((v) => v != null).reduce((s, v) => s + v, 0).toFixed(2),
-    windMph: +avg(days.map((d) => d.maxWindMph).filter((v) => v != null)).toFixed(1),
-    uvIndex: +avg(days.map((d) => d.uvIndex).filter((v) => v != null)).toFixed(1),
+    nitrogenDioxide: +avg(days.map((d) => d.nitrogenDioxide).filter((v) => v != null)).toFixed(1),
+    airQuality: Math.round(avg(days.map((d) => d.airQuality).filter((v) => v != null))),
   };
 }
 
@@ -209,8 +269,8 @@ export function aggregateDayHourly(dayWeather) {
   const avg = (arr) => arr.length ? arr.reduce((s, v) => s + v, 0) / arr.length : null;
   const temp = avg(hours.map((h) => h.temperatureF).filter((v) => v != null));
   const humidity = avg(hours.map((h) => h.humidity).filter((v) => v != null));
-  const wind = avg(hours.map((h) => h.windMph).filter((v) => v != null));
-  const uv = avg(hours.map((h) => h.uvIndex).filter((v) => v != null));
+  const no2 = avg(hours.map((h) => h.nitrogenDioxide).filter((v) => v != null));
+  const aqi = avg(hours.map((h) => h.airQuality).filter((v) => v != null));
   const rainfall = hours
     .map((h) => h.rainfallIn)
     .filter((v) => v != null)
@@ -220,7 +280,7 @@ export function aggregateDayHourly(dayWeather) {
     temperatureF: temp != null ? +temp.toFixed(1) : null,
     humidity: humidity != null ? +humidity.toFixed(1) : null,
     rainfallIn: +rainfall.toFixed(2),
-    windMph: wind != null ? +wind.toFixed(1) : null,
-    uvIndex: uv != null ? +uv.toFixed(1) : null,
+    nitrogenDioxide: no2 != null ? +no2.toFixed(1) : null,
+    airQuality: aqi != null ? Math.round(aqi) : null,
   };
 }

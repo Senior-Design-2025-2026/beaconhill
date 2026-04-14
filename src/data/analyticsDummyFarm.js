@@ -16,8 +16,8 @@ export const AMBIENT_METRICS = [
   { key: 'temperatureF', label: 'Temperature', unit: '°F' },
   { key: 'humidity',     label: 'Humidity',    unit: '%' },
   { key: 'rainfallIn',   label: 'Rainfall',   unit: 'in' },
-  { key: 'windMph',      label: 'Wind',       unit: 'mph' },
-  { key: 'uvIndex',      label: 'UV Index',   unit: '' },
+  { key: 'nitrogenDioxide', label: 'NO₂',     unit: 'µg/m³' },
+  { key: 'airQuality',   label: 'Air Quality', unit: 'AQI' },
 ];
 
 export const DUMMY_FARM_CURRENT = {

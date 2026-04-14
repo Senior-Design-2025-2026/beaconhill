@@ -81,8 +81,8 @@ export default function useFarmWeather(lat, lon, mode, dateISO = null) {
       temperatureF: dayHourly.hours.map((h) => ({ x: h.hourLabel, y: h.temperatureF })),
       humidity: dayHourly.hours.map((h) => ({ x: h.hourLabel, y: h.humidity })),
       rainfallIn: dayHourly.hours.map((h) => ({ x: h.hourLabel, y: h.rainfallIn })),
-      windMph: dayHourly.hours.map((h) => ({ x: h.hourLabel, y: h.windMph })),
-      uvIndex: dayHourly.hours.map((h) => ({ x: h.hourLabel, y: h.uvIndex })),
+      nitrogenDioxide: dayHourly.hours.map((h) => ({ x: h.hourLabel, y: h.nitrogenDioxide })),
+      airQuality: dayHourly.hours.map((h) => ({ x: h.hourLabel, y: h.airQuality })),
     };
   } else if (mode === 'week' && (pastWeek || forecast)) {
     ambientValues = aggregateForecastWeek(pastWeek || forecast);
@@ -91,8 +91,8 @@ export default function useFarmWeather(lat, lon, mode, dateISO = null) {
         temperatureF: pastWeek.days.map((d) => ({ x: d.date, y: d.avgTempF })),
         humidity: pastWeek.days.map((d) => ({ x: d.date, y: d.avgHumidity })),
         rainfallIn: pastWeek.days.map((d) => ({ x: d.date, y: d.totalPrecipIn })),
-        windMph: pastWeek.days.map((d) => ({ x: d.date, y: d.maxWindMph })),
-        uvIndex: pastWeek.days.map((d) => ({ x: d.date, y: d.uvIndex })),
+        nitrogenDioxide: pastWeek.days.map((d) => ({ x: d.date, y: d.nitrogenDioxide })),
+        airQuality: pastWeek.days.map((d) => ({ x: d.date, y: d.airQuality })),
       };
     }
   } else if (currentWeather) {
