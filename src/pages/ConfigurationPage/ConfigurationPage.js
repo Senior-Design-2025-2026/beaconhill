@@ -95,7 +95,7 @@ function ConfigurationPage() {
   return (
     <div>
       <Typography variant='h1' fontSize='50px' align='center' fontWeight="bold">
-        Configuration
+        Database
       </Typography>
       <Box
         sx={{
