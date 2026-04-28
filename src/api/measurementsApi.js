@@ -47,6 +47,10 @@ export async function getMeasurements() {
     readJsonPayload(measurementRes),
   ]);
 
+  nodes.sort((a, b) => {
+    return a.nodeName.localeCompare(b.nodeName);
+  });
+
   console.log({farms, nodes, measurements});
 
   return {
